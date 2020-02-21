@@ -7,6 +7,9 @@ using Splendor.Core.Domain;
 
 namespace Splendor.Core.Actions
 {
+    /// <summary>
+    /// Accepts either a reserved card or one from the face-up cards.
+    /// </summary>
     public class BuyCard : IAction
     {
         public Player Player { get; }
@@ -28,7 +31,7 @@ namespace Splendor.Core.Actions
             var tier = gameEngine.GameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));               
             var payment = Payment ?? CreateDefaultPayment();
 
-            // Perform transaction
+            // Perform transaction - card
             if (tier != null)
             {
                 var index = tier.ColumnSlots.Single(s => s.Value == Card).Key;
@@ -38,8 +41,13 @@ namespace Splendor.Core.Actions
             {
                 Player.ReservedCards.Remove(Card);
             }
-
             Player.CardsInPlay.Add(Card);
+
+            // Perform transaction - payment
+            foreach(var colour in payment.Keys)
+            {
+                Player.Purse[colour] -= payment[colour];
+            }
 
             gameEngine.CommitTurn();
         }
