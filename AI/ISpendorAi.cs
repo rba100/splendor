@@ -4,6 +4,6 @@ namespace Splendor.Core.AI
 {
     public interface ISpendorAi
     {
-        IAction ChooseAction(GameState gamestate);
+        IAction ChooseAction(GameState gameState);
     }
 }

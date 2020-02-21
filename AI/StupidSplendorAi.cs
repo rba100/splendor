@@ -1,18 +1,80 @@
 ﻿using Splendor.Core.Actions;
 
 using System;
+using System.Linq;
 
 namespace Splendor.Core.AI
 {
-
     public class StupidSplendorAi : ISpendorAi
     {
-        public IAction ChooseAction(GameState gamestate)
-        {
-            var me = gamestate.CurrentPlayer;
+        private readonly Random _random = new Random();
 
-            // If I can buy a card in hand, do so
-            throw new NotImplementedException();
+        public IAction ChooseAction(GameState gameState)
+        {
+            var me = gameState.CurrentPlayer;
+            bool CanBuy(Card card) => BuyCard.CanBuyCard(me, gameState, card);
+
+            var allFaceUpCards = gameState.Tiers.SelectMany(t => t.ColumnSlots)
+                                                .Select(s => s.Value)
+                                                .Where(card => card != null)
+                                                .ToArray();
+
+            // Buy a victory point card if possible
+            foreach(var card in allFaceUpCards.Concat(me.ReservedCards)
+                                              .Where(c => c.VictoryPoints > 0)
+                                              .OrderByDescending(c => c.VictoryPoints)
+                                              .Where(CanBuy))
+            {
+                return new BuyCard(card);
+            }
+
+            // Buy a card from my hand if possible
+            foreach (var card in me.ReservedCards.Where(CanBuy))
+            {
+                return new BuyCard(card);
+            }
+
+            // If I have 10 coins buy any card I can at all
+            if (me.Purse.Values.Sum() == 10)
+            {
+                foreach (var card in allFaceUpCards.Where(CanBuy))
+                {
+                    return new BuyCard(card);
+                } 
+            }
+
+            // Once in a while reserve a random card
+            if(me.ReservedCards.Count < 3 && _random.Next(6) == 0)
+            {
+                var myVictoryPoints = me.VictoryPoints();
+                if (myVictoryPoints > 9 && gameState.Tiers.Last().FaceDownCards.Count > 0)
+                {
+                    return new ReserveFaceDownCard(gameState.Tiers.Last().FaceDownCards.Peek().Tier);
+                }
+                if (myVictoryPoints > 4 && gameState.Tiers.Skip(1).First().FaceDownCards.Count > 0)
+                {
+                    return new ReserveFaceDownCard(gameState.Tiers.Skip(1).First().FaceDownCards.Peek().Tier);
+                }
+                if(gameState.Tiers.First().FaceDownCards.Count > 0)
+                {
+                    return new ReserveFaceDownCard(gameState.Tiers.First().FaceDownCards.Peek().Tier);
+                }
+            }
+
+            // Take coins at random
+            var colours = gameState.CoinsAvailable.Where(kvp => kvp.Value > 0).Select(c=>c.Key).ToList();
+            var count = Math.Min(Math.Min(10 - me.Purse.Values.Sum(), 3), colours.Count);
+            
+            if (count > 0)
+            {
+                colours.Shuffle();
+                var transaction = Utility.CreateEmptyTransaction();
+                foreach (var colour in colours.Take(count)) transaction[colour] = 1;
+                return new TakeCoins(transaction);
+            }
+
+            // Give up
+            return new NoAction();
         }
     }
 }
