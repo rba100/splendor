@@ -28,7 +28,7 @@ namespace Splendor
         {
             return Enum.GetValues(typeof(CoinColour))
                        .OfType<CoinColour>()
-                       .ToDictionary(col => col, col => CardsInPlay.Count(c => c.GivesDiscount == col));
+                       .ToDictionary(col => col, col => CardsInPlay.Count(c => c.BonusGiven == col));
         }
 
         public int VictoryPoints()

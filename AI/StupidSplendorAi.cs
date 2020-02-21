@@ -63,13 +63,13 @@ namespace Splendor.Core.AI
             // Take some coins
             var coloursAvailable = gameState.CoinsAvailable.Where(kvp => kvp.Value > 0 && kvp.Key != CoinColour.Gold).Select(c=>c.Key).ToList();
             var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Values.Sum(), 3), coloursAvailable.Count);
-            
-            if (coinsCountICanTake > 0)
-            {
-                var bestCardStudy = AnalyseCards(me, allFaceUpCards.Concat(me.ReservedCards), gameState)
-                    .OrderBy(s=>s.DifficultyRating)
+
+            var bestCardStudy = AnalyseCards(me, allFaceUpCards.Concat(me.ReservedCards), gameState)
+                    .OrderBy(s => s.DifficultyRating)
                     .FirstOrDefault();
 
+            if (coinsCountICanTake > 0)
+            {
                 if (bestCardStudy != null)
                 {
                     var coloursNeeded = bestCardStudy.Deficit.Where(kvp => kvp.Value > 0).Select(kvp => kvp.Key).ToList();
@@ -94,7 +94,7 @@ namespace Splendor.Core.AI
 
         private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player me, IEnumerable<Card> cards, GameState state)
         {
-            var budget = me.Purse.CreateCopy();
+            var budget = me.Purse.CreateCopy().MergeWith(me.GetDiscount());
             foreach (var card in cards)
             {
                 var cost = card.Cost;
@@ -107,7 +107,7 @@ namespace Splendor.Core.AI
                     scarcity += Math.Min(0, deficit[colour] - state.CoinsAvailable[colour]);
                 }
                 var rating = deficit.Values.Sum() + scarcity;
-                yield return new CardFeasibilityStudy { Deficit = deficit, DifficultyRating = rating };
+                yield return new CardFeasibilityStudy { Deficit = deficit, DifficultyRating = rating, Card = card };
             }
         }
 
@@ -125,31 +125,11 @@ namespace Splendor.Core.AI
             return null;
         }
 
-        private ReserveFaceDownCard ChooseFaceUpCardOrNull(GameState gameState)
-        {
-            var me = gameState.CurrentPlayer;
-            if (me.ReservedCards.Count == 3) return null;
-
-            var myVictoryPoints = me.VictoryPoints();
-            if (myVictoryPoints > 9 && gameState.Tiers.Last().FaceDownCards.Count > 0)
-            {
-                return new ReserveFaceDownCard(gameState.Tiers.Last().FaceDownCards.Peek().Tier);
-            }
-            if (myVictoryPoints > 4 && gameState.Tiers.Skip(1).First().FaceDownCards.Count > 0)
-            {
-                return new ReserveFaceDownCard(gameState.Tiers.Skip(1).First().FaceDownCards.Peek().Tier);
-            }
-            if (gameState.Tiers.First().FaceDownCards.Count > 0)
-            {
-                return new ReserveFaceDownCard(gameState.Tiers.First().FaceDownCards.Peek().Tier);
-            }
-            return null;
-        }
-
         private class CardFeasibilityStudy
         {
             public int DifficultyRating { get; set; }
             public IDictionary<CoinColour, int> Deficit { get; set; }
+            public Card Card { get; set; }
         }
     }
 }

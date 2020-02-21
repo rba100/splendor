@@ -10,18 +10,18 @@ namespace Splendor
             Tier = tier;
             VictoryPoints = victoryPoints;
             Cost = cost ?? throw new ArgumentNullException(nameof(cost));
-            GivesDiscount = givesDiscount;
+            BonusGiven = givesDiscount;
         }
 
         public override string ToString()
         {
             var tierMarker = new string('·', Tier);
-            return $"{GivesDiscount}{tierMarker} ({VictoryPoints})";
+            return $"{BonusGiven}{tierMarker} ({VictoryPoints})";
         }
 
         public int Tier { get; private set; }
         public int VictoryPoints { get; private set; }
         public IReadOnlyDictionary<CoinColour, int> Cost { get; private set; }
-        public CoinColour GivesDiscount { get; private set; }
+        public CoinColour BonusGiven { get; private set; }
     }
 }
