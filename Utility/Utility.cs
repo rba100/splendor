@@ -9,6 +9,11 @@ namespace Splendor.Core
     {
         private static readonly Random s_Rng = new Random();
 
+        /// <summary>
+        /// Mutates a list, reordering the contents at random.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
         public static void Shuffle<T>(this IList<T> list)
         {
             int n = list.Count;

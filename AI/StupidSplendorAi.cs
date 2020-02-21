@@ -62,7 +62,6 @@ namespace Splendor.Core.AI
             }
 
             // Do a reserve
-
             var action = ChooseFaceDownCard(gameState);
             if (action != null) return action;
 
