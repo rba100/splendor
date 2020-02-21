@@ -24,7 +24,7 @@ namespace Splendor
         public IList<Card> CardsInPlay { get; private set; }
         public IList<Noble> Nobles { get; private set; }
 
-        public IReadOnlyDictionary<CoinColour, int> GetDiscount()
+        public IDictionary<CoinColour, int> GetDiscount()
         {
             return Enum.GetValues(typeof(CoinColour))
                        .OfType<CoinColour>()

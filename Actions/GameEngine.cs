@@ -53,24 +53,4 @@ namespace Splendor.Core.Actions
             gameEngine.CommitTurn();
         }
     }
-
-    public class BuyCard : IAction
-    {
-        public Player Player { get; }
-        public Card Card { get; }
-        public IReadOnlyDictionary<CoinColour, int> CoinsTaken { get; }
-
-        public BuyCard(Player player, Card card, IReadOnlyDictionary<CoinColour, int> coinsTaken)
-        {
-            Player = player ?? throw new ArgumentNullException(nameof(player));
-            Card = card ?? throw new ArgumentNullException(nameof(card));
-            CoinsTaken = coinsTaken ?? throw new ArgumentNullException(nameof(coinsTaken));
-        }
-
-        public void Execute(GameEngine gameEngine)
-        {
-
-            gameEngine.CommitTurn();
-        }
-    }
 }
