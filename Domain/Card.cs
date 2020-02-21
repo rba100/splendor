@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Splendor
 {
@@ -16,7 +17,8 @@ namespace Splendor
         public override string ToString()
         {
             var tierMarker = new string('·', Tier);
-            return $"{BonusGiven}{tierMarker} ({VictoryPoints})";
+            var costs = Cost.Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
+            return $"{BonusGiven}{tierMarker} ({VictoryPoints}) {string.Join(",", costs)}";
         }
 
         public int Tier { get; private set; }

@@ -10,16 +10,16 @@ namespace Splendor.Core.Actions
         public IReadOnlyDictionary<CoinColour, int> CoinsTaken { get; }
         public IReadOnlyDictionary<CoinColour, int> CoinsReturned { get; }
 
-        public TakeCoins(IReadOnlyDictionary<CoinColour, int> coinsTaken, 
+        public TakeCoins(IReadOnlyDictionary<CoinColour, int> coinsTaken,
                          IReadOnlyDictionary<CoinColour, int> coinsReturned = null)
         {
             CoinsTaken = coinsTaken ?? throw new ArgumentNullException(nameof(coinsTaken));
-            CoinsReturned = coinsReturned ?? Utility.CoinQuantity();           
+            CoinsReturned = coinsReturned ?? Utility.CoinQuantity();
         }
 
         public override string ToString()
         {
-            var things = CoinsTaken.Where(c => c.Value > 0).Select(kvp => $"{kvp.Key}");
+            var things = CoinsTaken.Where(c => c.Value > 0).Select(kvp => (kvp.Value == 1 ? "" : $"{kvp.Value} ") + $"{kvp.Key}");
             return "Taking " + string.Join(", ", things);
         }
 

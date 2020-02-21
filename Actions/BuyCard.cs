@@ -24,8 +24,8 @@ namespace Splendor.Core.Actions
         public override string ToString()
         {
             var costs = Payment?.Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
-            if (costs?.Count() == 0) return $"Buying {Card} for free.";
-            return costs == null ? $"Buying {Card}" : $"Buying {Card} with {string.Join(", ", costs)}";
+            if (costs?.Count() == 0) return $"Buying [{Card}] for free.";
+            return costs == null ? $"Buying {Card}" : $"Buying [{Card}] with {string.Join(", ", costs)}";
         }
 
         public void Execute(IGameEngine gameEngine)

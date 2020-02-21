@@ -65,13 +65,6 @@ namespace Splendor.Core.AI
                 }
             }
 
-            // Once in a while reserve a random card
-            if (_random.Next(8) == 0)
-            {
-                var ac = ChooseRandomCardOrNull(gameState);
-                if (ac != null) return ac;
-            }
-
             // Take some coins
             var coloursAvailable = gameState.CoinsAvailable.Where(kvp => kvp.Value > 0 && kvp.Key != CoinColour.Gold).Select(c => c.Key).ToList();
             var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Values.Sum(), 3), coloursAvailable.Count);
@@ -88,6 +81,15 @@ namespace Splendor.Core.AI
                     coloursAvailable.Shuffle();
                 }
                 var transaction = Utility.CreateEmptyTransaction();
+                if(bestCardStudy.Deficit.Any(kvp=>kvp.Value >= 2))
+                {
+                    var neededColour = bestCardStudy.Deficit.First(kvp => kvp.Value >= 2).Key;
+                    if (gameState.CoinsAvailable[neededColour] > 3)
+                    {
+                        transaction[neededColour] = 2;
+                        return new TakeCoins(transaction);
+                    }
+                }
                 foreach (var colour in coloursAvailable.Take(coinsCountICanTake)) transaction[colour] = 1;
                 return new TakeCoins(transaction);
             }
