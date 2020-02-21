@@ -1,0 +1,2 @@
+# splendor
+ Splendor simulator
