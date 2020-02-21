@@ -23,8 +23,8 @@ namespace Splendor.Core.Actions
         public void Execute(IGameEngine gameEngine)
         {
             var player = gameEngine.GameState.CurrentPlayer;
-
-            if (gameEngine.GameState.Tiers[Tier-1].FaceDownCards.Count == 0)
+            var boardTier = gameEngine.GameState.Tiers.Single(t => t.Tier == Tier);
+            if (boardTier.FaceDownCards.Count == 0)
             {
                 throw new RulesViolationException("There aren't any cards in that tier left to reserve.");
             }
@@ -34,7 +34,7 @@ namespace Splendor.Core.Actions
                 throw new RulesViolationException("You can't reserve more than three cards.");
             }
 
-            var cardTaken = gameEngine.GameState.Tiers[Tier - 1].FaceDownCards.Dequeue();
+            var cardTaken = boardTier.FaceDownCards.Dequeue();
             player.ReservedCards.Add(cardTaken);
 
             if(gameEngine.GameState.CoinsAvailable[CoinColour.Gold] > 1)

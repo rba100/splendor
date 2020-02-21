@@ -1,6 +1,7 @@
 ﻿using Splendor.Core.Actions;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Splendor.Core.AI
@@ -39,11 +40,11 @@ namespace Splendor.Core.AI
             // Buy a card from my hand if possible
             foreach (var card in me.ReservedCards.Where(CanBuy))
             {
-                return new BuyCard(card);
+                return new BuyCard(card, BuyCard.CreateDefaultPaymentOrNull(me, card));
             }
 
-            // If I have 10 coins buy any card I can at all
-            if (me.Purse.Values.Sum() == 10)
+            // If I have 9 or more coins buy any card I can at all
+            if (me.Purse.Values.Sum() > 8)
             {
                 foreach (var card in allFaceUpCards.Where(CanBuy))
                 {
@@ -53,55 +54,78 @@ namespace Splendor.Core.AI
             }
 
             // Once in a while reserve a random card
-            if(_random.Next(6) == 0)
+            if(_random.Next(8) == 0)
             {
-                var ac = ChooseFaceDownCard(gameState);
+                var ac = ChooseRandomCardOrNull(gameState);
                 if (ac != null) return ac;
             }
 
-            var colours = gameState.CoinsAvailable.Where(kvp => kvp.Value > 0 && kvp.Key != CoinColour.Gold).Select(c=>c.Key).ToList();
-            var count = Math.Min(Math.Min(10 - me.Purse.Values.Sum(), 3), colours.Count);
+            // Take some coins
+            var coloursAvailable = gameState.CoinsAvailable.Where(kvp => kvp.Value > 0 && kvp.Key != CoinColour.Gold).Select(c=>c.Key).ToList();
+            var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Values.Sum(), 3), coloursAvailable.Count);
             
-            if (count > 0)
+            if (coinsCountICanTake > 0)
             {
-                colours.Shuffle();
+                var bestCardStudy = AnalyseCards(me, allFaceUpCards.Concat(me.ReservedCards), gameState)
+                    .OrderBy(s=>s.DifficultyRating)
+                    .FirstOrDefault();
+
+                if (bestCardStudy != null)
+                {
+                    var coloursNeeded = bestCardStudy.Deficit.Where(kvp => kvp.Value > 0).Select(kvp => kvp.Key).ToList();
+                    coloursAvailable = coloursAvailable.OrderByDescending(col => coloursNeeded.Contains(col)).ToList();
+                }
+                else
+                {
+                    coloursAvailable.Shuffle();
+                }
                 var transaction = Utility.CreateEmptyTransaction();
-                foreach (var colour in colours.Take(count)) transaction[colour] = 1;
+                foreach (var colour in coloursAvailable.Take(coinsCountICanTake)) transaction[colour] = 1;
                 return new TakeCoins(transaction);
             }
 
             // Do a reserve
-            var action = ChooseFaceDownCard(gameState);
+            var action = ChooseRandomCardOrNull(gameState);
             if (action != null) return action;
 
             // Give up
             return new NoAction();
         }
 
-        private ReserveFaceDownCard ChooseFaceDownCard(GameState gameState)
+        private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player me, IEnumerable<Card> cards, GameState state)
+        {
+            var budget = me.Purse.CreateCopy();
+            foreach (var card in cards)
+            {
+                var cost = card.Cost;
+                if (cost == null) continue;
+                var deficit = Utility.CreateEmptyTransaction();
+                int scarcity = 0;
+                foreach(var colour in cost.Keys)
+                {
+                    deficit[colour] = Math.Max(0, cost[colour] - budget[colour]);
+                    scarcity += Math.Min(0, deficit[colour] - state.CoinsAvailable[colour]);
+                }
+                var rating = deficit.Values.Sum() + scarcity;
+                yield return new CardFeasibilityStudy { Deficit = deficit, DifficultyRating = rating };
+            }
+        }
+
+        private ReserveFaceDownCard ChooseRandomCardOrNull(GameState gameState)
         {
             var me = gameState.CurrentPlayer;
-            var colourToGiveUp = me.Purse.Where(kvp => kvp.Value > 0 && kvp.Key != CoinColour.Gold).Select(kvp => kvp.Key).FirstOrDefault();
-
             if (me.ReservedCards.Count == 3) return null;
 
-            //var myVictoryPoints = me.VictoryPoints();
-            //if (myVictoryPoints > 9 && gameState.Tiers.Last().FaceDownCards.Count > 0)
-            //{
-            //    return new ReserveFaceDownCard(gameState.Tiers.Last().FaceDownCards.Peek().Tier, colourToGiveUp);
-            //}
-            //if (myVictoryPoints > 4 && gameState.Tiers.Skip(1).First().FaceDownCards.Count > 0)
-            //{
-            //    return new ReserveFaceDownCard(gameState.Tiers.Skip(1).First().FaceDownCards.Peek().Tier, colourToGiveUp);
-            //}
-            if (gameState.Tiers.First().FaceDownCards.Count > 0)
+            var colourToGiveUp = me.Purse.Where(kvp => kvp.Value > 0 && kvp.Key != CoinColour.Gold).Select(kvp => kvp.Key).FirstOrDefault();
+            var firstTier = gameState.Tiers.Single(t => t.Tier == 1);
+            if (firstTier.FaceDownCards.Count > 0)
             {
-                return new ReserveFaceDownCard(gameState.Tiers.First().FaceDownCards.Peek().Tier, colourToGiveUp);
+                return new ReserveFaceDownCard(1, colourToGiveUp);
             }
             return null;
         }
 
-        private ReserveFaceDownCard ChooseFaceUpCard(GameState gameState)
+        private ReserveFaceDownCard ChooseFaceUpCardOrNull(GameState gameState)
         {
             var me = gameState.CurrentPlayer;
             if (me.ReservedCards.Count == 3) return null;
@@ -120,6 +144,12 @@ namespace Splendor.Core.AI
                 return new ReserveFaceDownCard(gameState.Tiers.First().FaceDownCards.Peek().Tier);
             }
             return null;
+        }
+
+        private class CardFeasibilityStudy
+        {
+            public int DifficultyRating { get; set; }
+            public IDictionary<CoinColour, int> Deficit { get; set; }
         }
     }
 }

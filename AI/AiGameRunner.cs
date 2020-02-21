@@ -27,20 +27,23 @@ namespace Splendor.Core.AI
             while (!_engine.IsGameFinished && playersPassed < _engine.GameState.Players.Length)
             {
                 var index = Array.IndexOf(_engine.GameState.Players, _engine.GameState.CurrentPlayer);
+                var thisPlayer = _engine.GameState.Players[index];
                 var ai = _playerAi[index];
                 var action = ai.ChooseAction(_engine.GameState);
-                m_Log($"{_engine.GameState.CurrentPlayer.Name}, Action: {action}");
                 if (action is NoAction) playersPassed++; else playersPassed = 0;
                 action.Execute(_engine);
+
+                m_Log($"{ai.Name} (Bank:{thisPlayer.Purse.Values.Sum()}), Action: {action}");
             }
 
             Console.WriteLine("Game over!");
 
-            foreach (var player in _engine.GameState.Players)
+            for (int i = 0; i < _engine.GameState.Players.Length; i++)
             {
+                Player player = _engine.GameState.Players[i];
                 var score = player.VictoryPoints();
                 var s = score == 1 ? "" : "s";
-                m_Log($"{player.Name} — {score} point{s}");
+                m_Log($"{_playerAi[i].Name} — {score} point{s}");
             }
         }
     }

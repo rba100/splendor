@@ -4,8 +4,9 @@ namespace Splendor
 {
     public class BoardTier
     {
-        public BoardTier(IEnumerable<Card> cards, int columns)
+        public BoardTier(int tier, IEnumerable<Card> cards, int columns)
         {
+            Tier = tier;
             FaceDownCards = new Queue<Card>(cards);
             ColumnSlots = new Dictionary<int, Card>();
 
@@ -15,6 +16,7 @@ namespace Splendor
             }
         }
 
+        public int Tier { get; private set; }
         public Queue<Card> FaceDownCards { get; private set; }
         public IDictionary<int,Card> ColumnSlots { get; private set; }
     }

@@ -41,7 +41,7 @@ namespace Splendor
             var tiers = cards.Select(c => c.Tier).Distinct();
             foreach(var tier in tiers)
             {
-                boardTiers.Add(new BoardTier(cards.Where(c => c.Tier == tier), columns));
+                boardTiers.Add(new BoardTier(tier, cards.Where(c => c.Tier == tier), columns));
             }
 
             var playerList = new List<Player>();

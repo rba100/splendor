@@ -15,15 +15,16 @@ namespace Splendor.Core.Actions
         public Card Card { get; }
         public IReadOnlyDictionary<CoinColour, int> Payment { get; }
 
-        public BuyCard(Card card, IReadOnlyDictionary<CoinColour, int> optionalSpecificPayment = null)
+        public BuyCard(Card card, IReadOnlyDictionary<CoinColour, int> payment)
         {
             Card = card ?? throw new ArgumentNullException(nameof(card));
-            Payment = optionalSpecificPayment;
+            Payment = payment ?? throw new ArgumentNullException(nameof(payment));
         }
 
         public override string ToString()
         {
-            var costs = Payment?.Where(c => c.Value > 0).Select(kvp => $"{kvp.Key}x{kvp.Value}");
+            var costs = Payment?.Where(c => c.Value > 0).Select(kvp => $"{kvp.Key}x{kvp.Value}").ToList();
+            if (costs?.Count() == 0) return $"Buying {Card} for free.";
             return costs == null ? $"Buying {Card}" : $"Buying {Card} with {string.Join(", ", costs)}";
         }
 
@@ -32,13 +33,13 @@ namespace Splendor.Core.Actions
             var player = gameEngine.GameState.CurrentPlayer;
 
             // Validate 
-            ValidatePaymentIfNotNull(gameEngine);
+            if(!SuppliedPaymentIsValid(gameEngine)) throw new RulesViolationException("You can't afford this card with the supplied payment."); ;
             if(!VerifyCardIsInHandOrBoard(player, gameEngine.GameState, Card)) throw new RulesViolationException("That card isn't on the board or in hand.");
 
-            var tier = gameEngine.GameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));               
-            var payment = Payment ?? CreateDefaultPaymentOrNull(player, Card) ?? throw new RulesViolationException("You can't afford this card");
+            var tier = gameEngine.GameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));
 
-            // Perform transaction - card
+            // Perform transaction
+            //  - Card
             if (tier != null)
             {
                 var index = tier.ColumnSlots.Single(s => s.Value == Card).Key;
@@ -50,10 +51,11 @@ namespace Splendor.Core.Actions
             }
             player.CardsInPlay.Add(Card);
 
-            // Perform transaction - payment
-            foreach(var colour in payment.Keys)
+            //  - Payment
+            foreach(var colour in Payment.Keys)
             {
-                player.Purse[colour] -= payment[colour];
+                player.Purse[colour] -= Payment[colour];
+                gameEngine.GameState.CoinsAvailable[colour] += Payment[colour];
             }
 
             gameEngine.CommitTurn();
@@ -115,10 +117,8 @@ namespace Splendor.Core.Actions
             return payment;
         }
 
-        private void ValidatePaymentIfNotNull(IGameEngine gameEngine)
+        private bool SuppliedPaymentIsValid(IGameEngine gameEngine)
         {
-            if (Payment == null) return;
-
             var available = gameEngine.GameState.CurrentPlayer.Purse.CreateCopy();
             var costRemaining = Card.Cost.CreateCopy();
             var discount = gameEngine.GameState.CurrentPlayer.GetDiscount();
@@ -133,7 +133,7 @@ namespace Splendor.Core.Actions
                 if (costRemaining[colour] < 1) continue;
                 if (costRemaining[colour] > available[colour] + available[CoinColour.Gold])
                 {
-                    throw new RulesViolationException("You can't afford this card with the supplied payment.");
+                    return false;                    
                 }
 
                 if (costRemaining[colour] > available[colour])
@@ -141,6 +141,7 @@ namespace Splendor.Core.Actions
                     available[CoinColour.Gold] -= costRemaining[colour] - available[colour];
                 }
             }
+            return true;
         }
     }
 }
