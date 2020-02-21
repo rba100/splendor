@@ -27,9 +27,10 @@ namespace Splendor.Core.Actions
 
             // Validate 
             ValidatePaymentIfNotNull(gameEngine);
-            VerifyCardIsInHandOrBoard(gameEngine);
+            if(!VerifyCardIsInHandOrBoard(player, gameEngine.GameState, Card)) throw new RulesViolationException("That card isn't on the board or in hand.");
+
             var tier = gameEngine.GameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));               
-            var payment = Payment ?? CreateDefaultPayment(gameEngine);
+            var payment = Payment ?? CreateDefaultPaymentOrNull(player, Card) ?? throw new RulesViolationException("You can't afford this card");
 
             // Perform transaction - card
             if (tier != null)
@@ -52,23 +53,31 @@ namespace Splendor.Core.Actions
             gameEngine.CommitTurn();
         }
 
-        private void VerifyCardIsInHandOrBoard(IGameEngine gameEngine)
+        public static bool CanBuyCard(Player player, GameState gameState, Card card)
         {
-            if(gameEngine.GameState.CurrentPlayer.ReservedCards.Contains(Card)) return;
-            var tier = gameEngine.GameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));
-            if (tier == null)
-            {
-                throw new RulesViolationException("That card isn't on the board or in hand.");
-            }
+            if (!VerifyCardIsInHandOrBoard(player, gameState, card)) return false;
+            return CanAffordCard(player, card);
         }
 
-        private Dictionary<CoinColour, int> CreateDefaultPayment(IGameEngine gameEngine)
+        private static bool VerifyCardIsInHandOrBoard(Player player, GameState gameState, Card card)
+        {
+            if(player.ReservedCards.Contains(card)) return true;
+            var tier = gameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(card));
+            return tier != null;
+        }
+
+        private static bool CanAffordCard(Player player, Card card)
+        {
+            return CreateDefaultPaymentOrNull(player, card) != null;
+        }
+
+        private static Dictionary<CoinColour, int> CreateDefaultPaymentOrNull(Player player, Card card)
         {
             var payment = Utility.CreateEmptyTransaction();
 
-            var available = gameEngine.GameState.CurrentPlayer.Purse.CreateCopy();
-            var discount = gameEngine.GameState.CurrentPlayer.GetDiscount();
-            var costRemaining = Card.Cost.CreateCopy();
+            var available = player.Purse.CreateCopy();
+            var discount = player.GetDiscount();
+            var costRemaining = card.Cost.CreateCopy();
 
             foreach (var colour in discount.Keys)
             {
@@ -80,7 +89,7 @@ namespace Splendor.Core.Actions
                 if (costRemaining[colour] < 1) continue;
                 if (costRemaining[colour] > available[colour] + available[CoinColour.Gold])
                 {
-                    throw new RulesViolationException("You can't afford this card.");
+                    return null;
                 }
 
                 if (costRemaining[colour] < available[colour])

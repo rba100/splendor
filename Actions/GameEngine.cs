@@ -17,11 +17,6 @@ namespace Splendor.Core.Actions
             GameState = game ?? throw new ArgumentNullException(nameof(game));
         }
 
-        public IEnumerable<IAction> GetPossibleActions()
-        {
-            yield break;
-        }
-
         public void CommitTurn()
         {
             IsGameFinished = 
@@ -38,7 +33,6 @@ namespace Splendor.Core.Actions
     {
         GameState GameState { get; }
         void CommitTurn();
-        IEnumerable<IAction> GetPossibleActions();
     }
 
     public interface IAction
