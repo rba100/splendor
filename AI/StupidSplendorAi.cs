@@ -44,25 +44,13 @@ namespace Splendor.Core.AI
             }
 
             // Once in a while reserve a random card
-            if(me.ReservedCards.Count < 3 && _random.Next(6) == 0)
+            if(_random.Next(6) == 0)
             {
-                var myVictoryPoints = me.VictoryPoints();
-                if (myVictoryPoints > 9 && gameState.Tiers.Last().FaceDownCards.Count > 0)
-                {
-                    return new ReserveFaceDownCard(gameState.Tiers.Last().FaceDownCards.Peek().Tier);
-                }
-                if (myVictoryPoints > 4 && gameState.Tiers.Skip(1).First().FaceDownCards.Count > 0)
-                {
-                    return new ReserveFaceDownCard(gameState.Tiers.Skip(1).First().FaceDownCards.Peek().Tier);
-                }
-                if(gameState.Tiers.First().FaceDownCards.Count > 0)
-                {
-                    return new ReserveFaceDownCard(gameState.Tiers.First().FaceDownCards.Peek().Tier);
-                }
+                var ac = ChooseFaceDownCard(gameState);
+                if (ac != null) return ac;
             }
 
-            // Take coins at random
-            var colours = gameState.CoinsAvailable.Where(kvp => kvp.Value > 0).Select(c=>c.Key).ToList();
+            var colours = gameState.CoinsAvailable.Where(kvp => kvp.Value > 0 && kvp.Key != CoinColour.Gold).Select(c=>c.Key).ToList();
             var count = Math.Min(Math.Min(10 - me.Purse.Values.Sum(), 3), colours.Count);
             
             if (count > 0)
@@ -73,8 +61,55 @@ namespace Splendor.Core.AI
                 return new TakeCoins(transaction);
             }
 
+            // Do a reserve
+
+            var action = ChooseFaceDownCard(gameState);
+            if (action != null) return action;
+
             // Give up
             return new NoAction();
+        }
+
+        private ReserveFaceDownCard ChooseFaceDownCard(GameState gameState)
+        {
+            var me = gameState.CurrentPlayer;
+            if (me.ReservedCards.Count == 3) return null;
+
+            var myVictoryPoints = me.VictoryPoints();
+            if (myVictoryPoints > 9 && gameState.Tiers.Last().FaceDownCards.Count > 0)
+            {
+                return new ReserveFaceDownCard(gameState.Tiers.Last().FaceDownCards.Peek().Tier);
+            }
+            if (myVictoryPoints > 4 && gameState.Tiers.Skip(1).First().FaceDownCards.Count > 0)
+            {
+                return new ReserveFaceDownCard(gameState.Tiers.Skip(1).First().FaceDownCards.Peek().Tier);
+            }
+            if (gameState.Tiers.First().FaceDownCards.Count > 0)
+            {
+                return new ReserveFaceDownCard(gameState.Tiers.First().FaceDownCards.Peek().Tier);
+            }
+            return null;
+        }
+
+        private ReserveFaceDownCard ChooseFaceUpCard(GameState gameState)
+        {
+            var me = gameState.CurrentPlayer;
+            if (me.ReservedCards.Count == 3) return null;
+
+            var myVictoryPoints = me.VictoryPoints();
+            if (myVictoryPoints > 9 && gameState.Tiers.Last().FaceDownCards.Count > 0)
+            {
+                return new ReserveFaceDownCard(gameState.Tiers.Last().FaceDownCards.Peek().Tier);
+            }
+            if (myVictoryPoints > 4 && gameState.Tiers.Skip(1).First().FaceDownCards.Count > 0)
+            {
+                return new ReserveFaceDownCard(gameState.Tiers.Skip(1).First().FaceDownCards.Peek().Tier);
+            }
+            if (gameState.Tiers.First().FaceDownCards.Count > 0)
+            {
+                return new ReserveFaceDownCard(gameState.Tiers.First().FaceDownCards.Peek().Tier);
+            }
+            return null;
         }
     }
 }

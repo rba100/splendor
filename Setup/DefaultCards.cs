@@ -135,6 +135,7 @@ namespace Splendor
             dict[CoinColour.Red] = red;
             dict[CoinColour.Blue] = blue;
             dict[CoinColour.Green] = green;
+            dict[CoinColour.Gold] = 0;
             return new Noble(victoryPoints, dict);
         }
 
@@ -147,6 +148,7 @@ namespace Splendor
             costs[CoinColour.Red] = red;
             costs[CoinColour.Blue] = blue;
             costs[CoinColour.Green] = green;
+            costs[CoinColour.Gold] = 0;
             return new Card(tier, points, costs, colour);
         }
     }

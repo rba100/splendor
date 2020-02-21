@@ -81,7 +81,7 @@ namespace Splendor.Core.Actions
 
             foreach (var colour in discount.Keys)
             {
-                costRemaining[colour] = Math.Min(costRemaining[colour] - discount[colour], 0);
+                costRemaining[colour] = Math.Max(costRemaining[colour] - discount[colour], 0);
             }
 
             foreach (var colour in costRemaining.Keys)

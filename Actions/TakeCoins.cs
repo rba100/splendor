@@ -23,7 +23,7 @@ namespace Splendor.Core.Actions
             Validate(gameEngine);
 
             // Perform transaction
-            foreach (var colour in gameEngine.GameState.CoinsAvailable.Keys)
+            foreach (var colour in gameEngine.GameState.CoinsAvailable.Keys.ToArray())
             {
                 // Take coins
                 gameEngine.GameState.CoinsAvailable[colour] -= CoinsTaken[colour];

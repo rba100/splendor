@@ -39,19 +39,4 @@ namespace Splendor.Core.Actions
     {
         void Execute(GameEngine gameEngine);
     }
-
-    /// <summary>
-    /// Do nothing at all.
-    /// </summary>
-    /// <remarks>
-    /// In the official rules, this might not be allowed. We shall pretend it's a special case
-    /// of 'take three coins' where you choose to take zero.
-    /// </remarks>
-    public class NoAction : IAction
-    {
-        public void Execute(GameEngine gameEngine)
-        {
-            gameEngine.CommitTurn();
-        }
-    }
 }
