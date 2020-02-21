@@ -93,6 +93,12 @@ namespace Splendor.Core.AI
             }
 
             // Do a reserve
+            if (!me.ReservedCards.Contains(bestCardStudy.Card) && me.ReservedCards.Count < 3)
+            {
+                return new ReserveCard(bestCardStudy.Card);
+            }
+
+            // Do a reserve
             var action = ChooseRandomCardOrNull(gameState);
             if (action != null) return action;
 
@@ -115,7 +121,7 @@ namespace Splendor.Core.AI
                     scarcity += Math.Max(0, deficit[colour] - state.CoinsAvailable[colour]);
                 }
                 var repulsion = deficit.Values.Sum() + scarcity;
-                if (card.BonusGiven == FavouriteColour) repulsion -= 5;
+                if (card.BonusGiven == FavouriteColour) repulsion -= 8;
 
                 yield return new CardFeasibilityStudy { Deficit = deficit, Repulsion = repulsion, Card = card };
             }

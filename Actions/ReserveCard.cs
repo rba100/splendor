@@ -16,6 +16,11 @@ namespace Splendor.Core.Actions
             ColourToReturnIfMaxCoins = colourToReturnIfMaxCoins;
         }
 
+        public override string ToString()
+        {
+            return $"Reserved {Card}";
+        }
+
         public void Execute(IGameEngine gameEngine)
         {
             var player = gameEngine.GameState.CurrentPlayer;

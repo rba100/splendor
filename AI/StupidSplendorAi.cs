@@ -53,7 +53,7 @@ namespace Splendor.Core.AI
                 return new BuyCard(card, BuyCard.CreateDefaultPaymentOrNull(me, card));
             }
 
-            // If I have 9 or more coins buy any card I can at all
+            // If I have 9 or more coins buy any card I can
             if (me.Purse.Values.Sum() > 8)
             {
                 foreach (var card in allFaceUpCards.Where(CanBuy))
@@ -91,6 +91,11 @@ namespace Splendor.Core.AI
             }
 
             // Do a reserve
+            if(!me.ReservedCards.Contains(bestCardStudy.Card) && me.ReservedCards.Count < 3)
+            {
+                return new ReserveCard(bestCardStudy.Card);
+            }
+
             var action = ChooseRandomCardOrNull(gameState);
             if (action != null) return action;
 
