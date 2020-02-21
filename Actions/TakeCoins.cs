@@ -71,7 +71,6 @@ namespace Splendor.Core.Actions
                 {
                     throw new RulesViolationException("You can only take two coins if there are four or more available.");
                 }
-
             }
 
             var totalCoinsAfterTransaction = player.Purse.Values.Sum() + CoinsTaken.Values.Sum() - CoinsReturned.Values.Sum();
