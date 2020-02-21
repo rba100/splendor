@@ -15,6 +15,11 @@ namespace Splendor.Core.Actions
             ColourToReturnIfMaxCoins = colourToReturnIfMaxCoins;
         }
 
+        public override string ToString()
+        {
+            return $"Reserving a random card from tier {Tier}";
+        }
+
         public void Execute(GameEngine gameEngine)
         {
             var player = gameEngine.GameState.CurrentPlayer;

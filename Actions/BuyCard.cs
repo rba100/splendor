@@ -21,6 +21,12 @@ namespace Splendor.Core.Actions
             Payment = optionalSpecificPayment;
         }
 
+        public override string ToString()
+        {
+            var costs = Payment?.Where(c => c.Value > 0).Select(kvp => $"{kvp.Key}x{kvp.Value}");
+            return costs == null ? $"Buying {Card}" : $"Buying {Card} with {string.Join(", ", costs)}";
+        }
+
         public void Execute(GameEngine gameEngine)
         {
             var player = gameEngine.GameState.CurrentPlayer;

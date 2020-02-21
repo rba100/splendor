@@ -17,6 +17,12 @@ namespace Splendor.Core.Actions
             CoinsReturned = coinsReturned ?? Utility.CoinQuantity();           
         }
 
+        public override string ToString()
+        {
+            var things = CoinsTaken.Where(c => c.Value > 0).Select(kvp => $"{kvp.Key}");
+            return "Taking " + string.Join(", ", things);
+        }
+
         public void Execute(GameEngine gameEngine)
         {
             // Enforce rules

@@ -4,9 +4,9 @@ namespace Splendor
 {
     public class BoardTier
     {
-        public BoardTier(IEnumerable<Card> faceDownCards, int columns)
+        public BoardTier(IEnumerable<Card> cards, int columns)
         {
-            FaceDownCards = new Queue<Card>(faceDownCards);
+            FaceDownCards = new Queue<Card>(cards);
             ColumnSlots = new Dictionary<int, Card>();
 
             for(var i = 0; i < columns; i++)

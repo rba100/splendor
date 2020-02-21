@@ -34,9 +34,4 @@ namespace Splendor.Core.Actions
         GameState GameState { get; }
         void CommitTurn();
     }
-
-    public interface IAction
-    {
-        void Execute(GameEngine gameEngine);
-    }
 }

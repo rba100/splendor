@@ -72,20 +72,22 @@ namespace Splendor.Core.AI
         private ReserveFaceDownCard ChooseFaceDownCard(GameState gameState)
         {
             var me = gameState.CurrentPlayer;
+            var colourToGiveUp = me.Purse.Where(kvp => kvp.Value > 0 && kvp.Key != CoinColour.Gold).Select(kvp => kvp.Key).FirstOrDefault();
+
             if (me.ReservedCards.Count == 3) return null;
 
-            var myVictoryPoints = me.VictoryPoints();
-            if (myVictoryPoints > 9 && gameState.Tiers.Last().FaceDownCards.Count > 0)
-            {
-                return new ReserveFaceDownCard(gameState.Tiers.Last().FaceDownCards.Peek().Tier);
-            }
-            if (myVictoryPoints > 4 && gameState.Tiers.Skip(1).First().FaceDownCards.Count > 0)
-            {
-                return new ReserveFaceDownCard(gameState.Tiers.Skip(1).First().FaceDownCards.Peek().Tier);
-            }
+            //var myVictoryPoints = me.VictoryPoints();
+            //if (myVictoryPoints > 9 && gameState.Tiers.Last().FaceDownCards.Count > 0)
+            //{
+            //    return new ReserveFaceDownCard(gameState.Tiers.Last().FaceDownCards.Peek().Tier, colourToGiveUp);
+            //}
+            //if (myVictoryPoints > 4 && gameState.Tiers.Skip(1).First().FaceDownCards.Count > 0)
+            //{
+            //    return new ReserveFaceDownCard(gameState.Tiers.Skip(1).First().FaceDownCards.Peek().Tier, colourToGiveUp);
+            //}
             if (gameState.Tiers.First().FaceDownCards.Count > 0)
             {
-                return new ReserveFaceDownCard(gameState.Tiers.First().FaceDownCards.Peek().Tier);
+                return new ReserveFaceDownCard(gameState.Tiers.First().FaceDownCards.Peek().Tier, colourToGiveUp);
             }
             return null;
         }

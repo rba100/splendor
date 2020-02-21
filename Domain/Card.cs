@@ -13,6 +13,11 @@ namespace Splendor
             GivesDiscount = givesDiscount;
         }
 
+        public override string ToString()
+        {
+            return $"{Tier}-{GivesDiscount} ({VictoryPoints})";
+        }
+
         public int Tier { get; private set; }
         public int VictoryPoints { get; private set; }
         public IReadOnlyDictionary<CoinColour, int> Cost { get; private set; }

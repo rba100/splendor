@@ -9,5 +9,10 @@
         {
             gameEngine.CommitTurn();
         }
+
+        public override string ToString()
+        {
+            return $"Pass";
+        }
     }
 }
