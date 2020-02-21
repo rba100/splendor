@@ -115,7 +115,7 @@ namespace Splendor.Core.AI
                 foreach(var colour in cost.Keys)
                 {
                     deficit[colour] = Math.Max(0, cost[colour] - budget[colour]);
-                    scarcity += Math.Min(0, deficit[colour] - state.CoinsAvailable[colour]);
+                    scarcity += Math.Max(0, deficit[colour] - state.CoinsAvailable[colour]);
                 }
                 var rating = deficit.Values.Sum() + scarcity;
                 yield return new CardFeasibilityStudy { Deficit = deficit, DifficultyRating = rating, Card = card };
