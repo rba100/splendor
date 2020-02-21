@@ -61,10 +61,9 @@ namespace Splendor.Core.Actions
             gameEngine.CommitTurn();
         }
 
-        public static bool CanBuyCard(Player player, GameState gameState, Card card)
+        public static bool CanAffordCard(Player player, Card card)
         {
-            if (!VerifyCardIsInHandOrBoard(player, gameState, card)) return false;
-            return CanAffordCard(player, card);
+            return CreateDefaultPaymentOrNull(player, card) != null;
         }
 
         private static bool VerifyCardIsInHandOrBoard(Player player, GameState gameState, Card card)
@@ -72,11 +71,6 @@ namespace Splendor.Core.Actions
             if(player.ReservedCards.Contains(card)) return true;
             var tier = gameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(card));
             return tier != null;
-        }
-
-        private static bool CanAffordCard(Player player, Card card)
-        {
-            return CreateDefaultPaymentOrNull(player, card) != null;
         }
 
         public static Dictionary<CoinColour, int> CreateDefaultPaymentOrNull(Player player, Card card)

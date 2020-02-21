@@ -22,7 +22,7 @@ namespace Splendor.Core.AI
         public IAction ChooseAction(GameState gameState)
         {
             var me = gameState.CurrentPlayer;
-            bool CanBuy(Card card) => BuyCard.CanBuyCard(me, gameState, card);
+            bool CanBuy(Card card) => BuyCard.CanAffordCard(me, card);
 
             var allFaceUpCards = gameState.Tiers.SelectMany(t => t.ColumnSlots)
                                                 .Select(s => s.Value)
