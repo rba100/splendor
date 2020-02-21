@@ -15,7 +15,8 @@ namespace Splendor
 
         public override string ToString()
         {
-            return $"{Tier}-{GivesDiscount} ({VictoryPoints})";
+            var tierMarker = new string('·', Tier);
+            return $"{GivesDiscount}{tierMarker} ({VictoryPoints})";
         }
 
         public int Tier { get; private set; }

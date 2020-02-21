@@ -23,7 +23,7 @@ namespace Splendor.Core.Actions
             return "Taking " + string.Join(", ", things);
         }
 
-        public void Execute(GameEngine gameEngine)
+        public void Execute(IGameEngine gameEngine)
         {
             // Enforce rules
             Validate(gameEngine);

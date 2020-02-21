@@ -45,7 +45,7 @@ namespace Splendor
             }
 
             var playerList = new List<Player>();
-            for (var i = 0; i < players; i++) playerList.Add(new Player($"Player {i}"));
+            for (var i = 0; i < players; i++) playerList.Add(new Player($"Player {i+1}"));
 
             return new GameState(coinBank, nobleTier, boardTiers.ToArray(), playerList.ToArray());
         }

@@ -2,6 +2,6 @@
 {
     public interface IAction
     {
-        void Execute(GameEngine gameEngine);
+        void Execute(IGameEngine gameEngine);
     }
 }

@@ -5,7 +5,7 @@
     /// </remarks>
     public class NoAction : IAction
     {
-        public void Execute(GameEngine gameEngine)
+        public void Execute(IGameEngine gameEngine)
         {
             gameEngine.CommitTurn();
         }

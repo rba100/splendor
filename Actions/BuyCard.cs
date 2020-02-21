@@ -27,7 +27,7 @@ namespace Splendor.Core.Actions
             return costs == null ? $"Buying {Card}" : $"Buying {Card} with {string.Join(", ", costs)}";
         }
 
-        public void Execute(GameEngine gameEngine)
+        public void Execute(IGameEngine gameEngine)
         {
             var player = gameEngine.GameState.CurrentPlayer;
 
@@ -77,7 +77,7 @@ namespace Splendor.Core.Actions
             return CreateDefaultPaymentOrNull(player, card) != null;
         }
 
-        private static Dictionary<CoinColour, int> CreateDefaultPaymentOrNull(Player player, Card card)
+        public static Dictionary<CoinColour, int> CreateDefaultPaymentOrNull(Player player, Card card)
         {
             var payment = Utility.CreateEmptyTransaction();
 

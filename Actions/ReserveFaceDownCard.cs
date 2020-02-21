@@ -20,7 +20,7 @@ namespace Splendor.Core.Actions
             return $"Reserving a random card from tier {Tier}";
         }
 
-        public void Execute(GameEngine gameEngine)
+        public void Execute(IGameEngine gameEngine)
         {
             var player = gameEngine.GameState.CurrentPlayer;
 

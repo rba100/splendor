@@ -16,7 +16,7 @@ namespace Splendor.Core.Actions
             ColourToReturnIfMaxCoins = colourToReturnIfMaxCoins;
         }
 
-        public void Execute(GameEngine gameEngine)
+        public void Execute(IGameEngine gameEngine)
         {
             var player = gameEngine.GameState.CurrentPlayer;
 

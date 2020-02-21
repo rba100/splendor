@@ -31,6 +31,7 @@ namespace Splendor.Core.Actions
 
     public interface IGameEngine
     {
+        bool IsGameFinished { get; }
         GameState GameState { get; }
         void CommitTurn();
     }

@@ -9,6 +9,13 @@ namespace Splendor.Core.AI
     {
         private readonly Random _random = new Random();
 
+        public string Name { get; private set; }
+
+        public StupidSplendorAi(string name)
+        {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+        }
+
         public IAction ChooseAction(GameState gameState)
         {
             var me = gameState.CurrentPlayer;
@@ -25,7 +32,8 @@ namespace Splendor.Core.AI
                                               .OrderByDescending(c => c.VictoryPoints)
                                               .Where(CanBuy))
             {
-                return new BuyCard(card);
+                var payment = BuyCard.CreateDefaultPaymentOrNull(me, card);
+                return new BuyCard(card, payment);
             }
 
             // Buy a card from my hand if possible
@@ -39,7 +47,8 @@ namespace Splendor.Core.AI
             {
                 foreach (var card in allFaceUpCards.Where(CanBuy))
                 {
-                    return new BuyCard(card);
+                    var payment = BuyCard.CreateDefaultPaymentOrNull(me, card);
+                    return new BuyCard(card, payment);
                 } 
             }
 
