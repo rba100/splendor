@@ -21,7 +21,7 @@ namespace Splendor.Core.AI
             m_Log = log ?? new Action<string>(s => { });
         }
 
-        public void Run()
+        public Dictionary<ISpendorAi, int> Run()
         {
             int playersPassed = 0;
             while (!_engine.IsGameFinished && playersPassed < _engine.GameState.Players.Length)
@@ -35,8 +35,9 @@ namespace Splendor.Core.AI
                 m_Log($"{ai.Name} (Bank:{thisPlayer.Purse.Values.Sum()}), {action}");
             }
 
-            Console.WriteLine($"**** Game over after {_engine.RoundsCompleted} rounds.");
+            m_Log($"**** Game over after {_engine.RoundsCompleted} rounds.");
 
+            var results = new Dictionary<ISpendorAi, int>();
             for (int i = 0; i < _engine.GameState.Players.Length; i++)
             {
                 Player player = _engine.GameState.Players[i];
@@ -48,7 +49,9 @@ namespace Splendor.Core.AI
                 var bonuses = string.Join(", ", player.GetDiscount().Where(kvp => kvp.Key != CoinColour.Gold)
                                                                     .Select(kvp=> $"{kvp.Value} {kvp.Key}"));
                 m_Log($"{_playerAi[i].Name} — {score} point{s} ({nobles} noble{ns}{nobleNames}) (Bonuses {bonuses})");
+                results.Add(_playerAi[i], score);
             }
+            return results;
         }
     }
 }

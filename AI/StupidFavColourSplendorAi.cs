@@ -6,14 +6,14 @@ using System.Linq;
 
 namespace Splendor.Core.AI
 {
-    public class StupidLikesColourSplendorAi : ISpendorAi
+    public class StupidFavColourSplendorAi : ISpendorAi
     {
         private readonly Random _random = new Random();
         private readonly CoinColour FavouriteColour;
 
         public string Name { get; private set; }
 
-        public StupidLikesColourSplendorAi(string name, CoinColour favouriteColour)
+        public StupidFavColourSplendorAi(string name, CoinColour favouriteColour)
         {
             Name = name;
             FavouriteColour = favouriteColour;
@@ -114,10 +114,10 @@ namespace Splendor.Core.AI
                     deficit[colour] = Math.Max(0, cost[colour] - budget[colour]);
                     scarcity += Math.Max(0, deficit[colour] - state.CoinsAvailable[colour]);
                 }
-                var rating = deficit.Values.Sum() + scarcity;
-                if (card.BonusGiven == FavouriteColour) rating -= 5;
+                var repulsion = deficit.Values.Sum() + scarcity;
+                if (card.BonusGiven == FavouriteColour) repulsion -= 5;
 
-                yield return new CardFeasibilityStudy { Deficit = deficit, Repulsion = rating, Card = card };
+                yield return new CardFeasibilityStudy { Deficit = deficit, Repulsion = repulsion, Card = card };
             }
         }
 
