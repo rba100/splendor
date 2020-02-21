@@ -12,24 +12,24 @@ namespace Splendor.Core.Actions
     /// </summary>
     public class BuyCard : IAction
     {
-        public Player Player { get; }
         public Card Card { get; }
         public IReadOnlyDictionary<CoinColour, int> Payment { get; }
 
-        public BuyCard(Player player, Card card, IReadOnlyDictionary<CoinColour, int> optionalSpecificPayment = null)
+        public BuyCard(Card card, IReadOnlyDictionary<CoinColour, int> optionalSpecificPayment = null)
         {
-            Player = player ?? throw new ArgumentNullException(nameof(player));
             Card = card ?? throw new ArgumentNullException(nameof(card));
             Payment = optionalSpecificPayment;
         }
 
         public void Execute(GameEngine gameEngine)
         {
+            var player = gameEngine.GameState.CurrentPlayer;
+
             // Validate 
-            ValidatePaymentIfNotNull();
+            ValidatePaymentIfNotNull(gameEngine);
             VerifyCardIsInHandOrBoard(gameEngine);
             var tier = gameEngine.GameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));               
-            var payment = Payment ?? CreateDefaultPayment();
+            var payment = Payment ?? CreateDefaultPayment(gameEngine);
 
             // Perform transaction - card
             if (tier != null)
@@ -39,14 +39,14 @@ namespace Splendor.Core.Actions
             }
             else
             {
-                Player.ReservedCards.Remove(Card);
+                player.ReservedCards.Remove(Card);
             }
-            Player.CardsInPlay.Add(Card);
+            player.CardsInPlay.Add(Card);
 
             // Perform transaction - payment
             foreach(var colour in payment.Keys)
             {
-                Player.Purse[colour] -= payment[colour];
+                player.Purse[colour] -= payment[colour];
             }
 
             gameEngine.CommitTurn();
@@ -54,7 +54,7 @@ namespace Splendor.Core.Actions
 
         private void VerifyCardIsInHandOrBoard(IGameEngine gameEngine)
         {
-            if(Player.ReservedCards.Contains(Card)) return;
+            if(gameEngine.GameState.CurrentPlayer.ReservedCards.Contains(Card)) return;
             var tier = gameEngine.GameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));
             if (tier == null)
             {
@@ -62,12 +62,12 @@ namespace Splendor.Core.Actions
             }
         }
 
-        private Dictionary<CoinColour, int> CreateDefaultPayment()
+        private Dictionary<CoinColour, int> CreateDefaultPayment(IGameEngine gameEngine)
         {
             var payment = Utility.CreateEmptyTransaction();
 
-            var available = Player.Purse.CreateCopy();
-            var discount = Player.GetDiscount();
+            var available = gameEngine.GameState.CurrentPlayer.Purse.CreateCopy();
+            var discount = gameEngine.GameState.CurrentPlayer.GetDiscount();
             var costRemaining = Card.Cost.CreateCopy();
 
             foreach (var colour in discount.Keys)
@@ -100,13 +100,13 @@ namespace Splendor.Core.Actions
             return payment;
         }
 
-        private void ValidatePaymentIfNotNull()
+        private void ValidatePaymentIfNotNull(IGameEngine gameEngine)
         {
             if (Payment == null) return;
 
-            var available = Player.Purse.CreateCopy();
+            var available = gameEngine.GameState.CurrentPlayer.Purse.CreateCopy();
             var costRemaining = Card.Cost.CreateCopy();
-            var discount = Player.GetDiscount();
+            var discount = gameEngine.GameState.CurrentPlayer.GetDiscount();
 
             foreach (var colour in discount.Keys)
             {

@@ -6,14 +6,11 @@ namespace Splendor.Core.Actions
 {
     public class ReserveCard : IAction
     {
-        public Player Player { get; }
         public Card Card { get; }
         CoinColour? ColourToReturnIfMaxCoins { get; }
 
-        public ReserveCard(Player player, Card card, CoinColour? colourToReturnIfMaxCoins = null)
+        public ReserveCard(Card card, CoinColour? colourToReturnIfMaxCoins = null)
         {
-            Player = player ?? throw new ArgumentNullException(nameof(player));
-
             Card = card ?? throw new ArgumentNullException(nameof(card));
 
             ColourToReturnIfMaxCoins = colourToReturnIfMaxCoins;
@@ -21,7 +18,9 @@ namespace Splendor.Core.Actions
 
         public void Execute(GameEngine gameEngine)
         {
-            if (Player.ReservedCards.Count > 3)
+            var player = gameEngine.GameState.CurrentPlayer;
+
+            if (player.ReservedCards.Count > 3)
             {
                 throw new RulesViolationException("You can't reserve more than three cards.");
             }
@@ -36,27 +35,27 @@ namespace Splendor.Core.Actions
             var index = tier.ColumnSlots.Single(s => s.Value == Card).Key;
 
             tier.ColumnSlots[index] = tier.FaceDownCards.Count > 0 ? tier.FaceDownCards.Dequeue() : null;
-            Player.ReservedCards.Add(Card);
+            player.ReservedCards.Add(Card);
 
             if (gameEngine.GameState.CoinsAvailable[CoinColour.Gold] > 1)
             {
-                if (Player.Purse.Values.Sum() >= 10)
+                if (player.Purse.Values.Sum() >= 10)
                 {
                     var colourToReturn = ColourToReturnIfMaxCoins.HasValue
                         ? ColourToReturnIfMaxCoins.Value
-                        : Player.Purse.First(kvp => kvp.Value > 0).Key;
+                        : player.Purse.First(kvp => kvp.Value > 0).Key;
 
-                    if (Player.Purse[colourToReturn] < 1 && ColourToReturnIfMaxCoins != CoinColour.Gold)
+                    if (player.Purse[colourToReturn] < 1 && ColourToReturnIfMaxCoins != CoinColour.Gold)
                     {
                         throw new RulesViolationException("You can't give back a coin you don't have.");
                     }
 
-                    Player.Purse[colourToReturn]--;
+                    player.Purse[colourToReturn]--;
                     gameEngine.GameState.CoinsAvailable[colourToReturn]++;
                 }
 
                 gameEngine.GameState.CoinsAvailable[CoinColour.Gold]--;
-                Player.Purse[CoinColour.Gold]++;
+                player.Purse[CoinColour.Gold]++;
             }
 
             gameEngine.CommitTurn();
