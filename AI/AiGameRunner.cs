@@ -32,7 +32,7 @@ namespace Splendor.Core.AI
                 var action = ai.ChooseAction(_engine.GameState);
                 if (action is NoAction) playersPassed++; else playersPassed = 0;
                 action.Execute(_engine);
-                m_Log($"{ai.Name} (Bank:{thisPlayer.Purse.Values.Sum()}), Action: {action}");
+                m_Log($"{ai.Name} (Bank:{thisPlayer.Purse.Values.Sum()}), {action}");
             }
 
             Console.WriteLine($"**** Game over after {_engine.RoundsCompleted} rounds.");
@@ -44,7 +44,10 @@ namespace Splendor.Core.AI
                 var s = score == 1 ? "" : "s";
                 var nobles = player.Nobles.Count();
                 var ns = nobles == 1 ? "" : "s";
-                m_Log($"{_playerAi[i].Name} — {score} point{s} ({nobles} noble{ns})");
+                var nobleNames = nobles > 0 ? ": " + string.Join(", ", player.Nobles.Select(n => n.Name)) : "";
+                var bonuses = string.Join(", ", player.GetDiscount().Where(kvp => kvp.Key != CoinColour.Gold)
+                                                                    .Select(kvp=> $"{kvp.Value} {kvp.Key}"));
+                m_Log($"{_playerAi[i].Name} — {score} point{s} ({nobles} noble{ns}{nobleNames}) (Bonuses {bonuses})");
             }
         }
     }

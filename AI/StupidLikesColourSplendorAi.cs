@@ -6,15 +6,17 @@ using System.Linq;
 
 namespace Splendor.Core.AI
 {
-    public class StupidSplendorAi : ISpendorAi
+    public class StupidLikesColourSplendorAi : ISpendorAi
     {
         private readonly Random _random = new Random();
+        private readonly CoinColour FavouriteColour;
 
         public string Name { get; private set; }
 
-        public StupidSplendorAi(string name)
+        public StupidLikesColourSplendorAi(string name, CoinColour favouriteColour)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Name = name;
+            FavouriteColour = favouriteColour;
         }
 
         public IAction ChooseAction(GameState gameState)
@@ -28,7 +30,7 @@ namespace Splendor.Core.AI
                                                 .ToArray();
 
             // Buy a victory point card if possible
-            foreach(var card in allFaceUpCards.Concat(me.ReservedCards)
+            foreach (var card in allFaceUpCards.Concat(me.ReservedCards)
                                               .Where(c => c.VictoryPoints > 0)
                                               .OrderByDescending(c => c.VictoryPoints)
                                               .Where(CanBuy))
@@ -38,13 +40,13 @@ namespace Splendor.Core.AI
             }
 
             var bestCardStudy = AnalyseCards(me, allFaceUpCards.Concat(me.ReservedCards), gameState)
-                   .OrderBy(s => s.DifficultyRating)
-                   .FirstOrDefault();
+                    .OrderBy(s => s.Repulsion)
+                    .FirstOrDefault();
 
             // Buy favourite card if possible
-            if (CanBuy(bestCardStudy.Card))
-            {
-                return new BuyCard(bestCardStudy.Card, BuyCard.CreateDefaultPaymentOrNull(me, bestCardStudy.Card));
+            if (CanBuy(bestCardStudy.Card)) 
+            { 
+                return new BuyCard(bestCardStudy.Card, BuyCard.CreateDefaultPaymentOrNull(me, bestCardStudy.Card)); 
             }
 
             // Buy a card from my hand if possible
@@ -60,19 +62,19 @@ namespace Splendor.Core.AI
                 {
                     var payment = BuyCard.CreateDefaultPaymentOrNull(me, card);
                     return new BuyCard(card, payment);
-                } 
+                }
             }
 
             // Once in a while reserve a random card
-            if(_random.Next(8) == 0)
+            if (_random.Next(8) == 0)
             {
                 var ac = ChooseRandomCardOrNull(gameState);
                 if (ac != null) return ac;
             }
 
             // Take some coins
-            var coloursAvailable = gameState.CoinsAvailable.Where(kvp => kvp.Value > 0 && kvp.Key != CoinColour.Gold).Select(c=>c.Key).ToList();
-            var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Values.Sum(), 3), coloursAvailable.Count);           
+            var coloursAvailable = gameState.CoinsAvailable.Where(kvp => kvp.Value > 0 && kvp.Key != CoinColour.Gold).Select(c => c.Key).ToList();
+            var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Values.Sum(), 3), coloursAvailable.Count);
 
             if (coinsCountICanTake > 0)
             {
@@ -107,13 +109,15 @@ namespace Splendor.Core.AI
                 if (cost == null) continue;
                 var deficit = Utility.CreateEmptyTransaction();
                 int scarcity = 0;
-                foreach(var colour in cost.Keys)
+                foreach (var colour in cost.Keys)
                 {
                     deficit[colour] = Math.Max(0, cost[colour] - budget[colour]);
-                    scarcity += Math.Min(0, deficit[colour] - state.CoinsAvailable[colour]);
+                    scarcity += Math.Max(0, deficit[colour] - state.CoinsAvailable[colour]);
                 }
                 var rating = deficit.Values.Sum() + scarcity;
-                yield return new CardFeasibilityStudy { Deficit = deficit, DifficultyRating = rating, Card = card };
+                if (card.BonusGiven == FavouriteColour) rating -= 5;
+
+                yield return new CardFeasibilityStudy { Deficit = deficit, Repulsion = rating, Card = card };
             }
         }
 
@@ -133,7 +137,7 @@ namespace Splendor.Core.AI
 
         private class CardFeasibilityStudy
         {
-            public int DifficultyRating { get; set; }
+            public int Repulsion { get; set; }
             public IDictionary<CoinColour, int> Deficit { get; set; }
             public Card Card { get; set; }
         }

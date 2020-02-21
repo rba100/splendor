@@ -12,7 +12,7 @@
 
         public override string ToString()
         {
-            return $"Pass";
+            return $"Passing";
         }
     }
 }
