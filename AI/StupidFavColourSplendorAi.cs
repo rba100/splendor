@@ -32,7 +32,7 @@ namespace Splendor.Core.AI
             // Buy a victory point card if possible
             foreach (var card in allFaceUpCards.Concat(me.ReservedCards)
                                               .Where(c => c.VictoryPoints > 0)
-                                              .OrderByDescending(c => c.VictoryPoints)
+                                              .OrderByDescending(c => c.VictoryPoints + c.BonusGiven == FavouriteColour ? 1 : 0)
                                               .Where(CanBuy))
             {
                 var payment = BuyCard.CreateDefaultPaymentOrNull(me, card);
@@ -108,7 +108,7 @@ namespace Splendor.Core.AI
 
         private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player me, IEnumerable<Card> cards, GameState state)
         {
-            var budget = me.Purse.CreateCopy().MergeWith(me.GetDiscount());
+            var budget = me.Purse.MergeWith(me.GetDiscount());
             foreach (var card in cards)
             {
                 var cost = card.Cost;
