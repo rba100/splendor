@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Splendor.Core;
+using Splendor.Core.Domain;
 
 namespace Splendor
 {
@@ -19,17 +20,22 @@ namespace Splendor
         
         public GameState Create(int players)
         {
-            var startingCoinsAvailable = players > 3 ? 7 : 5;
+            var startingTokensPerColour 
+                = players == 4 ? 7 
+                : players == 3 ? 5 
+                : players == 2 ? 4 
+                : throw new ArgumentOutOfRangeException("Only 2,3, or 4 players are allowed.");
+
             var nobleCount = players + 1;
 
-            var coinBank = new Dictionary<CoinColour, int>();
+            var tokenBank = new Dictionary<TokenColour, int>();
 
-            coinBank[CoinColour.Gold] = 5;
-            coinBank[CoinColour.White] = startingCoinsAvailable;
-            coinBank[CoinColour.Red] = startingCoinsAvailable;
-            coinBank[CoinColour.Blue] = startingCoinsAvailable;
-            coinBank[CoinColour.Green] = startingCoinsAvailable;
-            coinBank[CoinColour.Black] = startingCoinsAvailable;
+            tokenBank[TokenColour.Gold] = 5;
+            tokenBank[TokenColour.White] = startingTokensPerColour;
+            tokenBank[TokenColour.Red] = startingTokensPerColour;
+            tokenBank[TokenColour.Blue] = startingTokensPerColour;
+            tokenBank[TokenColour.Green] = startingTokensPerColour;
+            tokenBank[TokenColour.Black] = startingTokensPerColour;
 
             var allNobles = _gameDataSource.AllNobles().ToList();
             allNobles.Shuffle();
@@ -47,7 +53,7 @@ namespace Splendor
             var playerList = new List<Player>();
             for (var i = 0; i < players; i++) playerList.Add(new Player($"Player {i+1}"));
 
-            return new GameState(coinBank, nobles, boardTiers.ToArray(), playerList.ToArray());
+            return new GameState(tokenBank, nobles, boardTiers.ToArray(), playerList.ToArray());
         }
     }
 }

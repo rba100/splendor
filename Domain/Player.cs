@@ -19,15 +19,15 @@ namespace Splendor
             CardsInPlay = new List<Card>();
         }
 
-        public IDictionary<CoinColour, int> Purse { get; private set; }
+        public IDictionary<TokenColour, int> Purse { get; private set; }
         public IList<Card> ReservedCards { get; private set; }
         public IList<Card> CardsInPlay { get; private set; }
         public IList<Noble> Nobles { get; private set; }
 
-        public IDictionary<CoinColour, int> GetDiscount()
+        public IDictionary<TokenColour, int> GetDiscount()
         {
-            return Enum.GetValues(typeof(CoinColour))
-                       .OfType<CoinColour>()
+            return Enum.GetValues(typeof(TokenColour))
+                       .OfType<TokenColour>()
                        .ToDictionary(col => col, col => CardsInPlay.Count(c => c.BonusGiven == col));
         }
 

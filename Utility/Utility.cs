@@ -27,10 +27,10 @@ namespace Splendor.Core
             }
         }
 
-        public static Dictionary<CoinColour,int> CreateEmptyCoinQuantity()
+        public static Dictionary<TokenColour,int> CreateEmptyTokenPool()
         {
-            return Enum.GetValues(typeof(CoinColour))
-                       .OfType<CoinColour>()
+            return Enum.GetValues(typeof(TokenColour))
+                       .OfType<TokenColour>()
                        .ToDictionary(col => col, col => 0);
         }
 
@@ -52,16 +52,16 @@ namespace Splendor.Core
             return newDict;
         }
 
-        public static Dictionary<CoinColour, int> CreatePurse(int black = 0, int blue = 0, int red = 0, int green = 0, int white = 0, int gold = 0)
+        public static Dictionary<TokenColour, int> CreatePurse(int black = 0, int blue = 0, int red = 0, int green = 0, int white = 0, int gold = 0)
         {
-            return new Dictionary<CoinColour, int>
+            return new Dictionary<TokenColour, int>
             {
-                { CoinColour.Black, black },
-                { CoinColour.Blue,  blue  },
-                { CoinColour.Red,   red   },
-                { CoinColour.Green, green },
-                { CoinColour.White, white },
-                { CoinColour.Gold,  gold  },
+                { TokenColour.Black, black },
+                { TokenColour.Blue,  blue  },
+                { TokenColour.Red,   red   },
+                { TokenColour.Green, green },
+                { TokenColour.White, white },
+                { TokenColour.Gold,  gold  },
             };
         }
     }

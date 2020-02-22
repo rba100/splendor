@@ -6,7 +6,7 @@ namespace Splendor
 {
     public class Card
     {
-        internal Card(int tier, int victoryPoints, IReadOnlyDictionary<CoinColour, int> cost, CoinColour givesDiscount)
+        internal Card(int tier, int victoryPoints, IReadOnlyDictionary<TokenColour, int> cost, TokenColour givesDiscount)
         {
             Tier = tier;
             VictoryPoints = victoryPoints;
@@ -23,7 +23,7 @@ namespace Splendor
 
         public int Tier { get; private set; }
         public int VictoryPoints { get; private set; }
-        public IReadOnlyDictionary<CoinColour, int> Cost { get; private set; }
-        public CoinColour BonusGiven { get; private set; }
+        public IReadOnlyDictionary<TokenColour, int> Cost { get; private set; }
+        public TokenColour BonusGiven { get; private set; }
     }
 }

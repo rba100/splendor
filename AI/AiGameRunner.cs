@@ -46,7 +46,7 @@ namespace Splendor.Core.AI
                 var nobles = player.Nobles.Count();
                 var ns = nobles == 1 ? "" : "s";
                 var nobleNames = nobles > 0 ? ": " + string.Join(", ", player.Nobles.Select(n => n.Name)) : "";
-                var bonuses = string.Join(", ", player.GetDiscount().Where(kvp => kvp.Key != CoinColour.Gold)
+                var bonuses = string.Join(", ", player.GetDiscount().Where(kvp => kvp.Key != TokenColour.Gold)
                                                                     .Select(kvp=> $"{kvp.Value} {kvp.Key}"));
                 m_Log($"{_playerAi[i].Name} — {score} point{s} ({nobles} noble{ns}{nobleNames}) (Bonuses {bonuses})");
                 results.Add(_playerAi[i], score);

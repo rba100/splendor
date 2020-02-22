@@ -8,9 +8,9 @@ namespace Splendor.Core.Actions
     public class ReserveFaceDownCard : IAction
     {
         public int Tier { get; }
-        CoinColour? ColourToReturnIfMaxCoins { get; }
+        TokenColour? ColourToReturnIfMaxCoins { get; }
 
-        public ReserveFaceDownCard(int tier, CoinColour? colourToReturnIfMaxCoins = null)
+        public ReserveFaceDownCard(int tier, TokenColour? colourToReturnIfMaxCoins = null)
         {
             Tier = tier;
             ColourToReturnIfMaxCoins = colourToReturnIfMaxCoins;
@@ -38,7 +38,7 @@ namespace Splendor.Core.Actions
             var cardTaken = boardTier.FaceDownCards.Dequeue();
             player.ReservedCards.Add(cardTaken);
 
-            if(gameState.CoinsAvailable[CoinColour.Gold] > 1)
+            if(gameState.TokensAvailable[TokenColour.Gold] > 1)
             {
                 if(player.Purse.Values.Sum() >= 10)
                 {
@@ -46,17 +46,17 @@ namespace Splendor.Core.Actions
                         ? ColourToReturnIfMaxCoins.Value 
                         : player.Purse.First(kvp => kvp.Value > 0).Key;
 
-                    if(player.Purse[colourToReturn] < 1 && ColourToReturnIfMaxCoins != CoinColour.Gold)
+                    if(player.Purse[colourToReturn] < 1 && ColourToReturnIfMaxCoins != TokenColour.Gold)
                     {
                         throw new RulesViolationException("You can't give back a coin you don't have.");
                     }
 
                     player.Purse[colourToReturn]--;
-                    gameState.CoinsAvailable[colourToReturn]++;
+                    gameState.TokensAvailable[colourToReturn]++;
                 }
 
-                gameState.CoinsAvailable[CoinColour.Gold]--;
-                player.Purse[CoinColour.Gold]++;
+                gameState.TokensAvailable[TokenColour.Gold]--;
+                player.Purse[TokenColour.Gold]++;
             }
 
             return gameState;

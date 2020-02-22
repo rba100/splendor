@@ -13,9 +13,9 @@ namespace Splendor.Core.Actions
     public class BuyCard : IAction
     {
         public Card Card { get; }
-        public IReadOnlyDictionary<CoinColour, int> Payment { get; }
+        public IReadOnlyDictionary<TokenColour, int> Payment { get; }
 
-        public BuyCard(Card card, IReadOnlyDictionary<CoinColour, int> payment)
+        public BuyCard(Card card, IReadOnlyDictionary<TokenColour, int> payment)
         {
             Card = card ?? throw new ArgumentNullException(nameof(card));
             Payment = payment ?? throw new ArgumentNullException(nameof(payment));
@@ -55,7 +55,7 @@ namespace Splendor.Core.Actions
             foreach(var colour in Payment.Keys)
             {
                 player.Purse[colour] -= Payment[colour];
-                gameState.CoinsAvailable[colour] += Payment[colour];
+                gameState.TokensAvailable[colour] += Payment[colour];
             }
 
             return gameState;
@@ -66,9 +66,9 @@ namespace Splendor.Core.Actions
             return CreateDefaultPaymentOrNull(player, card) != null;
         }
 
-        public static Dictionary<CoinColour, int> CreateDefaultPaymentOrNull(Player player, Card card)
+        public static Dictionary<TokenColour, int> CreateDefaultPaymentOrNull(Player player, Card card)
         {
-            var payment = Utility.CreateEmptyCoinQuantity();
+            var payment = Utility.CreateEmptyTokenPool();
 
             var available = player.Purse.CreateCopy();
             var discount = player.GetDiscount();
@@ -82,7 +82,7 @@ namespace Splendor.Core.Actions
             foreach (var colour in costRemaining.Keys)
             {
                 if (costRemaining[colour] < 1) continue;
-                if (costRemaining[colour] > available[colour] + available[CoinColour.Gold])
+                if (costRemaining[colour] > available[colour] + available[TokenColour.Gold])
                 {
                     return null;
                 }
@@ -96,8 +96,8 @@ namespace Splendor.Core.Actions
                     var goldNeeded = costRemaining[colour] - available[colour];
                     payment[colour] = available[colour];
 
-                    payment[CoinColour.Gold] += goldNeeded;
-                    available[CoinColour.Gold] -= goldNeeded;
+                    payment[TokenColour.Gold] += goldNeeded;
+                    available[TokenColour.Gold] -= goldNeeded;
                 }
             }
 
@@ -125,14 +125,14 @@ namespace Splendor.Core.Actions
             foreach (var colour in costRemaining.Keys)
             {
                 if (costRemaining[colour] < 1) continue;
-                if (costRemaining[colour] > available[colour] + available[CoinColour.Gold])
+                if (costRemaining[colour] > available[colour] + available[TokenColour.Gold])
                 {
                     return false;                    
                 }
 
                 if (costRemaining[colour] > available[colour])
                 {
-                    available[CoinColour.Gold] -= costRemaining[colour] - available[colour];
+                    available[TokenColour.Gold] -= costRemaining[colour] - available[colour];
                 }
             }
             return true;

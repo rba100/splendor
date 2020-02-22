@@ -6,14 +6,14 @@ namespace Splendor
 {
     public class Noble
     {
-        internal Noble(int victoryPoints, IReadOnlyDictionary<CoinColour, int> cost, string name = null)
+        internal Noble(int victoryPoints, IReadOnlyDictionary<TokenColour, int> cost, string name = null)
         {
             Cost = cost ?? throw new ArgumentNullException(nameof(cost));
             VictoryPoints = victoryPoints;
             Name = name ?? AutoName();
         }
 
-        public IReadOnlyDictionary<CoinColour, int> Cost { get; private set; }
+        public IReadOnlyDictionary<TokenColour, int> Cost { get; private set; }
         public int VictoryPoints { get; private set; }
 
         public string Name { get; private set; }
@@ -24,16 +24,16 @@ namespace Splendor
             return string.Join("", colours.Select(FromCoinColour));
         }
 
-        private string FromCoinColour(CoinColour col)
+        private string FromCoinColour(TokenColour col)
         {
             switch (col)
             {
-                case CoinColour.White: return "W";
-                case CoinColour.Blue: return "U";
-                case CoinColour.Red: return "R";
-                case CoinColour.Green: return "G";
-                case CoinColour.Black: return "B";
-                case CoinColour.Gold: return "G";
+                case TokenColour.White: return "W";
+                case TokenColour.Blue: return "U";
+                case TokenColour.Red: return "R";
+                case TokenColour.Green: return "G";
+                case TokenColour.Black: return "B";
+                case TokenColour.Gold: return "G";
                 default: throw new ArgumentOutOfRangeException(nameof(col));
             }
         }
