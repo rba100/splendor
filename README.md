@@ -14,7 +14,7 @@ Implement one of those. Look at `StupidSplendorAi` to see some of the helper met
 
  - When `ChooseAction` is called on your AI, it's guarenteed to be the turn of that AI.
  - Whilst the `GameState` object supplied maybe a different instance from last time, you can safely cache `Card`, `Player`, and `Noble` and use reference-equiality throughout a given game.
- - `ChooseAction` must only interact with the game by returning an action from the selection below. You must not modify `GameState`, pretend it's immutabile.
+ - `ChooseAction` must only interact with the game by returning an action from the selection below. You must not modify `GameState`. Pretend it's immutabile!
 
 ## Possible actions
 

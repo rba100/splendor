@@ -68,7 +68,7 @@ namespace Splendor.Core.Actions
 
         public static Dictionary<CoinColour, int> CreateDefaultPaymentOrNull(Player player, Card card)
         {
-            var payment = Utility.CreateEmptyTransaction();
+            var payment = Utility.CreateEmptyCoinQuantity();
 
             var available = player.Purse.CreateCopy();
             var discount = player.GetDiscount();

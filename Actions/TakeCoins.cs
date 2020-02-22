@@ -16,7 +16,7 @@ namespace Splendor.Core.Actions
                          IReadOnlyDictionary<CoinColour, int> coinsReturned = null)
         {
             CoinsTaken = coinsTaken ?? throw new ArgumentNullException(nameof(coinsTaken));
-            CoinsReturned = coinsReturned ?? Utility.CoinQuantity();
+            CoinsReturned = coinsReturned ?? Utility.CreateEmptyCoinQuantity();
         }
 
         public override string ToString()

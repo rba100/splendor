@@ -80,7 +80,7 @@ namespace Splendor.Core.AI
                 {
                     coloursAvailable.Shuffle();
                 }
-                var transaction = Utility.CreateEmptyTransaction();
+                var transaction = Utility.CreateEmptyCoinQuantity();
                 if(bestCardStudy.Deficit.Any(kvp=>kvp.Value >= 2) && coinsCountICanTake > 1)
                 {
                     var neededColour = bestCardStudy.Deficit.First(kvp => kvp.Value >= 2).Key;
@@ -115,7 +115,7 @@ namespace Splendor.Core.AI
             {
                 var cost = card.Cost;
                 if (cost == null) continue;
-                var deficit = Utility.CreateEmptyTransaction();
+                var deficit = Utility.CreateEmptyCoinQuantity();
                 int scarcity = 0;
                 foreach (var colour in cost.Keys)
                 {
