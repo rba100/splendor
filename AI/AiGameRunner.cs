@@ -39,7 +39,7 @@ namespace Splendor.Core.AI
                 m_Log($"{turnAi.Name} (Bank:{turnPlayer.Purse.Values.Sum()}), {action}");
             }
 
-            m_Log($"**** Game over after {_game.RoundsCompleted} rounds. Winner: " + _game.TopPlayer.Name);
+            m_Log($"**** Game over after {_game.RoundsCompleted} rounds. Winner: " + _playerMap[_game.TopPlayer].Name);
 
             var results = new Dictionary<ISpendorAi, int>();
             for (int i = 0; i < _game.State.Players.Length; i++)
