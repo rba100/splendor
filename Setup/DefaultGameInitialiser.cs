@@ -33,7 +33,7 @@ namespace Splendor
 
             var nobles = _gameDataSource.AllNobles().ToList();
             nobles.Shuffle();
-            var nobleTier = new NobleTier(nobles.Take(nobleCount).ToArray());
+            var nobleTier = nobles.Take(nobleCount).ToList();
 
             var boardTiers = new List<BoardTier>();
             var cards = _gameDataSource.AllCards().ToList();

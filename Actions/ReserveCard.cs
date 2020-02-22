@@ -21,16 +21,16 @@ namespace Splendor.Core.Actions
             return $"Reserved {Card}";
         }
 
-        public void Execute(IGame game)
+        public GameState Execute(GameState gameState)
         {
-            var player = game.State.CurrentPlayer;
+            var player = gameState.CurrentPlayer;
 
             if (player.ReservedCards.Count > 3)
             {
                 throw new RulesViolationException("You can't reserve more than three cards.");
             }
 
-            var tier = game.State.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));
+            var tier = gameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));
 
             if (tier == null)
             {
@@ -42,7 +42,7 @@ namespace Splendor.Core.Actions
             tier.ColumnSlots[index] = tier.FaceDownCards.Count > 0 ? tier.FaceDownCards.Dequeue() : null;
             player.ReservedCards.Add(Card);
 
-            if (game.State.CoinsAvailable[CoinColour.Gold] > 1)
+            if (gameState.CoinsAvailable[CoinColour.Gold] > 1)
             {
                 if (player.Purse.Values.Sum() >= 10)
                 {
@@ -56,14 +56,14 @@ namespace Splendor.Core.Actions
                     }
 
                     player.Purse[colourToReturn]--;
-                    game.State.CoinsAvailable[colourToReturn]++;
+                    gameState.CoinsAvailable[colourToReturn]++;
                 }
 
-                game.State.CoinsAvailable[CoinColour.Gold]--;
+                gameState.CoinsAvailable[CoinColour.Gold]--;
                 player.Purse[CoinColour.Gold]++;
             }
 
-            game.CommitTurn();
+            return gameState;
         }
     }
 }

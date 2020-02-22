@@ -1,6 +1,7 @@
-﻿using Splendor.Core.Domain;
-using System;
+﻿
 using System.Linq;
+
+using Splendor.Core.Domain;
 
 namespace Splendor.Core.Actions
 {
@@ -20,10 +21,10 @@ namespace Splendor.Core.Actions
             return $"Reserving a random card from tier {Tier}";
         }
 
-        public void Execute(IGame game)
+        public GameState Execute(GameState gameState)
         {
-            var player = game.State.CurrentPlayer;
-            var boardTier = game.State.Tiers.Single(t => t.Tier == Tier);
+            var player = gameState.CurrentPlayer;
+            var boardTier = gameState.Tiers.Single(t => t.Tier == Tier);
             if (boardTier.FaceDownCards.Count == 0)
             {
                 throw new RulesViolationException("There aren't any cards in that tier left to reserve.");
@@ -37,7 +38,7 @@ namespace Splendor.Core.Actions
             var cardTaken = boardTier.FaceDownCards.Dequeue();
             player.ReservedCards.Add(cardTaken);
 
-            if(game.State.CoinsAvailable[CoinColour.Gold] > 1)
+            if(gameState.CoinsAvailable[CoinColour.Gold] > 1)
             {
                 if(player.Purse.Values.Sum() >= 10)
                 {
@@ -51,14 +52,14 @@ namespace Splendor.Core.Actions
                     }
 
                     player.Purse[colourToReturn]--;
-                    game.State.CoinsAvailable[colourToReturn]++;
+                    gameState.CoinsAvailable[colourToReturn]++;
                 }
 
-                game.State.CoinsAvailable[CoinColour.Gold]--;
+                gameState.CoinsAvailable[CoinColour.Gold]--;
                 player.Purse[CoinColour.Gold]++;
             }
 
-            game.CommitTurn();
+            return gameState;
         }
     }
 }

@@ -2,6 +2,8 @@
 using System;
 using System.Linq;
 
+using Splendor.Core.Actions;
+
 namespace Splendor.Core
 {
     /// <summary>
@@ -13,7 +15,7 @@ namespace Splendor.Core
     /// </remarks>
     public class Game : IGame
     {
-        public GameState State { get; }
+        public GameState State { get; private set; }
         public bool IsGameFinished { get; private set; }
         public int RoundsCompleted { get; private set; }
 
@@ -22,11 +24,15 @@ namespace Splendor.Core
             State = game ?? throw new ArgumentNullException(nameof(game));
         }
 
-        public void CommitTurn()
+        public void CommitTurn(IAction action)
         {
+            // Run action
+            State = action.Execute(State);
+
             // Do nobles
             AssignNobles();
 
+            // Identify end game
             var endOfRound = State.Players.Last() == State.CurrentPlayer;
             if (endOfRound) RoundsCompleted++;
             IsGameFinished = endOfRound && State.Players.Any(p => p.VictoryPoints() >= 15);
@@ -45,23 +51,21 @@ namespace Splendor.Core
         {
             var currentPlayerBonuses = State.CurrentPlayer.GetDiscount();
 
-            foreach (var nobleIndex in State.NobleTier.ColumnToFreeNobles.Keys.ToArray()) 
+            foreach (var noble in State.Nobles) 
             {
-                Noble noble = State.NobleTier.ColumnToFreeNobles[nobleIndex];
-                if (noble == null) continue;
+                bool ruledOut = false;
                 foreach(var colour in noble.Cost.Keys)
                 {
                     if (!currentPlayerBonuses.ContainsKey(colour) || noble.Cost[colour] > currentPlayerBonuses[colour])
                     {
-                        noble = null; break;
+                        ruledOut = true; break;
                     }
                 }
-                if (noble == null) continue;
+                if (ruledOut) continue;
 
                 // Give that noble to the player
                 State.CurrentPlayer.Nobles.Add(noble);
-                // Remove noble from available
-                State.NobleTier.ColumnToFreeNobles[nobleIndex] = null;
+                State.Nobles.Remove(noble);
                 break;
             }
         }

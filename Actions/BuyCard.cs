@@ -28,15 +28,15 @@ namespace Splendor.Core.Actions
             return costs == null ? $"Buying {Card}" : $"Buying [{Card}] with {string.Join(", ", costs)}";
         }
 
-        public void Execute(IGame game)
+        public GameState Execute(GameState gameState)
         {
-            var player = game.State.CurrentPlayer;
+            var player = gameState.CurrentPlayer;
 
             // Validate 
-            if(!SuppliedPaymentIsValid(game)) throw new RulesViolationException("You can't afford this card with the supplied payment."); ;
-            if(!VerifyCardIsInHandOrBoard(player, game.State, Card)) throw new RulesViolationException("That card isn't on the board or in hand.");
+            if(!SuppliedPaymentIsValid(gameState)) throw new RulesViolationException("You can't afford this card with the supplied payment."); ;
+            if(!VerifyCardIsInHandOrBoard(player, gameState, Card)) throw new RulesViolationException("That card isn't on the board or in hand.");
 
-            var tier = game.State.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));
+            var tier = gameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));
 
             // Perform transaction
             //  - Card
@@ -55,10 +55,10 @@ namespace Splendor.Core.Actions
             foreach(var colour in Payment.Keys)
             {
                 player.Purse[colour] -= Payment[colour];
-                game.State.CoinsAvailable[colour] += Payment[colour];
+                gameState.CoinsAvailable[colour] += Payment[colour];
             }
 
-            game.CommitTurn();
+            return gameState;
         }
 
         public static bool CanAffordCard(Player player, Card card)
@@ -111,11 +111,11 @@ namespace Splendor.Core.Actions
             return tier != null;
         }
 
-        private bool SuppliedPaymentIsValid(IGame game)
+        private bool SuppliedPaymentIsValid(GameState gameState)
         {
-            var available = game.State.CurrentPlayer.Purse.CreateCopy();
+            var available = gameState.CurrentPlayer.Purse.CreateCopy();
             var costRemaining = Card.Cost.CreateCopy();
-            var discount = game.State.CurrentPlayer.GetDiscount();
+            var discount = gameState.CurrentPlayer.GetDiscount();
 
             foreach (var colour in discount.Keys)
             {

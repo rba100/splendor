@@ -31,7 +31,7 @@ namespace Splendor.Core.AI
                 var ai = _playerAi[index];
                 var action = ai.ChooseAction(_engine.State);
                 if (action is NoAction) playersPassed++; else playersPassed = 0;
-                action.Execute(_engine);
+                _engine.CommitTurn(action);
                 m_Log($"{ai.Name} (Bank:{thisPlayer.Purse.Values.Sum()}), {action}");
             }
 
