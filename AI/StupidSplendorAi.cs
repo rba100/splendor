@@ -22,10 +22,11 @@ namespace Splendor.Core.AI
             var me = gameState.CurrentPlayer;
             bool CanBuy(Card card) => BuyCard.CanAffordCard(me, card);
 
-            var allFaceUpCards = gameState.Tiers.SelectMany(t => t.ColumnSlots)
-                                                .Select(s => s.Value)
-                                                .Where(card => card != null)
-                                                .ToArray();
+            var allFaceUpCards = gameState.Tiers
+                .SelectMany(t => t.ColumnSlots)                                                
+                .Select(s => s.Value)                                                
+                .Where(card => card != null) // If a stack runs out of cards, a slot will be null                                                
+                .ToArray();
 
             // First, if I can buy a card that gives victory points, I always do.
             foreach(var card in allFaceUpCards.Concat(me.ReservedCards)
@@ -37,6 +38,7 @@ namespace Splendor.Core.AI
                 return new BuyCard(card, payment);
             }
 
+            // I look at all the cards I can see and choose one that looks the best in terms of accessibility
             var bestCardStudy = AnalyseCards(me, allFaceUpCards.Concat(me.ReservedCards), gameState)
                    .OrderBy(s => s.DifficultyRating)
                    .FirstOrDefault();
@@ -98,10 +100,11 @@ namespace Splendor.Core.AI
                 return new ReserveCard(bestCardStudy.Card);
             }
 
+            // Seventh, If I've already reserved the best looking card, I take a gamble.
             var action = ChooseRandomCardOrNull(gameState);
             if (action != null) return action;
 
-            // If I'm all out of options I give up.
+            // Lastly, if I think I can't do anything at all I just pass the turn.
             return new NoAction();
         }
 
