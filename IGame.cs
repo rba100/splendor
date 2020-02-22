@@ -6,7 +6,9 @@ namespace Splendor.Core
     {
         bool IsGameFinished { get; }
         GameState State { get; }
-        public int RoundsCompleted { get; }
         void CommitTurn(IAction action);
+
+        // Metrics
+        public int RoundsCompleted { get; }
     }
 }

@@ -31,9 +31,9 @@ namespace Splendor
             coinBank[CoinColour.Green] = startingCoinsAvailable;
             coinBank[CoinColour.Black] = startingCoinsAvailable;
 
-            var nobles = _gameDataSource.AllNobles().ToList();
-            nobles.Shuffle();
-            var nobleTier = nobles.Take(nobleCount).ToList();
+            var allNobles = _gameDataSource.AllNobles().ToList();
+            allNobles.Shuffle();
+            var nobles = allNobles.Take(nobleCount).ToList();
 
             var boardTiers = new List<BoardTier>();
             var cards = _gameDataSource.AllCards().ToList();
@@ -47,7 +47,7 @@ namespace Splendor
             var playerList = new List<Player>();
             for (var i = 0; i < players; i++) playerList.Add(new Player($"Player {i+1}"));
 
-            return new GameState(coinBank, nobleTier, boardTiers.ToArray(), playerList.ToArray());
+            return new GameState(coinBank, nobles, boardTiers.ToArray(), playerList.ToArray());
         }
     }
 }

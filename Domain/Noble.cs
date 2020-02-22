@@ -6,7 +6,7 @@ namespace Splendor
 {
     public class Noble
     {
-        public Noble(int victoryPoints, IReadOnlyDictionary<CoinColour, int> cost, string name = null)
+        internal Noble(int victoryPoints, IReadOnlyDictionary<CoinColour, int> cost, string name = null)
         {
             Cost = cost ?? throw new ArgumentNullException(nameof(cost));
             VictoryPoints = victoryPoints;

@@ -2,9 +2,9 @@
 
 namespace Splendor
 {
-    public class BoardTier
+    public sealed class BoardTier
     {
-        public BoardTier(int tier, IEnumerable<Card> cards, int columns)
+        internal BoardTier(int tier, IEnumerable<Card> cards, int columns)
         {
             Tier = tier;
             FaceDownCards = new Queue<Card>(cards);

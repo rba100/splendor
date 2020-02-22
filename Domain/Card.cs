@@ -6,7 +6,7 @@ namespace Splendor
 {
     public class Card
     {
-        public Card(int tier, int victoryPoints, IReadOnlyDictionary<CoinColour, int> cost, CoinColour givesDiscount)
+        internal Card(int tier, int victoryPoints, IReadOnlyDictionary<CoinColour, int> cost, CoinColour givesDiscount)
         {
             Tier = tier;
             VictoryPoints = victoryPoints;

@@ -10,7 +10,7 @@ namespace Splendor
     {
         public string Name { get; }
 
-        public Player(string name)
+        internal Player(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Purse = Utility.CreatePurse();
