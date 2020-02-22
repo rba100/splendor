@@ -5,9 +5,9 @@
     /// </remarks>
     public class NoAction : IAction
     {
-        public void Execute(IGameEngine gameEngine)
+        public void Execute(IGame game)
         {
-            gameEngine.CommitTurn();
+            game.CommitTurn();
         }
 
         public override string ToString()

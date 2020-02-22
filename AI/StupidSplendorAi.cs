@@ -79,7 +79,7 @@ namespace Splendor.Core.AI
                     coloursAvailable.Shuffle();
                 }
                 var transaction = Utility.CreateEmptyTransaction();
-                if (bestCardStudy.Deficit.Any(kvp => kvp.Value >= 2))
+                if (bestCardStudy.Deficit.Any(kvp => kvp.Value >= 2) && coinsCountICanTake > 1)
                 {
                     var neededColour = bestCardStudy.Deficit.First(kvp => kvp.Value >= 2).Key;
                     if (gameState.CoinsAvailable[neededColour] > 3)

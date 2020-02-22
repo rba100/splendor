@@ -1,9 +1,9 @@
-﻿namespace Splendor.Core.Actions
+﻿namespace Splendor.Core
 {
-    public interface IGameEngine
+    public interface IGame
     {
         bool IsGameFinished { get; }
-        GameState GameState { get; }
+        GameState State { get; }
         public int RoundsCompleted { get; }
         void CommitTurn();
     }

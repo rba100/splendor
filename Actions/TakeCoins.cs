@@ -1,7 +1,9 @@
-﻿using Splendor.Core.Domain;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using Splendor.Core.Domain;
 
 namespace Splendor.Core.Actions
 {
@@ -23,30 +25,30 @@ namespace Splendor.Core.Actions
             return "Taking " + string.Join(", ", things);
         }
 
-        public void Execute(IGameEngine gameEngine)
+        public void Execute(IGame game)
         {
             // Enforce rules
-            Validate(gameEngine);
+            Validate(game);
 
             // Perform transaction
-            foreach (var colour in gameEngine.GameState.CoinsAvailable.Keys.ToArray())
+            foreach (var colour in game.State.CoinsAvailable.Keys.ToArray())
             {
                 // Take coins
-                gameEngine.GameState.CoinsAvailable[colour] -= CoinsTaken[colour];
-                gameEngine.GameState.CurrentPlayer.Purse[colour] += CoinsTaken[colour];
+                game.State.CoinsAvailable[colour] -= CoinsTaken[colour];
+                game.State.CurrentPlayer.Purse[colour] += CoinsTaken[colour];
 
                 // Return coins
-                gameEngine.GameState.CoinsAvailable[colour] += CoinsReturned[colour];
-                gameEngine.GameState.CurrentPlayer.Purse[colour] -= CoinsReturned[colour];
+                game.State.CoinsAvailable[colour] += CoinsReturned[colour];
+                game.State.CurrentPlayer.Purse[colour] -= CoinsReturned[colour];
             }
 
             // End turn
-            gameEngine.CommitTurn();
+            game.CommitTurn();
         }
 
-        private void Validate(IGameEngine gameEngine)
+        private void Validate(IGame game)
         {
-            var player = gameEngine.GameState.CurrentPlayer;
+            var player = game.State.CurrentPlayer;
 
             if (CoinsTaken.Values.Sum() > 3)
             {
@@ -65,9 +67,9 @@ namespace Splendor.Core.Actions
                 // No other coins can be taken
                 if (CoinsTaken.Count(kvp => kvp.Value == 0) != CoinsTaken.Count - 1)
                 {
-                    throw new RulesViolationException("You can only take two coins of the same colour if you take only those two coins.");
+                    throw new RulesViolationException("You can take two coins of the same colour only if you take just those two coins.");
                 }
-                if (gameEngine.GameState.CoinsAvailable[doubleCoinColour] < 4)
+                if (game.State.CoinsAvailable[doubleCoinColour] < 4)
                 {
                     throw new RulesViolationException("You can only take two coins if there are four or more available.");
                 }
@@ -78,7 +80,7 @@ namespace Splendor.Core.Actions
 
             foreach (var colour in CoinsTaken.Keys)
             {
-                if (gameEngine.GameState.CoinsAvailable[colour] < CoinsTaken[colour])
+                if (game.State.CoinsAvailable[colour] < CoinsTaken[colour])
                     throw new RulesViolationException($"There aren't enough {colour} coins to take.");
             }
 

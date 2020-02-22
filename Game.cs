@@ -1,20 +1,25 @@
-﻿using System;
+﻿
+using System;
 using System.Linq;
 
-namespace Splendor.Core.Actions
+namespace Splendor.Core
 {
     /// <summary>
-    /// Logic for game rules other than initialisation
+    /// Logic for global game rules other than initialisation.
     /// </summary>
-    public class GameEngine : IGameEngine
+    /// <remarks>
+    /// - Identifies when game has ended
+    /// - Assigns nobles
+    /// </remarks>
+    public class Game : IGame
     {
-        public GameState GameState { get; }
+        public GameState State { get; }
         public bool IsGameFinished { get; private set; }
         public int RoundsCompleted { get; private set; }
 
-        public GameEngine(GameState game)
+        public Game(GameState game)
         {
-            GameState = game ?? throw new ArgumentNullException(nameof(game));
+            State = game ?? throw new ArgumentNullException(nameof(game));
         }
 
         public void CommitTurn()
@@ -22,14 +27,14 @@ namespace Splendor.Core.Actions
             // Do nobles
             AssignNobles();
 
-            var endOfRound = GameState.Players.Last() == GameState.CurrentPlayer;
+            var endOfRound = State.Players.Last() == State.CurrentPlayer;
             if (endOfRound) RoundsCompleted++;
-            IsGameFinished = endOfRound && GameState.Players.Any(p => p.VictoryPoints() >= 15);
+            IsGameFinished = endOfRound && State.Players.Any(p => p.VictoryPoints() >= 15);
 
             // Increment player
-            var nextIndex = (Array.IndexOf(GameState.Players, GameState.CurrentPlayer) + 1)
-                % GameState.Players.Length;
-            GameState.CurrentPlayer = GameState.Players[nextIndex];
+            var nextIndex = (Array.IndexOf(State.Players, State.CurrentPlayer) + 1)
+                % State.Players.Length;
+            State.CurrentPlayer = State.Players[nextIndex];
         }
 
         /// <summary>
@@ -38,11 +43,11 @@ namespace Splendor.Core.Actions
         /// </summary>
         private void AssignNobles()
         {
-            var currentPlayerBonuses = GameState.CurrentPlayer.GetDiscount();
+            var currentPlayerBonuses = State.CurrentPlayer.GetDiscount();
 
-            foreach (var nobleIndex in GameState.NobleTier.ColumnToFreeNobles.Keys.ToArray()) 
+            foreach (var nobleIndex in State.NobleTier.ColumnToFreeNobles.Keys.ToArray()) 
             {
-                Noble noble = GameState.NobleTier.ColumnToFreeNobles[nobleIndex];
+                Noble noble = State.NobleTier.ColumnToFreeNobles[nobleIndex];
                 if (noble == null) continue;
                 foreach(var colour in noble.Cost.Keys)
                 {
@@ -54,9 +59,9 @@ namespace Splendor.Core.Actions
                 if (noble == null) continue;
 
                 // Give that noble to the player
-                GameState.CurrentPlayer.Nobles.Add(noble);
+                State.CurrentPlayer.Nobles.Add(noble);
                 // Remove noble from available
-                GameState.NobleTier.ColumnToFreeNobles[nobleIndex] = null;
+                State.NobleTier.ColumnToFreeNobles[nobleIndex] = null;
                 break;
             }
         }

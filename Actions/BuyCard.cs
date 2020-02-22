@@ -28,15 +28,15 @@ namespace Splendor.Core.Actions
             return costs == null ? $"Buying {Card}" : $"Buying [{Card}] with {string.Join(", ", costs)}";
         }
 
-        public void Execute(IGameEngine gameEngine)
+        public void Execute(IGame game)
         {
-            var player = gameEngine.GameState.CurrentPlayer;
+            var player = game.State.CurrentPlayer;
 
             // Validate 
-            if(!SuppliedPaymentIsValid(gameEngine)) throw new RulesViolationException("You can't afford this card with the supplied payment."); ;
-            if(!VerifyCardIsInHandOrBoard(player, gameEngine.GameState, Card)) throw new RulesViolationException("That card isn't on the board or in hand.");
+            if(!SuppliedPaymentIsValid(game)) throw new RulesViolationException("You can't afford this card with the supplied payment."); ;
+            if(!VerifyCardIsInHandOrBoard(player, game.State, Card)) throw new RulesViolationException("That card isn't on the board or in hand.");
 
-            var tier = gameEngine.GameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));
+            var tier = game.State.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));
 
             // Perform transaction
             //  - Card
@@ -55,22 +55,15 @@ namespace Splendor.Core.Actions
             foreach(var colour in Payment.Keys)
             {
                 player.Purse[colour] -= Payment[colour];
-                gameEngine.GameState.CoinsAvailable[colour] += Payment[colour];
+                game.State.CoinsAvailable[colour] += Payment[colour];
             }
 
-            gameEngine.CommitTurn();
+            game.CommitTurn();
         }
 
         public static bool CanAffordCard(Player player, Card card)
         {
             return CreateDefaultPaymentOrNull(player, card) != null;
-        }
-
-        private static bool VerifyCardIsInHandOrBoard(Player player, GameState gameState, Card card)
-        {
-            if(player.ReservedCards.Contains(card)) return true;
-            var tier = gameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(card));
-            return tier != null;
         }
 
         public static Dictionary<CoinColour, int> CreateDefaultPaymentOrNull(Player player, Card card)
@@ -111,11 +104,18 @@ namespace Splendor.Core.Actions
             return payment;
         }
 
-        private bool SuppliedPaymentIsValid(IGameEngine gameEngine)
+        private static bool VerifyCardIsInHandOrBoard(Player player, GameState gameState, Card card)
         {
-            var available = gameEngine.GameState.CurrentPlayer.Purse.CreateCopy();
+            if (player.ReservedCards.Contains(card)) return true;
+            var tier = gameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(card));
+            return tier != null;
+        }
+
+        private bool SuppliedPaymentIsValid(IGame game)
+        {
+            var available = game.State.CurrentPlayer.Purse.CreateCopy();
             var costRemaining = Card.Cost.CreateCopy();
-            var discount = gameEngine.GameState.CurrentPlayer.GetDiscount();
+            var discount = game.State.CurrentPlayer.GetDiscount();
 
             foreach (var colour in discount.Keys)
             {
