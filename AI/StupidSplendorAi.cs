@@ -27,7 +27,7 @@ namespace Splendor.Core.AI
                                                 .Where(card => card != null)
                                                 .ToArray();
 
-            // Buy a victory point card if possible
+            // First, if I can buy a card that gives victory points, I always do.
             foreach(var card in allFaceUpCards.Concat(me.ReservedCards)
                                               .Where(c => c.VictoryPoints > 0)
                                               .OrderByDescending(c => c.VictoryPoints)
@@ -41,19 +41,19 @@ namespace Splendor.Core.AI
                    .OrderBy(s => s.DifficultyRating)
                    .FirstOrDefault();
 
-            // Buy favourite card if possible
+            // Second, if the most accessible card is purchasable, I buy it.
             if (CanBuy(bestCardStudy.Card))
             {
                 return new BuyCard(bestCardStudy.Card, BuyCard.CreateDefaultPaymentOrNull(me, bestCardStudy.Card));
             }
 
-            // Buy a card from my hand if possible
+            // Third, I try and get rid of reserved cards.
             foreach (var card in me.ReservedCards.Where(CanBuy))
             {
                 return new BuyCard(card, BuyCard.CreateDefaultPaymentOrNull(me, card));
             }
 
-            // If I have 9 or more coins buy any card I can
+            // Fourth, I check if I've got loads of coins and if so, I buy any card I can afford
             if (me.Purse.Values.Sum() > 8)
             {
                 foreach (var card in allFaceUpCards.Where(CanBuy))
@@ -63,7 +63,7 @@ namespace Splendor.Core.AI
                 } 
             }
 
-            // Take some coins
+            // Fifth, I top up my coins, favouring colours needed by the most accessible card.
             var coloursAvailable = gameState.CoinsAvailable.Where(kvp => kvp.Value > 0 && kvp.Key != CoinColour.Gold).Select(c=>c.Key).ToList();
             var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Values.Sum(), 3), coloursAvailable.Count);           
 
@@ -92,7 +92,7 @@ namespace Splendor.Core.AI
                 return new TakeCoins(transaction);
             }
 
-            // Do a reserve
+            // Sixth, if it comes to it, I just reserve the best looking card I can see.
             if(!me.ReservedCards.Contains(bestCardStudy.Card) && me.ReservedCards.Count < 3)
             {
                 return new ReserveCard(bestCardStudy.Card);
@@ -101,7 +101,7 @@ namespace Splendor.Core.AI
             var action = ChooseRandomCardOrNull(gameState);
             if (action != null) return action;
 
-            // Give up
+            // If I'm all out of options I give up.
             return new NoAction();
         }
 
