@@ -7,7 +7,7 @@ using Splendor.Core.Actions;
 namespace Splendor.Core
 {
     /// <summary>
-    /// Logic for global game rules other than initialisation.
+    /// Logic for global game rules.
     /// </summary>
     /// <remarks>
     /// - Identifies when game has ended
@@ -18,6 +18,8 @@ namespace Splendor.Core
         public GameState State { get; private set; }
         public bool IsGameFinished { get; private set; }
         public int RoundsCompleted { get; private set; }
+
+        private const int c_PointsForWin = 15;
 
         public Game(GameState game)
         {
@@ -35,7 +37,7 @@ namespace Splendor.Core
             // Identify end game
             var endOfRound = State.Players.Last() == State.CurrentPlayer;
             if (endOfRound) RoundsCompleted++;
-            IsGameFinished = endOfRound && State.Players.Any(p => p.VictoryPoints() >= 15);
+            IsGameFinished = endOfRound && State.Players.Any(p => p.VictoryPoints() >= c_PointsForWin);
 
             // Increment player
             var nextIndex = (Array.IndexOf(State.Players, State.CurrentPlayer) + 1)
