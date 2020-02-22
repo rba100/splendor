@@ -8,15 +8,20 @@ namespace Splendor.Core.AI
 {
     public class AiGameRunner
     {
-        private readonly ISpendorAi[] _playerAi;
+        private readonly Dictionary<Player, ISpendorAi> _playerMap;
         private readonly IGame _game;
 
         private readonly Action<string> m_Log;
 
         public AiGameRunner(IEnumerable<ISpendorAi> players, Action<string> log)
         {
-            _playerAi = players?.ToArray() ?? throw new ArgumentNullException(nameof(players));
-            var state = new DefaultGameInitialiser(new DefaultCards()).Create(players: _playerAi.Length);
+            var ais = players.ToArray();
+            var state = new DefaultGameInitialiser(new DefaultCards()).Create(players: ais.Length);
+            _playerMap = new Dictionary<Player, ISpendorAi>();
+            for(int i = 0; i < state.Players.Length; i++)
+            {
+                _playerMap[state.Players[i]] = ais[i];
+            }
             _game = new Game(state);
             m_Log = log ?? new Action<string>(s => { });
         }
@@ -26,21 +31,21 @@ namespace Splendor.Core.AI
             int playersPassed = 0;
             while (!_game.IsGameFinished && playersPassed < _game.State.Players.Length)
             {
-                var index = Array.IndexOf(_game.State.Players, _game.State.CurrentPlayer);
-                var ai = _playerAi[index];
-                var action = ai.ChooseAction(_game.State);
+                var turnPlayer = _game.State.CurrentPlayer;
+                var turnAi = _playerMap[turnPlayer];
+                var action = turnAi.ChooseAction(_game.State);
                 if (action is NoAction) playersPassed++; else playersPassed = 0;
                 _game.CommitTurn(action);
-                var thisPlayer = _game.State.Players[index];
-                m_Log($"{ai.Name} (Bank:{thisPlayer.Purse.Values.Sum()}), {action}");
+                m_Log($"{turnAi.Name} (Bank:{turnPlayer.Purse.Values.Sum()}), {action}");
             }
 
-            m_Log($"**** Game over after {_game.RoundsCompleted} rounds.");
+            m_Log($"**** Game over after {_game.RoundsCompleted} rounds. Winner: " + _game.TopPlayer.Name);
 
             var results = new Dictionary<ISpendorAi, int>();
             for (int i = 0; i < _game.State.Players.Length; i++)
             {
                 Player player = _game.State.Players[i];
+                var ai = _playerMap[player];
                 var score = player.VictoryPoints();
                 var s = score == 1 ? "" : "s";
                 var nobles = player.Nobles.Count();
@@ -48,8 +53,8 @@ namespace Splendor.Core.AI
                 var nobleNames = nobles > 0 ? ": " + string.Join(", ", player.Nobles.Select(n => n.Name)) : "";
                 var bonuses = string.Join(", ", player.GetDiscount().Where(kvp => kvp.Key != TokenColour.Gold)
                                                                     .Select(kvp=> $"{kvp.Value} {kvp.Key}"));
-                m_Log($"{_playerAi[i].Name} — {score} point{s} ({nobles} noble{ns}{nobleNames}) (Bonuses {bonuses})");
-                results.Add(_playerAi[i], score);
+                m_Log($"{ai.Name} — {score} point{s} ({nobles} noble{ns}{nobleNames}) (Bonuses {bonuses})");
+                results.Add(ai, score);
             }
             return results;
         }

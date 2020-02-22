@@ -45,6 +45,15 @@ namespace Splendor.Core
             State.CurrentPlayer = State.Players[nextIndex];
         }
 
+        public Player TopPlayer
+        {
+            get
+            {
+                return State.Players.OrderByDescending(p => p.VictoryPoints())
+                                    .ThenByDescending(p => p.CardsInPlay.Count).First();
+            }
+        }
+
         /// <summary>
         /// Player gets to choose which noble if there's more than once applicable,
         /// however this implementation just assigns the first one found.
@@ -53,10 +62,10 @@ namespace Splendor.Core
         {
             var currentPlayerBonuses = State.CurrentPlayer.GetDiscount();
 
-            foreach (var noble in State.Nobles) 
+            foreach (var noble in State.Nobles)
             {
                 bool ruledOut = false;
-                foreach(var colour in noble.Cost.Keys)
+                foreach (var colour in noble.Cost.Keys)
                 {
                     if (!currentPlayerBonuses.ContainsKey(colour) || noble.Cost[colour] > currentPlayerBonuses[colour])
                     {

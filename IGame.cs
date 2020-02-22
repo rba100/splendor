@@ -10,5 +10,6 @@ namespace Splendor.Core
 
         // Metrics
         public int RoundsCompleted { get; }
-    }
+        public Player TopPlayer { get; }
+     }
 }
