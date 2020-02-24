@@ -9,7 +9,7 @@ namespace Splendor.Core
         void CommitTurn(IAction action);
 
         // Metrics
-        public int RoundsCompleted { get; }
-        public Player TopPlayer { get; }
+        int RoundsCompleted { get; }
+        Player TopPlayer { get; }
      }
 }
