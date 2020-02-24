@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splendor.Core", "Splendor.Core\Splendor.Core.csproj", "{A03E46A1-7C20-4DEC-BCEA-7D3E25A3421E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Splendor.ConsoleRunner", "Splendor.ConsoleRunner\Splendor.ConsoleRunner.csproj", "{0B399E6F-6709-490B-BA05-1040D414DC1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{A03E46A1-7C20-4DEC-BCEA-7D3E25A3421E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A03E46A1-7C20-4DEC-BCEA-7D3E25A3421E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A03E46A1-7C20-4DEC-BCEA-7D3E25A3421E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B399E6F-6709-490B-BA05-1040D414DC1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B399E6F-6709-490B-BA05-1040D414DC1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B399E6F-6709-490B-BA05-1040D414DC1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B399E6F-6709-490B-BA05-1040D414DC1C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
