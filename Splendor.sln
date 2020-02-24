@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splendor.Core", "Splendor\Splendor.Core.csproj", "{A03E46A1-7C20-4DEC-BCEA-7D3E25A3421E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Splendor.TestProgram", "Splendor.TestProgram\Splendor.TestProgram.csproj", "{A60D1C18-F613-4347-9519-E9C7671EEBBE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A03E46A1-7C20-4DEC-BCEA-7D3E25A3421E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A03E46A1-7C20-4DEC-BCEA-7D3E25A3421E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A03E46A1-7C20-4DEC-BCEA-7D3E25A3421E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A03E46A1-7C20-4DEC-BCEA-7D3E25A3421E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A60D1C18-F613-4347-9519-E9C7671EEBBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A60D1C18-F613-4347-9519-E9C7671EEBBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A60D1C18-F613-4347-9519-E9C7671EEBBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A60D1C18-F613-4347-9519-E9C7671EEBBE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D508DBA7-8E5F-4905-B703-B08621E4F931}
+	EndGlobalSection
+EndGlobal
