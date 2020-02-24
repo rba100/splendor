@@ -10,6 +10,10 @@ namespace Splendor.Core
 
         // Metrics
         int RoundsCompleted { get; }
+
+        /// <summary>
+        /// The player with the most prestige points. If there's a tie, ranking is then by the fewest development cards.
+        /// </summary>
         Player TopPlayer { get; }
      }
 }
