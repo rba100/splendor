@@ -6,23 +6,22 @@ using System.Linq;
 
 namespace Splendor.Core.AI
 {
-    public class StupidFavColourSplendorAi : ISpendorAi
+    public class NobleButStupidSplendorAi : ISpendorAi
     {
-        private readonly Random _random = new Random();
-        private readonly TokenColour FavouriteColour;
-
         public string Name { get; private set; }
 
-        public StupidFavColourSplendorAi(string name, TokenColour favouriteColour)
+        public NobleButStupidSplendorAi(string name)
         {
             Name = name;
-            FavouriteColour = favouriteColour;
         }
 
         public IAction ChooseAction(GameState gameState)
         {
             var me = gameState.CurrentPlayer;
+
             bool CanBuy(Card card) => BuyCard.CanAffordCard(me, card);
+
+            var coloursForNoble = GetColoursForCheapestNoble(gameState);
 
             var allFaceUpCards = gameState.Tiers.SelectMany(t => t.ColumnSlots)
                                                 .Select(s => s.Value)
@@ -32,14 +31,14 @@ namespace Splendor.Core.AI
             // Buy a victory point card if possible
             foreach (var card in allFaceUpCards.Concat(me.ReservedCards)
                                               .Where(c => c.VictoryPoints > 0)
-                                              .OrderByDescending(c => c.VictoryPoints + c.BonusGiven == FavouriteColour ? 1 : 0)
+                                              .OrderByDescending(c => c.VictoryPoints)
                                               .Where(CanBuy))
             {
                 var payment = BuyCard.CreateDefaultPaymentOrNull(me, card);
                 return new BuyCard(card, payment);
             }
 
-            var bestCardStudy = AnalyseCards(me, allFaceUpCards.Concat(me.ReservedCards), gameState)
+            var bestCardStudy = AnalyseCards(me, allFaceUpCards.Concat(me.ReservedCards), gameState, coloursForNoble)
                     .OrderBy(s => s.Repulsion)
                     .FirstOrDefault();
 
@@ -108,7 +107,28 @@ namespace Splendor.Core.AI
             return new NoAction();
         }
 
-        private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player me, IEnumerable<Card> cards, GameState state)
+        private TokenColour[] GetColoursForCheapestNoble(GameState gameState)
+        {
+            var me = gameState.CurrentPlayer;
+
+            Noble cheapestNoble = null;
+            int cheapestNobleDef = 99;
+            foreach (var noble in gameState.Nobles)
+            {
+                var deficitColours = me.Purse.GetDeficitFor(noble.Cost);
+                var deficitSum = me.Purse.GetDeficitFor(noble.Cost).SumValues();
+                // Look no further if close
+                if (deficitSum <= 4) return noble.Cost.NonZeroColours();
+                if(deficitSum < cheapestNobleDef)
+                {
+                    cheapestNobleDef = deficitSum;
+                    cheapestNoble = noble;
+                }
+            }
+            return cheapestNoble?.Cost.NonZeroColours() ?? new TokenColour[0];
+        }
+
+        private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player me, IEnumerable<Card> cards, GameState state, TokenColour[] favouriteColours)
         {
             var budget = me.Purse.MergeWith(me.GetDiscount());
             foreach (var card in cards)
@@ -123,7 +143,7 @@ namespace Splendor.Core.AI
                     scarcity += Math.Max(0, deficit[colour] - state.TokensAvailable[colour]);
                 }
                 var repulsion = deficit.Values.Sum() + scarcity;
-                if (card.BonusGiven == FavouriteColour) repulsion -= 8;
+                if (favouriteColours.Contains(card.BonusGiven)) repulsion -= 1;
 
                 yield return new CardFeasibilityStudy { Deficit = deficit, Repulsion = repulsion, Card = card };
             }

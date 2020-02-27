@@ -64,5 +64,22 @@ namespace Splendor.Core
                 { TokenColour.Gold,  gold  },
             };
         }
+
+        public static Dictionary<TokenColour, int> GetDeficitFor(this IDictionary<TokenColour, int> dictionary, IReadOnlyDictionary<TokenColour, int> other)
+        {
+            var newDict = dictionary.Keys.Union(other.Keys).ToDictionary(col => col, col => 0);
+            foreach (var kvp in dictionary) newDict[kvp.Key] = Math.Max(0, other[kvp.Key] - dictionary[kvp.Key]);
+            return newDict;
+        }
+
+        public static int SumValues(this IReadOnlyDictionary<TokenColour, int> dictionary)
+        {
+            return dictionary.Values.Sum();
+        }
+
+        public static TokenColour[] NonZeroColours(this IReadOnlyDictionary<TokenColour, int> dictionary)
+        {
+            return dictionary.Where(kvp=>kvp.Value > 0).Select(kvp=>kvp.Key).ToArray();
+        }
     }
 }

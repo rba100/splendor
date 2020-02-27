@@ -9,14 +9,14 @@ namespace Splendor.ConsoleRunner
     {
         static void Main(string[] args)
         {
-            Run1000();
+            Run1();
         }
 
         static void Run1()
         {
-            var aiPlayers = new[]
+            var aiPlayers = new ISpendorAi[]
             {
-                new StupidSplendorAi("Robin"),
+                new NobleButStupidSplendorAi("Robin"),
                 new StupidSplendorAi("James"),
                 new StupidSplendorAi("Mat"),
             };
@@ -32,7 +32,7 @@ namespace Splendor.ConsoleRunner
         {
             var scoreBoard = new Dictionary<ISpendorAi, int> 
             {
-                { new StupidSplendorAi("Robin"), 0},
+                { new NobleButStupidSplendorAi("Robin"), 0},
                 { new StupidSplendorAi("James"), 0},
                 { new StupidSplendorAi("Mat"), 0},
             };
