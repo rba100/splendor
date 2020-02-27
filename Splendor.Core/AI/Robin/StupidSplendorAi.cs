@@ -8,8 +8,6 @@ namespace Splendor.Core.AI
 {
     public class StupidSplendorAi : ISpendorAi
     {
-        private readonly Random _random = new Random();
-
         public string Name { get; private set; }
 
         public StupidSplendorAi(string name)
