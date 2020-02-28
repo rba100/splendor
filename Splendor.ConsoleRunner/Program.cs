@@ -11,8 +11,8 @@ namespace Splendor.ConsoleRunner
     {
         static void Main(string[] args)
         {
-            Run1();
-            //Run(numberOfGames: 10000, useParallelism: true);
+            //Run1();
+            Run(numberOfGames: 1000, useParallelism: true);
         }
 
         static void Run1()
@@ -37,9 +37,9 @@ namespace Splendor.ConsoleRunner
 
             var scoreBoard = new Dictionary<ISpendorAi, int>
             {
-                { new ObservantStupidSplendorAi("Robin"), 0},
-                { new StupidSplendorAi("James"), 0},
-                { new NobleButStupidSplendorAi("Mat"), 0},
+                { new StupidSplendorAi("Stupid"), 0},
+                { new ObservantStupidSplendorAi("Observant"), 0},
+                { new NobleButStupidSplendorAi("Noble"), 0},
             };
             var ais = scoreBoard.Select(p => p.Key).ToArray();
             var range = Enumerable.Range(0, numberOfGames);
