@@ -7,13 +7,13 @@ using TokenPool = System.Collections.Generic.IReadOnlyDictionary<Splendor.TokenC
 
 namespace Splendor.Core.AI
 {
-    public class InvestingStupidSplendorAi : ISpendorAi
+    public class ObservantStupidSplendorAi : ISpendorAi
     {
         public string Name { get; private set; }
 
         private AiOptions _options;
 
-        public InvestingStupidSplendorAi(string name, AiOptions options = null)
+        public ObservantStupidSplendorAi(string name, AiOptions options = null)
         {
             Name = name;
             _options = options ?? new AiOptions();
@@ -21,6 +21,8 @@ namespace Splendor.Core.AI
 
         public IAction ChooseAction(GameState gameState)
         {
+            /* PRECALCULATIONS */
+
             var me = gameState.CurrentPlayer;
             var otherPlayers = gameState.Players.Where(p => p != me).ToArray();
             var myBudget = me.GetDiscount().MergeWith(me.Purse);
@@ -52,16 +54,10 @@ namespace Splendor.Core.AI
                 var nextBudget = myBudget.MergeWith(targetDiscount);
                 myNextTargetCard = AnalyseCards(nextBudget, faceUpAndMyReserved.Except(new[] { myTargetCard.Card }).ToArray(), gameState, coloursForNoble)
                     .OrderBy(s => s.Repulsion)
-                    .FirstOrDefault(); 
+                    .FirstOrDefault();
             }
 
-            // Buy a big victory point card if possible
-            foreach (var card in cardsICanBuy.Where(c => c.VictoryPoints > 1)
-                                             .OrderByDescending(c => c.VictoryPoints))
-            {
-                var payment = BuyCard.CreateDefaultPaymentOrNull(me, card);
-                return new BuyCard(card, payment);
-            }
+            /* BEHAVIOUR */
 
             // Check to see if other players are about to win
             foreach (var otherPlayer in otherPlayers)
@@ -69,9 +65,9 @@ namespace Splendor.Core.AI
                 if (!_options.IsTheiving) break;
                 var score = otherPlayer.VictoryPoints();
                 var otherPlayerDiscount = otherPlayer.GetDiscount();
-                
+
                 var nobleDangerMap = new List<TokenColour>();
-                foreach(var noble in gameState.Nobles)
+                foreach (var noble in gameState.Nobles)
                 {
                     TokenPool deficit = otherPlayerDiscount.GetDeficitFor(noble.Cost);
                     if (deficit.SumValues() != 1) continue;
@@ -80,7 +76,7 @@ namespace Splendor.Core.AI
 
                 if (score < 10 && !nobleDangerMap.Any()) continue;
 
-                var riskCards = allFaceUpCards.Where(c => c.VictoryPoints + score + (nobleDangerMap.Contains(c.BonusGiven) ? 3 : 0 )>= 15)
+                var riskCards = allFaceUpCards.Where(c => c.VictoryPoints + score + (nobleDangerMap.Contains(c.BonusGiven) ? 3 : 0) >= 15)
                                               .Where(c => BuyCard.CanAffordCard(otherPlayer, c))
                                               .ToArray();
 
@@ -88,6 +84,14 @@ namespace Splendor.Core.AI
                 var riskCard = riskCards.Single();
                 if (cardsICanBuy.Contains(riskCard)) return new BuyCard(riskCard, BuyCard.CreateDefaultPaymentOrNull(me, riskCard));
                 if (me.ReservedCards.Count < 3) return new ReserveCard(riskCard);
+            }
+
+            // Buy a 2 or greater victory point card if possible
+            foreach (var card in cardsICanBuy.Where(c => c.VictoryPoints > 1)
+                                             .OrderByDescending(c => c.VictoryPoints))
+            {
+                var payment = BuyCard.CreateDefaultPaymentOrNull(me, card);
+                return new BuyCard(card, payment);
             }
 
             // Buy favourite card if possible
@@ -99,7 +103,7 @@ namespace Splendor.Core.AI
             // If I have 9 or more coins buy any reasonable card I can at all
             if (me.Purse.Values.Sum() > 8)
             {
-                foreach (var study in myOrderedCardStudy.Where(s=>s.Deficit.SumValues() == 0))
+                foreach (var study in myOrderedCardStudy.Where(s => s.Deficit.SumValues() == 0))
                 {
                     var payment = BuyCard.CreateDefaultPaymentOrNull(me, study.Card);
                     return new BuyCard(study.Card, payment);
@@ -121,7 +125,7 @@ namespace Splendor.Core.AI
             if (action != null) return action;
 
             // do the give/take coins if possible
-            return takeTokens ?? (IAction) new NoAction();
+            return takeTokens ?? (IAction)new NoAction();
         }
 
         private TakeTokens GetTakeTokens(GameState gameState, CardFeasibilityStudy firstChoice, CardFeasibilityStudy secondChoice)
@@ -164,7 +168,11 @@ namespace Splendor.Core.AI
             // otherwise just swap a single coin towards what we need
             if (coloursAvailable.Count == 0) return null;
             var colourToTake = coloursAvailable.First();
-            var colourToGiveBack = me.Purse.NonZeroColours().Where(c => c != colourToTake).Cast<TokenColour?>().FirstOrDefault();
+            var colourToGiveBack = me.Purse.NonZeroColours()
+                                           .OrderBy(c=>c == TokenColour.Gold)
+                                           .Where(c => c != colourToTake)
+                                           .Cast<TokenColour?>()
+                                           .FirstOrDefault();
             if (!colourToGiveBack.HasValue) return null;
             var take = Utility.CreateEmptyTokenPool();
             var give = Utility.CreateEmptyTokenPool();
@@ -210,7 +218,7 @@ namespace Splendor.Core.AI
                     deficit[colour] = Math.Max(0, cost[colour] - budget[colour]);
                     scarcity += Math.Max(0, deficit[colour] - state.TokensAvailable[colour]);
                 }
-                var repulsion = deficit.Values.Sum() + scarcity*1;
+                var repulsion = deficit.Values.Sum() + scarcity * 1;
                 if (_options.ConsidersNobles && coloursForNoble.Contains(card.BonusGiven)) repulsion -= 1;
                 if (coloursNeeded.Contains(card.BonusGiven)) repulsion -= 2;
                 if (card.VictoryPoints > 0) repulsion -= 1;

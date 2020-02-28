@@ -20,7 +20,7 @@ namespace Splendor.ConsoleRunner
             var aiPlayers = new ISpendorAi[]
             {
                 new NobleButStupidSplendorAi("Noble"),
-                new InvestingStupidSplendorAi("Invest"),
+                new ObservantStupidSplendorAi("Invest"),
                 new StupidSplendorAi("Stupid"),
             };
 
@@ -37,8 +37,8 @@ namespace Splendor.ConsoleRunner
 
             var scoreBoard = new Dictionary<ISpendorAi, int>
             {
+                { new ObservantStupidSplendorAi("Robin"), 0},
                 { new StupidSplendorAi("James"), 0},
-                { new InvestingStupidSplendorAi("Robin"), 0},
                 { new NobleButStupidSplendorAi("Mat"), 0},
             };
             var ais = scoreBoard.Select(p => p.Key).ToArray();
