@@ -20,7 +20,7 @@ namespace Splendor.ConsoleRunner
             var aiPlayers = new ISpendorAi[]
             {
                 new NobleButStupidSplendorAi("Noble"),
-                new ObservantStupidSplendorAi("Invest"),
+                new ObservantStupidSplendorAi("Observant"),
                 new StupidSplendorAi("Stupid"),
             };
 
