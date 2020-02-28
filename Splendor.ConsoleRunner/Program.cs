@@ -30,23 +30,27 @@ namespace Splendor.ConsoleRunner
             Console.ReadLine();
         }
 
-        static void Run(int numberOfGames)
+        static void Run(int numberOfGames = 1, bool useParallelism = true)
         {
             int tenPercent = numberOfGames / 10;
 
             var scoreBoard = new Dictionary<ISpendorAi, int>
             {
                 { new StupidSplendorAi("James"), 0},
-                { new StupidSplendorAi("Robin"), 0},
-                { new NobleButStupidSplendorAi("Mat"), 0},
+                { new NobleButStupidSplendorAi("Robin"), 0},
+                { new StupidSplendorAi("Mat"), 0},
             };
             var ais = scoreBoard.Select(p => p.Key).ToArray();
+            var range = Enumerable.Range(0, numberOfGames);
 
-            var resultsSet = Enumerable.Range(0, numberOfGames)
-                                       .AsParallel()
-                                       .Select(i => { if (i % tenPercent == 0) Console.Write(".");
-                                                      return new AiGameRunner(ais, _ => { }).Run(); })
-                                       .ToList();
+            Dictionary<ISpendorAi,int> runGame(int iteration) {
+                if (iteration % tenPercent == 0) Console.Write(".");
+                return new AiGameRunner(ais, _ => { }).Run();
+            };
+
+            var resultsSet = useParallelism
+                ? range.AsParallel().Select(runGame).ToList()
+                : range.Select(runGame).ToList();
             
             foreach(var results in resultsSet)
             {
