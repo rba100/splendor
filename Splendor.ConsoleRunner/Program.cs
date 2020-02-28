@@ -11,6 +11,7 @@ namespace Splendor.ConsoleRunner
     {
         static void Main(string[] args)
         {
+            //Run1();
             Run(numberOfGames: 10000, useParallelism: true);
         }
 
@@ -18,9 +19,9 @@ namespace Splendor.ConsoleRunner
         {
             var aiPlayers = new ISpendorAi[]
             {
-                new NobleButStupidSplendorAi("Robin"),
-                new StupidSplendorAi("James"),
-                new StupidSplendorAi("Mat"),
+                new NobleButStupidSplendorAi("Noble"),
+                new InvestingStupidSplendorAi("Invest"),
+                new StupidSplendorAi("Stupid"),
             };
 
             var runner = new AiGameRunner(aiPlayers, Console.WriteLine);

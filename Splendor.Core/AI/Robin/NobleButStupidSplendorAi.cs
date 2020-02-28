@@ -12,7 +12,7 @@ namespace Splendor.Core.AI
 
         public NobleButStupidSplendorAi(string name)
         {
-            Name = $"Noble {name}";
+            Name = name;
         }
 
         public IAction ChooseAction(GameState gameState)
