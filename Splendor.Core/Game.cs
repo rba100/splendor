@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Splendor.Core.Actions;
@@ -35,14 +36,14 @@ namespace Splendor.Core
             AssignNobles();
 
             // Identify end game
-            var endOfRound = State.Players.Last() == State.CurrentPlayer;
+            var endOfRound = State.Players.Last().Name == State.CurrentPlayer.Name;
             if (endOfRound) RoundsCompleted++;
             IsGameFinished = endOfRound && State.Players.Any(p => p.VictoryPoints() >= c_PointsForWin);
 
             // Increment player
-            var nextIndex = (Array.IndexOf(State.Players, State.CurrentPlayer) + 1)
-                % State.Players.Length;
-            State.CurrentPlayer = State.Players[nextIndex];
+            var nextIndex = (Array.IndexOf(State.Players.ToArray(), State.CurrentPlayer) + 1)
+                % State.Players.Count;
+            State = State.CopyWith(currentPlayer: State.Players.Skip(nextIndex).First());
         }
 
         public Player TopPlayer
@@ -61,7 +62,7 @@ namespace Splendor.Core
         private void AssignNobles()
         {
             var currentPlayerBonuses = State.CurrentPlayer.GetDiscount();
-
+            var nextNobles = new List<Noble>(State.Nobles);
             foreach (var noble in State.Nobles)
             {
                 bool ruledOut = false;
@@ -74,9 +75,10 @@ namespace Splendor.Core
                 }
                 if (ruledOut) continue;
 
-                // Give that noble to the player
-                State.CurrentPlayer.Nobles.Add(noble);
-                State.Nobles.Remove(noble);
+                var nextPlayer = State.CurrentPlayer.CloneWithNoble(noble);
+                nextNobles.Remove(noble);
+
+                State = State.CopyWith(nobles: nextNobles).CopyWithPlayer(nextPlayer);
                 break;
             }
         }

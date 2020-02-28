@@ -30,19 +30,24 @@ namespace Splendor.Core.Actions
             // Enforce rules
             Validate(gameState);
 
+            var nextAvailableTokens = gameState.TokensAvailable.CreateCopy();
+            var nextPlayerTokens = gameState.CurrentPlayer.Purse.CreateCopy();
+
             // Perform transaction
             foreach (var colour in gameState.TokensAvailable.Keys.ToArray())
             {
                 // Take coins
-                gameState.TokensAvailable[colour] -= TokensToTake[colour];
-                gameState.CurrentPlayer.Purse[colour] += TokensToTake[colour];
+                nextAvailableTokens[colour] -= TokensToTake[colour];
+                nextPlayerTokens[colour] += TokensToTake[colour];
 
                 // Return coins
-                gameState.TokensAvailable[colour] += TokensToReturn[colour];
-                gameState.CurrentPlayer.Purse[colour] -= TokensToReturn[colour];
+                nextAvailableTokens[colour] += TokensToReturn[colour];
+                nextPlayerTokens[colour] -= TokensToReturn[colour];
             }
 
-            return gameState;
+            var player = gameState.CurrentPlayer.Clone(withPurse: nextPlayerTokens);
+
+            return gameState.CopyWith(coinsAvailable: nextAvailableTokens).CopyWithPlayer(player);
         }
 
         private void Validate(GameState gameState)

@@ -1,7 +1,9 @@
-﻿namespace Splendor
+﻿using System.Collections.Generic;
+
+namespace Splendor
 {
     public interface IGameInitialiser
     {
-        GameState Create(int players);
+        GameState Create(IEnumerable<string> playerNames);
     }
 }

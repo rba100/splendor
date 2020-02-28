@@ -60,31 +60,30 @@ namespace Splendor.Core.AI
             /* BEHAVIOUR */
 
             // Check to see if other players are about to win
-            foreach (var otherPlayer in otherPlayers)
-            {
-                if (!_options.IsTheiving) break;
-                var score = otherPlayer.VictoryPoints();
-                var otherPlayerDiscount = otherPlayer.GetDiscount();
-
-                var nobleDangerMap = new List<TokenColour>();
-                foreach (var noble in gameState.Nobles)
+            if (_options.IsTheiving) foreach (var otherPlayer in otherPlayers)
                 {
-                    TokenPool deficit = otherPlayerDiscount.GetDeficitFor(noble.Cost);
-                    if (deficit.SumValues() != 1) continue;
-                    nobleDangerMap.Add(deficit.NonZeroColours().Single());
+                    var score = otherPlayer.VictoryPoints();
+                    var otherPlayerDiscount = otherPlayer.GetDiscount();
+
+                    var nobleDangerMap = new List<TokenColour>();
+                    foreach (var noble in gameState.Nobles)
+                    {
+                        TokenPool deficit = otherPlayerDiscount.GetDeficitFor(noble.Cost);
+                        if (deficit.SumValues() != 1) continue;
+                        nobleDangerMap.Add(deficit.NonZeroColours().Single());
+                    }
+
+                    if (score < 10 && !nobleDangerMap.Any()) continue;
+
+                    var riskCards = allFaceUpCards.Where(c => c.VictoryPoints + score + (nobleDangerMap.Contains(c.BonusGiven) ? 3 : 0) >= 15)
+                                                  .Where(c => BuyCard.CanAffordCard(otherPlayer, c))
+                                                  .ToArray();
+
+                    if (riskCards.Length != 1) continue; // We're screwed if he has more than one winning move.
+                    var riskCard = riskCards.Single();
+                    if (cardsICanBuy.Contains(riskCard)) return new BuyCard(riskCard, BuyCard.CreateDefaultPaymentOrNull(me, riskCard));
+                    if (me.ReservedCards.Count < 3) return new ReserveCard(riskCard);
                 }
-
-                if (score < 10 && !nobleDangerMap.Any()) continue;
-
-                var riskCards = allFaceUpCards.Where(c => c.VictoryPoints + score + (nobleDangerMap.Contains(c.BonusGiven) ? 3 : 0) >= 15)
-                                              .Where(c => BuyCard.CanAffordCard(otherPlayer, c))
-                                              .ToArray();
-
-                if (riskCards.Length != 1) continue; // We're screwed if he has more than one winning move.
-                var riskCard = riskCards.Single();
-                if (cardsICanBuy.Contains(riskCard)) return new BuyCard(riskCard, BuyCard.CreateDefaultPaymentOrNull(me, riskCard));
-                if (me.ReservedCards.Count < 3) return new ReserveCard(riskCard);
-            }
 
             // Buy a 2 or greater victory point card if possible
             foreach (var card in cardsICanBuy.Where(c => c.VictoryPoints > 1)
@@ -169,7 +168,7 @@ namespace Splendor.Core.AI
             if (coloursAvailable.Count == 0) return null;
             var colourToTake = coloursAvailable.First();
             var colourToGiveBack = me.Purse.NonZeroColours()
-                                           .OrderBy(c=>c == TokenColour.Gold)
+                                           .OrderBy(c => c == TokenColour.Gold)
                                            .Where(c => c != colourToTake)
                                            .Cast<TokenColour?>()
                                            .FirstOrDefault();
@@ -250,7 +249,7 @@ namespace Splendor.Core.AI
             if (me.ReservedCards.Count == 3) return null;
 
             var firstTier = gameState.Tiers.Single(t => t.Tier == 1);
-            if (firstTier.FaceDownCards.Count > 0)
+            if (firstTier.HasFaceDownCardsRemaining)
             {
                 return new ReserveFaceDownCard(1);
             }

@@ -36,29 +36,37 @@ namespace Splendor.Core.Actions
             if(!SuppliedPaymentIsValid(gameState)) throw new RulesViolationException("You can't afford this card with the supplied payment."); ;
             if(!VerifyCardIsInHandOrBoard(player, gameState, Card)) throw new RulesViolationException("That card isn't on the board or in hand.");
 
-            var tier = gameState.Tiers.SingleOrDefault(t => t.ColumnSlots.Values.Contains(Card));
+            var isFromHand = player.ReservedCards.Contains(Card);
 
-            // Perform transaction
-            //  - Card
-            if (tier != null)
+            var nextTiers = new List<BoardTier>(gameState.Tiers);
+            var nextTier = gameState.Tiers.Single(t => t.Tier == Card.Tier);
+            var playerCardsInPlay = new List<Card>(player.CardsInPlay);
+            var playerReserved = new List<Card>(player.ReservedCards);
+            var playerPurse = player.Purse.CreateCopy();
+            var nextTokensAvailable = gameState.TokensAvailable.CreateCopy();
+
+            if (isFromHand)
             {
-                var index = tier.ColumnSlots.Single(s => s.Value == Card).Key;
-                tier.ColumnSlots[index] = tier.FaceDownCards.Count > 0 ? tier.FaceDownCards.Dequeue() : null;
+                playerReserved.Remove(Card);
             }
             else
             {
-                player.ReservedCards.Remove(Card);
+                nextTiers.Remove(nextTier);
+                nextTiers.Add(nextTier.Clone(withCardTaken: Card));
             }
-            player.CardsInPlay.Add(Card);
+
+            playerCardsInPlay.Add(Card);
 
             //  - Payment
             foreach(var colour in Payment.Keys)
             {
-                player.Purse[colour] -= Payment[colour];
-                gameState.TokensAvailable[colour] += Payment[colour];
+                playerPurse[colour] -= Payment[colour];
+                nextTokensAvailable[colour] += Payment[colour];
             }
 
-            return gameState;
+            var nextPlayer = player.Clone(playerPurse, playerReserved, playerCardsInPlay);
+
+            return gameState.CopyWithPlayer(nextPlayer).CopyWith(nextTokensAvailable, tiers: nextTiers);
         }
 
         public static bool CanAffordCard(Player player, Card card)

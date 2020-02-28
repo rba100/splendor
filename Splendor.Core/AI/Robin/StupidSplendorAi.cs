@@ -132,7 +132,7 @@ namespace Splendor.Core.AI
 
             var colourToGiveUp = me.Purse.Where(kvp => kvp.Value > 0 && kvp.Key != TokenColour.Gold).Select(kvp => kvp.Key).FirstOrDefault();
             var firstTier = gameState.Tiers.Single(t => t.Tier == 1);
-            if (firstTier.FaceDownCards.Count > 0)
+            if (firstTier.HasFaceDownCardsRemaining)
             {
                 return new ReserveFaceDownCard(1, colourToGiveUp);
             }

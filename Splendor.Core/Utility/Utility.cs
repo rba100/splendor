@@ -34,7 +34,12 @@ namespace Splendor.Core
                        .ToDictionary(col => col, col => 0);
         }
 
-        public static Dictionary<T, T2> CreateCopy<T,T2>(this IDictionary<T, T2> dictionary)
+        public static Dictionary<T, T2> CreateCopy<T,T2>(this Dictionary<T, T2> dictionary)
+        {
+            return dictionary.ToDictionary(d => d.Key, d => d.Value);
+        }
+
+        public static Dictionary<T, T2> CreateCopy<T, T2>(this IDictionary<T, T2> dictionary)
         {
             return dictionary.ToDictionary(d => d.Key, d => d.Value);
         }
@@ -44,7 +49,7 @@ namespace Splendor.Core
             return dictionary.ToDictionary(d => d.Key, d => d.Value);
         }
 
-        public static Dictionary<T, int> MergeWith<T>(this IDictionary<T, int> dictionary, IDictionary<T, int> other)
+        public static Dictionary<T, int> MergeWith2<T>(this IDictionary<T, int> dictionary, IDictionary<T, int> other)
         {
             var newDict = dictionary.Keys.Union(other.Keys).ToDictionary(col => col, col => 0);
             foreach (var kvp in dictionary) newDict[kvp.Key] += kvp.Value;
@@ -52,17 +57,12 @@ namespace Splendor.Core
             return newDict;
         }
 
-        public static Dictionary<TokenColour, int> CreatePurse(int black = 0, int blue = 0, int red = 0, int green = 0, int white = 0, int gold = 0)
+        public static Dictionary<T, int> MergeWith<T>(this IReadOnlyDictionary<T, int> dictionary, IReadOnlyDictionary<T, int> other)
         {
-            return new Dictionary<TokenColour, int>
-            {
-                { TokenColour.Black, black },
-                { TokenColour.Blue,  blue  },
-                { TokenColour.Red,   red   },
-                { TokenColour.Green, green },
-                { TokenColour.White, white },
-                { TokenColour.Gold,  gold  },
-            };
+            var newDict = dictionary.Keys.Union(other.Keys).ToDictionary(col => col, col => 0);
+            foreach (var kvp in dictionary) newDict[kvp.Key] += kvp.Value;
+            foreach (var kvp in other) newDict[kvp.Key] += kvp.Value;
+            return newDict;
         }
 
         public static Dictionary<TokenColour, int> GetDeficitFor(this IDictionary<TokenColour, int> dictionary, IReadOnlyDictionary<TokenColour, int> other)

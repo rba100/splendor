@@ -1,5 +1,6 @@
 ﻿using Splendor.Core.Domain;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Splendor.Core.Actions
@@ -37,10 +38,16 @@ namespace Splendor.Core.Actions
                 throw new RulesViolationException("That card isn't on the board.");
             }
 
-            var index = tier.ColumnSlots.Single(s => s.Value == Card).Key;
+            var nextTiers = new List<BoardTier>(gameState.Tiers);
+            var nextTier = gameState.Tiers.Single(t => t.Tier == Card.Tier);
+            nextTiers.Remove(nextTier);
+            nextTiers.Add(nextTier.Clone(withCardTaken: Card));
+            var playerCardsInPlay = new List<Card>(player.CardsInPlay);
+            var playerReserved = new List<Card>(player.ReservedCards);
+            var playerPurse = player.Purse.CreateCopy();
+            var nextTokensAvailable = gameState.TokensAvailable.CreateCopy();
 
-            tier.ColumnSlots[index] = tier.FaceDownCards.Count > 0 ? tier.FaceDownCards.Dequeue() : null;
-            player.ReservedCards.Add(Card);
+            var index = tier.ColumnSlots.Single(s => s.Value == Card).Key;
 
             if (gameState.TokensAvailable[TokenColour.Gold] > 1)
             {
@@ -55,15 +62,20 @@ namespace Splendor.Core.Actions
                         throw new RulesViolationException("You can't give back a coin you don't have.");
                     }
 
-                    player.Purse[colourToReturn]--;
-                    gameState.TokensAvailable[colourToReturn]++;
+                    playerPurse[colourToReturn]--;
+                    nextTokensAvailable[colourToReturn]++;
                 }
 
-                gameState.TokensAvailable[TokenColour.Gold]--;
-                player.Purse[TokenColour.Gold]++;
+                nextTokensAvailable[TokenColour.Gold]--;
+                playerPurse[TokenColour.Gold]++;
             }
 
-            return gameState;
+            var nextPlayers = new List<Player>();
+            foreach (var p in gameState.Players) if (p.Name == player.Name)
+                    nextPlayers.Add(player.Clone(playerPurse, playerReserved, playerCardsInPlay));
+                else nextPlayers.Add(p);
+                
+            return gameState.CopyWith(nextTokensAvailable, tiers: nextTiers, players: nextPlayers);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Generic;
 using System.Linq;
 
 using Splendor.Core.Domain;
@@ -24,26 +25,30 @@ namespace Splendor.Core.Actions
         public GameState Execute(GameState gameState)
         {
             var player = gameState.CurrentPlayer;
-            var boardTier = gameState.Tiers.Single(t => t.Tier == Tier);
-            if (boardTier.FaceDownCards.Count == 0)
-            {
-                throw new RulesViolationException("There aren't any cards in that tier left to reserve.");
-            }
 
-            if(player.ReservedCards.Count > 3)
+            if (player.ReservedCards.Count > 3)
             {
                 throw new RulesViolationException("You can't reserve more than three cards.");
             }
 
-            var cardTaken = boardTier.FaceDownCards.Dequeue();
-            player.ReservedCards.Add(cardTaken);
+            var nextTiers = new List<BoardTier>(gameState.Tiers);
+            var tier = gameState.Tiers.Single(t => t.Tier == Tier);
+            var playerCardsInPlay = new List<Card>(player.CardsInPlay);
+            var playerReserved = new List<Card>(player.ReservedCards);
+            var playerPurse = player.Purse.CreateCopy();
+            var nextTokensAvailable = gameState.TokensAvailable.CreateCopy();
 
-            if(gameState.TokensAvailable[TokenColour.Gold] > 1)
+            nextTiers.Remove(tier);
+            var (nextTier, cardTaken) = tier.CloneAndTakeFaceDownCard();
+            nextTiers.Add(nextTier);
+            playerReserved.Add(cardTaken);
+
+            if (gameState.TokensAvailable[TokenColour.Gold] > 1)
             {
-                if(player.Purse.Values.Sum() >= 10)
+                if (player.Purse.Values.Sum() >= 10)
                 {
-                    var colourToReturn = ColourToReturnIfMaxCoins.HasValue 
-                        ? ColourToReturnIfMaxCoins.Value 
+                    var colourToReturn = ColourToReturnIfMaxCoins.HasValue
+                        ? ColourToReturnIfMaxCoins.Value
                         : player.Purse.First(kvp => kvp.Key != TokenColour.Gold && kvp.Value > 0).Key;
 
                     if (player.Purse[colourToReturn] < 1 && ColourToReturnIfMaxCoins != TokenColour.Gold)
@@ -51,15 +56,20 @@ namespace Splendor.Core.Actions
                         throw new RulesViolationException("You can't give back a coin you don't have.");
                     }
 
-                    player.Purse[colourToReturn]--;
-                    gameState.TokensAvailable[colourToReturn]++;
+                    playerPurse[colourToReturn]--;
+                    nextTokensAvailable[colourToReturn]++;
                 }
 
-                gameState.TokensAvailable[TokenColour.Gold]--;
-                player.Purse[TokenColour.Gold]++;
+                nextTokensAvailable[TokenColour.Gold]--;
+                playerPurse[TokenColour.Gold]++;
             }
 
-            return gameState;
+            var nextPlayers = new List<Player>();
+            foreach (var p in gameState.Players) if (p.Name == player.Name)
+                    nextPlayers.Add(player.Clone(playerPurse, playerReserved, playerCardsInPlay));
+                else nextPlayers.Add(p);
+
+            return gameState.CopyWith(nextTokensAvailable, tiers: nextTiers, players: nextPlayers);
         }
     }
 }
