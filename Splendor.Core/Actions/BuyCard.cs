@@ -66,7 +66,7 @@ namespace Splendor.Core.Actions
 
             var nextPlayer = player.Clone(playerPurse, playerReserved, playerCardsInPlay);
 
-            return gameState.CopyWithPlayer(nextPlayer).CopyWith(nextTokensAvailable, tiers: nextTiers);
+            return gameState.CloneWithPlayerReplacedByName(nextPlayer).Clone(nextTokensAvailable, withTiers: nextTiers);
         }
 
         public static bool CanAffordCard(Player player, Card card)

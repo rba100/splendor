@@ -34,11 +34,6 @@ namespace Splendor.Core
                        .ToDictionary(col => col, col => 0);
         }
 
-        public static Dictionary<T, T2> CreateCopy<T,T2>(this Dictionary<T, T2> dictionary)
-        {
-            return dictionary.ToDictionary(d => d.Key, d => d.Value);
-        }
-
         public static Dictionary<T, T2> CreateCopy<T, T2>(this IReadOnlyDictionary<T, T2> dictionary)
         {
             return dictionary.ToDictionary(d => d.Key, d => d.Value);

@@ -47,7 +47,7 @@ namespace Splendor.Core.Actions
 
             var player = gameState.CurrentPlayer.Clone(withPurse: nextPlayerTokens);
 
-            return gameState.CopyWith(coinsAvailable: nextAvailableTokens).CopyWithPlayer(player);
+            return gameState.Clone(withTokensAvailable: nextAvailableTokens).CloneWithPlayerReplacedByName(player);
         }
 
         private void Validate(GameState gameState)

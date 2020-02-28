@@ -21,17 +21,17 @@ namespace Splendor
         public IReadOnlyCollection<Player> Players { get; private set; }
         public Player CurrentPlayer { get; private set; }
 
-        public GameState CopyWith(IReadOnlyDictionary<TokenColour, int> coinsAvailable = null, ICollection<Noble> nobles = null, IReadOnlyCollection<BoardTier> tiers = null, IReadOnlyCollection<Player> players = null, Player currentPlayer = null)
+        public GameState Clone(IReadOnlyDictionary<TokenColour, int> withTokensAvailable = null, ICollection<Noble> withNobles = null, IReadOnlyCollection<BoardTier> withTiers = null, IReadOnlyCollection<Player> withPlayers = null, Player withCurrentPlayer = null)
         {
             return new GameState(
-                coinsAvailable ?? TokensAvailable,
-                nobles ?? Nobles,
-                tiers ?? Tiers,
-                players ?? Players,
-                currentPlayer ?? CurrentPlayer);
+                withTokensAvailable ?? TokensAvailable,
+                withNobles ?? Nobles,
+                withTiers ?? Tiers,
+                withPlayers ?? Players,
+                withCurrentPlayer ?? CurrentPlayer);
         }
 
-        public GameState CopyWithPlayer(Player player)
+        public GameState CloneWithPlayerReplacedByName(Player player)
         {
             var nextPlayers = new List<Player>();
             foreach (var p in Players) if (p.Name == player.Name)
@@ -40,7 +40,7 @@ namespace Splendor
 
             var cp = CurrentPlayer.Name == player.Name ? player : CurrentPlayer;
 
-            return CopyWith(players: nextPlayers, currentPlayer: cp);
+            return Clone(withPlayers: nextPlayers, withCurrentPlayer: cp);
         }
     }
 }

@@ -43,7 +43,7 @@ namespace Splendor.Core
             // Increment player
             var nextIndex = (Array.IndexOf(State.Players.ToArray(), State.CurrentPlayer) + 1)
                 % State.Players.Count;
-            State = State.CopyWith(currentPlayer: State.Players.Skip(nextIndex).First());
+            State = State.Clone(withCurrentPlayer: State.Players.Skip(nextIndex).First());
         }
 
         public Player TopPlayer
@@ -62,6 +62,8 @@ namespace Splendor.Core
         private void AssignNobles()
         {
             var currentPlayerBonuses = State.CurrentPlayer.GetDiscount();
+            if (currentPlayerBonuses.SumValues() < 8) return;
+
             var nextNobles = new List<Noble>(State.Nobles);
             foreach (var noble in State.Nobles)
             {
@@ -78,7 +80,7 @@ namespace Splendor.Core
                 var nextPlayer = State.CurrentPlayer.CloneWithNoble(noble);
                 nextNobles.Remove(noble);
 
-                State = State.CopyWith(nobles: nextNobles).CopyWithPlayer(nextPlayer);
+                State = State.Clone(withNobles: nextNobles).CloneWithPlayerReplacedByName(nextPlayer);
                 break;
             }
         }

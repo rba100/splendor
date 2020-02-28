@@ -75,7 +75,7 @@ namespace Splendor.Core.Actions
                     nextPlayers.Add(player.Clone(playerPurse, playerReserved, playerCardsInPlay));
                 else nextPlayers.Add(p);
                 
-            return gameState.CopyWith(nextTokensAvailable, tiers: nextTiers, players: nextPlayers);
+            return gameState.Clone(nextTokensAvailable, withTiers: nextTiers, withPlayers: nextPlayers);
         }
     }
 }
