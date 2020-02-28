@@ -48,7 +48,7 @@ namespace Splendor.Core.Actions
                 {
                     var colourToReturn = ColourToReturnIfMaxCoins.HasValue
                         ? ColourToReturnIfMaxCoins.Value
-                        : player.Purse.First(kvp => kvp.Value > 0).Key;
+                        : player.Purse.First(kvp => kvp.Key != TokenColour.Gold && kvp.Value > 0).Key;
 
                     if (player.Purse[colourToReturn] < 1 && ColourToReturnIfMaxCoins != TokenColour.Gold)
                     {
