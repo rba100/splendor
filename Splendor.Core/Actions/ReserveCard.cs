@@ -42,7 +42,6 @@ namespace Splendor.Core.Actions
             var nextTier = gameState.Tiers.Single(t => t.Tier == Card.Tier);
             nextTiers.Remove(nextTier);
             nextTiers.Add(nextTier.Clone(withCardTaken: Card));
-            var playerCardsInPlay = new List<Card>(player.CardsInPlay);
             var playerReserved = new List<Card>(player.ReservedCards);
             var playerPurse = player.Purse.CreateCopy();
             var nextTokensAvailable = gameState.TokensAvailable.CreateCopy();
@@ -70,12 +69,8 @@ namespace Splendor.Core.Actions
                 playerPurse[TokenColour.Gold]++;
             }
 
-            var nextPlayers = new List<Player>();
-            foreach (var p in gameState.Players) if (p.Name == player.Name)
-                    nextPlayers.Add(player.Clone(playerPurse, playerReserved, playerCardsInPlay));
-                else nextPlayers.Add(p);
-                
-            return gameState.Clone(nextTokensAvailable, withTiers: nextTiers, withPlayers: nextPlayers);
+            var nextPlayer = player.Clone(playerPurse, playerReserved);
+            return gameState.Clone(nextTokensAvailable, withTiers: nextTiers).CloneWithPlayerReplacedByName(nextPlayer);
         }
     }
 }

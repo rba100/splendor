@@ -68,7 +68,7 @@ namespace Splendor.Core.AI
                     var nobleDangerMap = new List<TokenColour>();
                     foreach (var noble in gameState.Nobles)
                     {
-                        TokenPool deficit = otherPlayerDiscount.GetDeficitFor(noble.Cost);
+                        var deficit = otherPlayerDiscount.GetDeficitFor(noble.Cost);
                         if (deficit.SumValues() != 1) continue;
                         nobleDangerMap.Add(deficit.NonZeroColours().Single());
                     }
@@ -79,7 +79,8 @@ namespace Splendor.Core.AI
                                                   .Where(c => BuyCard.CanAffordCard(otherPlayer, c))
                                                   .ToArray();
 
-                    if (riskCards.Length != 1) continue; // We're screwed if he has more than one winning move.
+                    if (riskCards.Length == 0) continue; 
+                    if (riskCards.Length > 1) break; // We're screwed if he has more than one winning move.
                     var riskCard = riskCards.Single();
                     if (cardsICanBuy.Contains(riskCard)) return new BuyCard(riskCard, BuyCard.CreateDefaultPaymentOrNull(me, riskCard));
                     if (me.ReservedCards.Count < 3) return new ReserveCard(riskCard);
@@ -151,7 +152,11 @@ namespace Splendor.Core.AI
                     coloursAvailable.Shuffle();
                 }
                 var transaction = Utility.CreateEmptyTokenPool();
-                if (firstChoice.Deficit.Any(kvp => kvp.Value >= 2) && coinsCountICanTake > 1)
+
+                if (_options.CanTakeTwo 
+                    && firstChoice.Deficit.Any(kvp => kvp.Value >= 2)
+                    && firstChoice.Deficit.SumValues() == 2
+                    && coinsCountICanTake > 1)
                 {
                     var neededColour = firstChoice.Deficit.First(kvp => kvp.Value >= 2).Key;
                     if (gameState.TokensAvailable[neededColour] > 3)
@@ -269,5 +274,6 @@ namespace Splendor.Core.AI
         public bool IsTheiving { get; set; } = true;
         public bool LooksAhead { get; set; } = true;
         public bool ConsidersNobles { get; set; } = false;
+        public bool CanTakeTwo { get; set; } = true;
     }
 }
