@@ -24,6 +24,7 @@ namespace Splendor.Core.AI
             /* PRECALCULATIONS */
 
             var me = gameState.CurrentPlayer;
+            var myScore = me.VictoryPoints();
             var otherPlayers = gameState.Players.Where(p => p != me).ToArray();
             var myBudget = me.GetDiscount().MergeWith(me.Purse);
 
@@ -59,11 +60,11 @@ namespace Splendor.Core.AI
 
             /* BEHAVIOUR */
 
-            // Check to see if other players are about to win
-            if (_options.IsTheiving) foreach (var otherPlayer in otherPlayers)
+            // Check to see if a player can win (including me)
+            if (_options.IsTheiving) foreach (var player in gameState.Players.OrderByDescending(p => p == me))
                 {
-                    var score = otherPlayer.VictoryPoints();
-                    var otherPlayerDiscount = otherPlayer.GetDiscount();
+                    var score = player.VictoryPoints();
+                    var otherPlayerDiscount = player.GetDiscount();
 
                     var nobleDangerMap = new List<TokenColour>();
                     foreach (var noble in gameState.Nobles)
@@ -76,14 +77,14 @@ namespace Splendor.Core.AI
                     if (score < 10 && !nobleDangerMap.Any()) continue;
 
                     var riskCards = allFaceUpCards.Where(c => c.VictoryPoints + score + (nobleDangerMap.Contains(c.BonusGiven) ? 3 : 0) >= 15)
-                                                  .Where(c => BuyCard.CanAffordCard(otherPlayer, c))
+                                                  .Where(c => BuyCard.CanAffordCard(player, c))
                                                   .ToArray();
 
-                    if (riskCards.Length == 0) continue; 
-                    if (riskCards.Length > 1) break; // We're screwed if he has more than one winning move.
-                    var riskCard = riskCards.Single();
+                    if (riskCards.Length == 0) continue;
+                    if (player != me && riskCards.Length > 1) break; // We're screwed if he has more than one winning move.
+                    var riskCard = riskCards.First();
                     if (cardsICanBuy.Contains(riskCard)) return new BuyCard(riskCard, BuyCard.CreateDefaultPaymentOrNull(me, riskCard));
-                    if (me.ReservedCards.Count < 3) return new ReserveCard(riskCard);
+                    if (player != me && me.ReservedCards.Count < 3) return new ReserveCard(riskCard);
                 }
 
             // Buy a 2 or greater victory point card if possible
@@ -153,7 +154,7 @@ namespace Splendor.Core.AI
                 }
                 var transaction = Utility.CreateEmptyTokenPool();
 
-                if (_options.CanTakeTwo 
+                if (_options.CanTakeTwo
                     && firstChoice.Deficit.Any(kvp => kvp.Value >= 2)
                     && firstChoice.Deficit.SumValues() == 2
                     && coinsCountICanTake > 1)
