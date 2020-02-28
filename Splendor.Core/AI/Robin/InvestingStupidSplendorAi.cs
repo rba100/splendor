@@ -54,6 +54,7 @@ namespace Splendor.Core.AI
             {
                 if (!_options.IsTheiving) break;
                 var score = otherPlayer.VictoryPoints();
+                if (score < 10) continue;
                 var riskCards = allFaceUpCards.Where(c => c.VictoryPoints + score >= 15)
                                               .Where(c => BuyCard.CanAffordCard(otherPlayer, c))
                                               .ToArray();
@@ -208,6 +209,6 @@ namespace Splendor.Core.AI
     public class AiOptions
     {
         public bool IsTheiving { get; set; } = true;
-        public bool ConsidersNobles { get; set; } = true;
+        public bool ConsidersNobles { get; set; } = false;
     }
 }
