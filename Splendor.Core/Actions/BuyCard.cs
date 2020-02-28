@@ -74,7 +74,7 @@ namespace Splendor.Core.Actions
             return CreateDefaultPaymentOrNull(player, card) != null;
         }
 
-        public static Dictionary<TokenColour, int> CreateDefaultPaymentOrNull(Player player, Card card)
+        public static IReadOnlyDictionary<TokenColour, int> CreateDefaultPaymentOrNull(Player player, Card card)
         {
             var payment = Utility.CreateEmptyTokenPool();
 

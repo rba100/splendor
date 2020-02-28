@@ -232,7 +232,7 @@ namespace Splendor.Core.AI
 
             foreach (var card in cards)
             {
-                IDictionary<TokenColour, int> deficit = budget.GetDeficitFor(card.Cost);
+                var deficit = budget.GetDeficitFor(card.Cost);
                 foreach (var colour in deficit.NonZeroColours()) colourChart[colour] += 1;
             }
 

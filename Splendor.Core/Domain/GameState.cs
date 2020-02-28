@@ -1,15 +1,12 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Linq;
-
-using Splendor.Core;
 
 namespace Splendor
 {
     public class GameState
     {
-        public GameState(IDictionary<TokenColour, int> coinsAvailable, ICollection<Noble> nobles, IReadOnlyCollection<BoardTier> tiers, IReadOnlyCollection<Player> players, Player currentPlayer)
+        public GameState(IReadOnlyDictionary<TokenColour, int> coinsAvailable, ICollection<Noble> nobles, IReadOnlyCollection<BoardTier> tiers, IReadOnlyCollection<Player> players, Player currentPlayer)
         {
             TokensAvailable = coinsAvailable ?? throw new ArgumentNullException(nameof(coinsAvailable));
             Nobles = nobles ?? throw new ArgumentNullException(nameof(nobles));
@@ -18,13 +15,13 @@ namespace Splendor
             CurrentPlayer = currentPlayer ?? throw new ArgumentNullException(nameof(currentPlayer));
         }
 
-        public IDictionary<TokenColour, int> TokensAvailable { get; private set; }
+        public IReadOnlyDictionary<TokenColour, int> TokensAvailable { get; private set; }
         public ICollection<Noble> Nobles { get; private set; }
         public IReadOnlyCollection<BoardTier> Tiers { get; private set; }
         public IReadOnlyCollection<Player> Players { get; private set; }
         public Player CurrentPlayer { get; private set; }
 
-        public GameState CopyWith(IDictionary<TokenColour, int> coinsAvailable = null, ICollection<Noble> nobles = null, IReadOnlyCollection<BoardTier> tiers = null, IReadOnlyCollection<Player> players = null, Player currentPlayer = null)
+        public GameState CopyWith(IReadOnlyDictionary<TokenColour, int> coinsAvailable = null, ICollection<Noble> nobles = null, IReadOnlyCollection<BoardTier> tiers = null, IReadOnlyCollection<Player> players = null, Player currentPlayer = null)
         {
             return new GameState(
                 coinsAvailable ?? TokensAvailable,

@@ -1,5 +1,5 @@
-﻿using Splendor.Core;
-using Splendor.Core.Domain;
+﻿
+using Splendor.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
