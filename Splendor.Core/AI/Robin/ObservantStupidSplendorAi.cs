@@ -78,6 +78,7 @@ namespace Splendor.Core.AI
 
                     var riskCards = allFaceUpCards.Where(c => c.VictoryPoints + score + (nobleDangerMap.Contains(c.BonusGiven) ? 3 : 0) >= 15)
                                                   .Where(c => BuyCard.CanAffordCard(player, c))
+                                                  .OrderByDescending(c => c.VictoryPoints + (nobleDangerMap.Contains(c.BonusGiven) ? 3 : 0))
                                                   .ToArray();
 
                     if (riskCards.Length == 0) continue;
