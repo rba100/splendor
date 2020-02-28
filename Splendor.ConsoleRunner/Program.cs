@@ -1,7 +1,9 @@
-﻿using Splendor.Core.AI;
+﻿
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using Splendor.Core.AI;
 
 namespace Splendor.ConsoleRunner
 {
@@ -9,7 +11,7 @@ namespace Splendor.ConsoleRunner
     {
         static void Main(string[] args)
         {
-            Run1();
+            Run(numberOfGames: 1000);
         }
 
         static void Run1()
@@ -28,31 +30,37 @@ namespace Splendor.ConsoleRunner
             Console.ReadLine();
         }
 
-        static void Run1000()
+        static void Run(int numberOfGames)
         {
-            var scoreBoard = new Dictionary<ISpendorAi, int> 
-            {
-                { new NobleButStupidSplendorAi("Robin"), 0},
-                { new StupidSplendorAi("James"), 0},
-                { new StupidSplendorAi("Mat"), 0},
-            };
+            int tenPercent = numberOfGames / 10;
 
-            for(int i = 0; i < 1000; i++)
+            var scoreBoard = new Dictionary<ISpendorAi, int>
             {
-                if (i % 100 == 0) Console.Write(".");
-                var runner = new AiGameRunner(scoreBoard.Select(p=>p.Key), _ => { });
-                var results = runner.Run();
+                { new StupidSplendorAi("James"), 0},
+                { new StupidSplendorAi("Robin"), 0},
+                { new NobleButStupidSplendorAi("Mat"), 0},
+            };
+            var ais = scoreBoard.Select(p => p.Key).ToArray();
+
+            var resultsSet = Enumerable.Range(0, numberOfGames)
+                                       .AsParallel()
+                                       .Select(i => { if (i % tenPercent == 0) Console.Write(".");
+                                                      return new AiGameRunner(ais, _ => { }).Run(); })
+                                       .ToList();
+            
+            foreach(var results in resultsSet)
+            {
                 var max = results.Values.Max();
-                foreach(var ai in results.Where(r=>r.Value == max)) scoreBoard[ai.Key]++;
+                foreach (var ai in results.Where(r => r.Value == max)) scoreBoard[ai.Key]++;
             }
 
             Console.Write(Environment.NewLine);
 
-            foreach(var row in scoreBoard)
+            foreach (var row in scoreBoard)
             {
                 Console.WriteLine($"{row.Key.Name} {row.Value} wins");
             }
-            
+
             Console.ReadLine();
         }
     }

@@ -12,7 +12,7 @@ namespace Splendor.Core.AI
 
         public NobleButStupidSplendorAi(string name)
         {
-            Name = name;
+            Name = $"Noble {name}";
         }
 
         public IAction ChooseAction(GameState gameState)
@@ -25,14 +25,15 @@ namespace Splendor.Core.AI
 
             var allFaceUpCards = gameState.Tiers.SelectMany(t => t.ColumnSlots)
                                                 .Select(s => s.Value)
-                                                .Where(card => card != null)
+                                                .Where(card => card != null) 
                                                 .ToArray();
 
             // Buy a victory point card if possible
             foreach (var card in allFaceUpCards.Concat(me.ReservedCards)
-                                              .Where(c => c.VictoryPoints > 0)
-                                              .OrderByDescending(c => c.VictoryPoints)
-                                              .Where(CanBuy))
+                                               .Where(c => c.VictoryPoints > 0)
+                                               .OrderByDescending(c => c.VictoryPoints)
+                                               .ThenByDescending(c=> coloursForNoble.Contains(c.BonusGiven))
+                                               .Where(CanBuy))
             {
                 var payment = BuyCard.CreateDefaultPaymentOrNull(me, card);
                 return new BuyCard(card, payment);
@@ -72,7 +73,7 @@ namespace Splendor.Core.AI
             {
                 if (bestCardStudy != null)
                 {
-                    var coloursNeeded = bestCardStudy.Deficit.Where(kvp => kvp.Value > 0).Select(kvp => kvp.Key).ToList();
+                    var coloursNeeded = bestCardStudy.Deficit.NonZeroColours().ToList();
                     coloursAvailable = coloursAvailable.OrderByDescending(col => coloursNeeded.Contains(col)).ToList();
                 }
                 else
@@ -117,8 +118,7 @@ namespace Splendor.Core.AI
             {
                 var deficitColours = me.Purse.GetDeficitFor(noble.Cost);
                 var deficitSum = me.Purse.GetDeficitFor(noble.Cost).SumValues();
-                // Look no further if close
-                if (deficitSum <= 4) return noble.Cost.NonZeroColours();
+
                 if(deficitSum < cheapestNobleDef)
                 {
                     cheapestNobleDef = deficitSum;
@@ -166,7 +166,7 @@ namespace Splendor.Core.AI
         private class CardFeasibilityStudy
         {
             public int Repulsion { get; set; }
-            public IDictionary<TokenColour, int> Deficit { get; set; }
+            public IReadOnlyDictionary<TokenColour, int> Deficit { get; set; }
             public Card Card { get; set; }
         }
     }
