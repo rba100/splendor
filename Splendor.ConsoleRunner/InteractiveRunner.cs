@@ -61,6 +61,19 @@ namespace Splendor.ConsoleRunner
             Console.WriteLine("****************************************");
         }
 
+        private string PrintTokenPool(IReadOnlyDictionary<TokenColour, int> tokenPool)
+        {
+            var readOuts = tokenPool.
+                Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
+            return string.Join(", ", readOuts);
+        }
+
+        private string PrintTokenPoolShort(IReadOnlyDictionary<TokenColour, int> tokenPool)
+        {
+            var readOuts = tokenPool.Where(c => c.Value > 0).Select(kvp => new string(FromCoinColour(kvp.Key)[0],kvp.Value)).ToList();
+            return string.Join(" ", readOuts);
+        }
+
         private void PrintState(IGame game)
         {
             Console.Write("Nobles: ");
@@ -69,7 +82,9 @@ namespace Splendor.ConsoleRunner
             {
                 foreach(var slot in tier.ColumnSlots.OrderBy(s=>s.Key))
                 {
-                    Console.WriteLine($"{tier.Tier}-{slot.Key} : " + slot.Value?.ToString() ?? "[EMPTY]");
+                    var card = slot.Value;
+                    var buyIndicator = card == null ? " " : BuyCard.CanAffordCard(game.State.CurrentPlayer, card) ? "*" : " ";
+                    Console.WriteLine($"{tier.Tier}-{slot.Key}{buyIndicator}: " + slot.Value?.ToString() ?? "[EMPTY]");
                 }
             }
             foreach (var card in game.State.CurrentPlayer.ReservedCards)
@@ -77,11 +92,10 @@ namespace Splendor.ConsoleRunner
                 Console.WriteLine($"Res : " + card.ToString());
             }
 
-            var purseValues = game.State.CurrentPlayer.Purse.
-                Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
+            Console.WriteLine($"Bank: {PrintTokenPoolShort(game.State.TokensAvailable)}");
+            var purseValues = game.State.CurrentPlayer.Purse.Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
             Console.WriteLine("Purse: " + string.Join(", ", purseValues));
-            var spendingPower = game.State.CurrentPlayer.Purse.MergeWith(game.State.CurrentPlayer.GetDiscount())
-                .Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
+            var spendingPower = game.State.CurrentPlayer.Purse.MergeWith(game.State.CurrentPlayer.GetDiscount()).Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
             Console.WriteLine("Can afford: " + string.Join(", ", spendingPower));
         }
 
@@ -146,6 +160,19 @@ namespace Splendor.ConsoleRunner
                 }
             }
             return tokens;
+        }
+        private string FromCoinColour(TokenColour col)
+        {
+            switch (col)
+            {
+                case TokenColour.White: return "W";
+                case TokenColour.Blue: return "U";
+                case TokenColour.Red: return "R";
+                case TokenColour.Green: return "G";
+                case TokenColour.Black: return "B";
+                case TokenColour.Gold: return "G";
+                default: throw new ArgumentOutOfRangeException(nameof(col));
+            }
         }
     }
 }
