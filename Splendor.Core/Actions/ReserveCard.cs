@@ -46,7 +46,7 @@ namespace Splendor.Core.Actions
             var playerPurse = player.Purse.CreateCopy();
             var nextTokensAvailable = gameState.TokensAvailable.CreateCopy();
 
-            var index = tier.ColumnSlots.Single(s => s.Value == Card).Key;
+            playerReserved.Add(Card);
 
             if (gameState.TokensAvailable[TokenColour.Gold] > 1)
             {
@@ -68,6 +68,8 @@ namespace Splendor.Core.Actions
                 nextTokensAvailable[TokenColour.Gold]--;
                 playerPurse[TokenColour.Gold]++;
             }
+
+
 
             var nextPlayer = player.Clone(playerPurse, playerReserved);
             return gameState.Clone(nextTokensAvailable, withTiers: nextTiers).CloneWithPlayerReplacedByName(nextPlayer);

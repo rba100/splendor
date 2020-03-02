@@ -171,7 +171,7 @@ namespace Splendor.ConsoleRunner
                 case TokenColour.Red: return "R";
                 case TokenColour.Green: return "G";
                 case TokenColour.Black: return "B";
-                case TokenColour.Gold: return "G";
+                case TokenColour.Gold: return "$";
                 default: throw new ArgumentOutOfRangeException(nameof(col));
             }
         }
