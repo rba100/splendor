@@ -96,6 +96,7 @@ namespace Splendor.ConsoleRunner
             Console.WriteLine($"Bank: {PrintTokenPoolShort(game.State.TokensAvailable)}");
             var purseValues = game.State.CurrentPlayer.Purse.Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
             Console.WriteLine("Purse: " + string.Join(", ", purseValues));
+            Console.WriteLine($"Bonuses: {PrintTokenPoolShort(game.State.CurrentPlayer.GetDiscount())}");
             var spendingPower = game.State.CurrentPlayer.Purse.MergeWith(game.State.CurrentPlayer.GetDiscount()).Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
             Console.WriteLine("Can afford: " + string.Join(", ", spendingPower));
         }
@@ -104,16 +105,18 @@ namespace Splendor.ConsoleRunner
         {
             var i = input.ToLowerInvariant().Trim();
 
-            if (i.StartsWith("take"))
+            if (i.StartsWith("t"))
             {
-                var codes = i.Substring("take".Length);
+                var whiteSpace = i.IndexOf(' ');
+                var codes = i.Substring(whiteSpace);
                 var tokens = TokenPoolFromInput(codes);
                 return new TakeTokens(tokens, Utility.CreateEmptyTokenPool());
             };
 
-            if (i.StartsWith("buy"))
+            if (i.StartsWith("b"))
             {
-                var args = i.Substring("buy".Length).Trim();
+                var whiteSpace = i.IndexOf(' ');
+                var args = i.Substring(whiteSpace).Trim();
                 if (args.StartsWith("res"))
                 {
                     var resCard = state.CurrentPlayer.ReservedCards.FirstOrDefault(c => BuyCard.CanAffordCard(state.CurrentPlayer, c));
@@ -131,9 +134,10 @@ namespace Splendor.ConsoleRunner
                 return new BuyCard(card, payment);
             }
 
-            if (i.StartsWith("reserve"))
+            if (i.StartsWith("r"))
             {
-                var args = i.Substring("reserve".Length).Trim();
+                var whiteSpace = i.IndexOf(' ');
+                var args = i.Substring(whiteSpace).Trim();
                 var tier = int.Parse(args[0].ToString());
                 if (args.Length == 1) return new ReserveFaceDownCard(tier);
                 if (args[1] != '-') throw new ArgumentException($"Syntax error. Usage: 'buy 1-2' for buying the second card in tier one.");                

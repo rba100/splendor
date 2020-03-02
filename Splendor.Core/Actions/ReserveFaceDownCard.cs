@@ -26,7 +26,7 @@ namespace Splendor.Core.Actions
         {
             var player = gameState.CurrentPlayer;
 
-            if (player.ReservedCards.Count > 3)
+            if (player.ReservedCards.Count >= 3)
             {
                 throw new RulesViolationException("You can't reserve more than three cards.");
             }

@@ -54,7 +54,7 @@ namespace Splendor
                 boardTiers.Add(new BoardTier(tier, cards.Where(c => c.Tier == tier), columns));
             }
 
-            return new GameState(tokenBank, nobles, boardTiers.ToArray(), playerList.ToArray(), playerList.First());
+            return new GameState(tokenBank, nobles, boardTiers.ToArray(), playerList.ToArray(), 0);
         }
     }
 }

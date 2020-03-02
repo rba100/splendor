@@ -43,7 +43,7 @@ namespace Splendor.Core
             // Increment player
             var nextIndex = (Array.IndexOf(State.Players.ToArray(), State.CurrentPlayer) + 1)
                 % State.Players.Count;
-            State = State.Clone(withCurrentPlayer: State.Players.Skip(nextIndex).First());
+            State = State.Clone(currentPlayerIndex: nextIndex);
         }
 
         public Player TopPlayer
