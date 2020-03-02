@@ -19,7 +19,7 @@ namespace Splendor
         {
             var tierMarker = new string('·', Tier);
             var costs = Cost.Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
-            return $"{BonusGiven}{tierMarker} ({VictoryPoints}) {string.Join(",", costs)}";
+            return $"{VictoryPoints}pt {BonusGiven}{tierMarker} {string.Join(",", costs)}";
         }
 
         public int Tier { get; private set; }

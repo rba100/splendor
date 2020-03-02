@@ -56,7 +56,11 @@ namespace Splendor.Core.Actions
 
             if (TokensToTake.Values.Sum() > 3)
             {
-                throw new RulesViolationException("You can only take up to three different tokens, or two of the same if there are four of that type available");
+                throw new RulesViolationException("You can only take up to three different tokens, or two of the same if there are four of that type available.");
+            }
+            else if (TokensToTake.Values.Any(v=>v > 2))
+            {
+                throw new RulesViolationException("You can only take up to two tokens of any one colour.");
             }
 
             if (TokensToTake[TokenColour.Gold] > 0)

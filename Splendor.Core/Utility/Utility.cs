@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Splendor.Core
 {
-    internal static class Utility
+    public static class Utility
     {
         private static readonly Random s_Rng = new Random();
 
