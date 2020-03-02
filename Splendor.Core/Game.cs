@@ -41,9 +41,7 @@ namespace Splendor.Core
             IsGameFinished = endOfRound && State.Players.Any(p => p.VictoryPoints() >= c_PointsForWin);
 
             // Increment player
-            var nextIndex = (Array.IndexOf(State.Players.ToArray(), State.CurrentPlayer) + 1)
-                % State.Players.Count;
-            State = State.Clone(currentPlayerIndex: nextIndex);
+            State = State.CloneWithIncrementedCurrentPlayer();
         }
 
         public Player TopPlayer

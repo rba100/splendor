@@ -34,6 +34,16 @@ namespace Splendor
                 currentPlayerIndex.HasValue ? currentPlayerIndex.Value : _currentPlayerIndex);
         }
 
+        public GameState CloneWithIncrementedCurrentPlayer()
+        {
+            return new GameState(
+                TokensAvailable,
+                Nobles,
+                Tiers,
+                Players,
+                (_currentPlayerIndex+1) % Players.Count);
+        }
+
         public GameState CloneWithPlayerReplacedByName(Player player)
         {
             var nextPlayers = new List<Player>();
