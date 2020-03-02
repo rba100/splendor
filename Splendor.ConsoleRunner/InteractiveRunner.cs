@@ -52,9 +52,10 @@ namespace Splendor.ConsoleRunner
                     action = ai.ChooseAction(game.State);
                     game.CommitTurn(action);
                 }
+
                 var updatedTurnPlayer = game.State.Players.Single(p => p.Name == turnPlayer.Name);
 
-                Console.WriteLine($"{updatedTurnPlayer.Name}, {action}");
+                Console.WriteLine($"{updatedTurnPlayer.Name} {updatedTurnPlayer.VictoryPoints()}pts, {action}");
             }
             Console.WriteLine("****************************************");
             Console.WriteLine(game.TopPlayer.Name + " wins!");
