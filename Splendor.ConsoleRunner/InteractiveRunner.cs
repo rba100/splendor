@@ -84,13 +84,14 @@ namespace Splendor.ConsoleRunner
                 foreach(var slot in tier.ColumnSlots.OrderBy(s=>s.Key))
                 {
                     var card = slot.Value;
-                    var buyIndicator = card == null ? " " : BuyCard.CanAffordCard(game.State.CurrentPlayer, card) ? "*" : " ";
+                    var buyIndicator = GetBuyIndicator(card, game.State.CurrentPlayer);
                     Console.WriteLine($"{tier.Tier}-{slot.Key}{buyIndicator}: " + slot.Value?.ToString() ?? "[EMPTY]");
                 }
             }
             foreach (var card in game.State.CurrentPlayer.ReservedCards)
             {
-                Console.WriteLine($"Res : " + card.ToString());
+                var buyIndicator = GetBuyIndicator(card, game.State.CurrentPlayer);
+                Console.WriteLine($"Res{buyIndicator}: " + card.ToString());
             }
 
             Console.WriteLine($"Bank: {PrintTokenPoolShort(game.State.TokensAvailable)}");
@@ -101,9 +102,31 @@ namespace Splendor.ConsoleRunner
             Console.WriteLine("Can afford: " + string.Join(", ", spendingPower));
         }
 
+        private string GetBuyIndicator(Card card, Player player)
+        {
+            var buyIndicator = card == null 
+                ? " " 
+                : BuyCard.CanAffordCard(player, card) 
+                   ? "*" 
+                   : player.GetDiscount().MergeWith(player.Purse).GetDeficitFor(card.Cost).SumValues() < 3 ? "·" : " ";
+            return buyIndicator;
+        }
+
         private IAction GetActionFromInput(string input, GameState state)
         {
             var i = input.ToLowerInvariant().Trim();
+
+            if (i.StartsWith("h"))
+            {
+                Console.WriteLine("Commands: refer to cards buy their tier and index, e.g. '1-2' for tier 1, 2nd card.");
+                Console.WriteLine("    t: take tokens, e.g. 't ugb' for take blUe, Green, Black.");
+                Console.WriteLine("    b: buy card. e.g. 'b 1-2', or 'b res' to buy a reserved card (choice made for you).");
+                Console.WriteLine("    r: reserve card. e.g. 'r 1-2', or just 'r 1' to reserve a random face down card from tier 1.");
+                Console.WriteLine("Instruments:");
+                Console.WriteLine("    *: you can afford this card.");
+                Console.WriteLine("    ·: you can almost afford this card.");
+                return null;
+            }
 
             if (i.StartsWith("t"))
             {
@@ -119,13 +142,13 @@ namespace Splendor.ConsoleRunner
                 var args = i.Substring(whiteSpace).Trim();
                 if (args.StartsWith("res"))
                 {
-                    var resCard = state.CurrentPlayer.ReservedCards.FirstOrDefault(c => BuyCard.CanAffordCard(state.CurrentPlayer, c));
+                    var resCard = state.CurrentPlayer.ReservedCards.OrderByDescending(c=>c.VictoryPoints).FirstOrDefault(c => BuyCard.CanAffordCard(state.CurrentPlayer, c));
                     if(resCard == null) throw new ArgumentException("You can't afford any of your reserved cards.");
                     var resPayment = BuyCard.CreateDefaultPaymentOrNull(state.CurrentPlayer, resCard);
                     if (resPayment == null) throw new ArgumentException("You cannot afford this card or did not specify sufficient payment.");
                     return new BuyCard(resCard, resPayment);
                 }
-                if (args[1] != '-') throw new ArgumentException($"Syntax error. Usage: 'buy 1-2' for buying the second card in tier one.");
+                if (args[1] != '-') throw new ArgumentException($"Syntax error. Usage: 'b 1-2' for buying the second card in tier one.");
                 var tier = int.Parse(args[0].ToString());                
                 var cardIndex = int.Parse(args[2].ToString());
                 var card = state.Tiers.Single(t => t.Tier == tier).ColumnSlots[cardIndex];
@@ -140,7 +163,7 @@ namespace Splendor.ConsoleRunner
                 var args = i.Substring(whiteSpace).Trim();
                 var tier = int.Parse(args[0].ToString());
                 if (args.Length == 1) return new ReserveFaceDownCard(tier);
-                if (args[1] != '-') throw new ArgumentException($"Syntax error. Usage: 'buy 1-2' for buying the second card in tier one.");                
+                if (args[1] != '-') throw new ArgumentException($"Syntax error. Usage: 'r 1-2' for reserving the second card in tier one.");                
                 var cardIndex = int.Parse(args[2].ToString());
                 var card = state.Tiers.Single(t => t.Tier == tier).ColumnSlots[cardIndex];
                 return new ReserveCard(card);
