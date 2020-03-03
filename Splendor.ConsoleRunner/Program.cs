@@ -11,9 +11,9 @@ namespace Splendor.ConsoleRunner
     {
         static void Main(string[] args)
         {
-            Interactive();
+            //Interactive();
             //Run1();
-            //Run(numberOfGames: 2000, useParallelism: true);
+            Run(numberOfGames: 2000, useParallelism: true);
         }
 
         static void Interactive()
@@ -46,7 +46,7 @@ namespace Splendor.ConsoleRunner
             var scoreBoard = new Dictionary<ISpendorAi, int>
             {
                 { new StupidSplendorAi("Stupid"), 0},
-                { new ObservantStupidSplendorAi("Observant", new AiOptions{ CanTakeTwo = true }), 0},
+                { new ObservantStupidSplendorAi("Observant"), 0},
                 { new NobleButStupidSplendorAi("Noble"), 0},
             };
             var ais = scoreBoard.Select(p => p.Key).ToArray();
