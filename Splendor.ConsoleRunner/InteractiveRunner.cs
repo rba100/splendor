@@ -80,7 +80,8 @@ namespace Splendor.ConsoleRunner
             foreach (var card in game.State.CurrentPlayer.ReservedCards)
             {
                 var buyIndicator = GetBuyIndicator(card, budget);
-                Console.WriteLine($"Res{buyIndicator}: " + card.ToString());
+                Console.Write($"Res{buyIndicator}: ");
+                PrintCardLine(card, budget);
             }
 
             Console.Write("Bank: "); PrintTokenPoolShortWithColours(game.State.TokensAvailable); Console.WriteLine();
@@ -214,6 +215,7 @@ namespace Splendor.ConsoleRunner
 
         public void PrintCardLine(Card card, IReadOnlyDictionary<TokenColour, int> budget)
         {
+            if (card == null) Console.WriteLine("[Empty]");
             var tierMarker = new string('·', card.Tier);
             Console.Write($"{card.VictoryPoints}pt {card.BonusGiven}{tierMarker} ");
             bool first = true;
