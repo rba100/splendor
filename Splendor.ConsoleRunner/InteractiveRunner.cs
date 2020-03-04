@@ -62,21 +62,9 @@ namespace Splendor.ConsoleRunner
             Console.WriteLine("****************************************");
         }
 
-        private string PrintTokenPool(IReadOnlyDictionary<TokenColour, int> tokenPool)
-        {
-            var readOuts = tokenPool.
-                Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
-            return string.Join(", ", readOuts);
-        }
-
-        private string PrintTokenPoolShort(IReadOnlyDictionary<TokenColour, int> tokenPool)
-        {
-            var readOuts = tokenPool.Where(c => c.Value > 0).Select(kvp => new string(FromCoinColour(kvp.Key)[0],kvp.Value)).ToList();
-            return string.Join(" ", readOuts);
-        }
-
         private void PrintState(IGame game)
         {
+            var budget = game.State.CurrentPlayer.GetDiscount().MergeWith(game.State.CurrentPlayer.Purse);
             Console.Write("Nobles: ");
             Console.WriteLine(string.Join(",", game.State.Nobles.Select(n => n.Name).ToArray()));
             foreach(var tier in game.State.Tiers.OrderByDescending(t => t.Tier))
@@ -84,31 +72,44 @@ namespace Splendor.ConsoleRunner
                 foreach(var slot in tier.ColumnSlots.OrderBy(s=>s.Key))
                 {
                     var card = slot.Value;
-                    var buyIndicator = GetBuyIndicator(card, game.State.CurrentPlayer);
-                    Console.WriteLine($"{tier.Tier}-{slot.Key}{buyIndicator}: " + slot.Value?.ToString() ?? "[EMPTY]");
+                    var buyIndicator = GetBuyIndicator(card, budget);
+                    Console.Write($"{tier.Tier}-{slot.Key}{buyIndicator}: ");
+                    PrintCardLine(card, budget);
                 }
             }
             foreach (var card in game.State.CurrentPlayer.ReservedCards)
             {
-                var buyIndicator = GetBuyIndicator(card, game.State.CurrentPlayer);
+                var buyIndicator = GetBuyIndicator(card, budget);
                 Console.WriteLine($"Res{buyIndicator}: " + card.ToString());
             }
 
-            Console.WriteLine($"Bank: {PrintTokenPoolShort(game.State.TokensAvailable)}");
+            Console.Write("Bank: "); PrintTokenPoolShortWithColours(game.State.TokensAvailable); Console.WriteLine();
+            //Console.WriteLine($"Bank: {PrintTokenPoolShort(game.State.TokensAvailable)}");
             var purseValues = game.State.CurrentPlayer.Purse.Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
             Console.WriteLine("Purse: " + string.Join(", ", purseValues));
-            Console.WriteLine($"Bonuses: {PrintTokenPoolShort(game.State.CurrentPlayer.GetDiscount())}");
+
+            Console.Write("Bonuses: "); PrintTokenPoolShortWithColours(game.State.CurrentPlayer.GetDiscount()); Console.WriteLine();
+            //Console.WriteLine($"Bonuses: {PrintTokenPoolShort(game.State.CurrentPlayer.GetDiscount())}");
             var spendingPower = game.State.CurrentPlayer.Purse.MergeWith(game.State.CurrentPlayer.GetDiscount()).Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
             Console.WriteLine("Can afford: " + string.Join(", ", spendingPower));
         }
 
-        private string GetBuyIndicator(Card card, Player player)
+        private void PrintTokenPoolShortWithColours(IReadOnlyDictionary<TokenColour, int> tokenPool)
+        {
+            foreach (var kvp in tokenPool)
+            {
+                var str = new string(FromCoinColour(kvp.Key)[0], kvp.Value);
+                Write(str + " ", ToConsole(kvp.Key));
+            }
+        }
+
+        private string GetBuyIndicator(Card card, IReadOnlyDictionary<TokenColour, int> budget)
         {
             var buyIndicator = card == null 
                 ? " " 
-                : BuyCard.CanAffordCard(player, card) 
+                : BuyCard.CanAffordCard(budget, card) 
                    ? "*" 
-                   : player.GetDiscount().MergeWith(player.Purse).GetDeficitFor(card.Cost).SumValues() < 3 ? "·" : " ";
+                   : budget.SumValues() < 3 ? "·" : " ";
             return buyIndicator;
         }
 
@@ -200,6 +201,50 @@ namespace Splendor.ConsoleRunner
                 case TokenColour.Black: return "B";
                 case TokenColour.Gold: return "$";
                 default: throw new ArgumentOutOfRangeException(nameof(col));
+            }
+        }
+
+        private void Write(string message, ConsoleColor colour)
+        {
+            var old = Console.ForegroundColor;
+            Console.ForegroundColor = colour;
+            Console.Write(message);
+            Console.ForegroundColor = old;
+        }
+
+        public void PrintCardLine(Card card, IReadOnlyDictionary<TokenColour, int> budget)
+        {
+            var tierMarker = new string('·', card.Tier);
+            Console.Write($"{card.VictoryPoints}pt {card.BonusGiven}{tierMarker} ");
+            bool first = true;
+            foreach(var row in card.Cost.Where(c => c.Value > 0))
+            {
+                if (!first) Console.Write(", ");
+                first = false;
+                var canAfford = budget[row.Key] >= row.Value;
+                var colour = canAfford ? ConsoleColor.White : ConsoleColor.Gray;
+                Write($"{row.Value} {row.Key}", colour);
+            }
+            Console.WriteLine();
+        }
+
+        private ConsoleColor ToConsole(TokenColour colour)
+        {
+            switch (colour)
+            {
+                case TokenColour.White:
+                    return ConsoleColor.White;
+                case TokenColour.Blue:
+                    return ConsoleColor.Blue;
+                case TokenColour.Red:
+                    return ConsoleColor.Red;
+                case TokenColour.Green:
+                    return ConsoleColor.Green;
+                case TokenColour.Black:
+                    return ConsoleColor.DarkGray;
+                case TokenColour.Gold:
+                    return ConsoleColor.DarkYellow;
+                default: throw new ArgumentOutOfRangeException(nameof(colour));
             }
         }
     }

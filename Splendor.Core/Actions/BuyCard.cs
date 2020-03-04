@@ -74,6 +74,43 @@ namespace Splendor.Core.Actions
             return CreateDefaultPaymentOrNull(player, card) != null;
         }
 
+        public static bool CanAffordCard(IReadOnlyDictionary<TokenColour, int> budget, Card card)
+        {
+            return CreateDefaultPaymentOrNull(budget, card) != null;
+        }
+
+        public static IReadOnlyDictionary<TokenColour, int> CreateDefaultPaymentOrNull(IReadOnlyDictionary<TokenColour, int> budget, Card card)
+        {
+            var payment = Utility.CreateEmptyTokenPool();
+            var available = budget.CreateCopy();
+            var costRemaining = card.Cost.CreateCopy();
+
+            foreach (var colour in costRemaining.Keys)
+            {
+                if (costRemaining[colour] < 1) continue;
+                if (costRemaining[colour] > available[colour] + available[TokenColour.Gold])
+                {
+                    return null;
+                }
+
+                if (costRemaining[colour] < available[colour])
+                {
+                    payment[colour] = costRemaining[colour];
+                }
+                else
+                {
+                    var goldNeeded = costRemaining[colour] - available[colour];
+                    payment[colour] = available[colour];
+
+                    payment[TokenColour.Gold] += goldNeeded;
+                    available[TokenColour.Gold] -= goldNeeded;
+                }
+            }
+
+            return payment;
+        }
+
+
         public static IReadOnlyDictionary<TokenColour, int> CreateDefaultPaymentOrNull(Player player, Card card)
         {
             var payment = Utility.CreateEmptyTokenPool();
