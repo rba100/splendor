@@ -1,4 +1,4 @@
 ﻿namespace Splendor
 {
-    public enum TokenColour { White, Blue, Red, Green, Black, Gold }
+    public enum TokenColour { Gold, White, Red, Blue, Green, Black  }
 }
