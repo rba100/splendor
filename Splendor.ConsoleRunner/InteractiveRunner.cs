@@ -85,22 +85,30 @@ namespace Splendor.ConsoleRunner
             }
 
             Console.Write("Bank: "); PrintTokenPoolShortWithColours(game.State.TokensAvailable); Console.WriteLine();
-            //Console.WriteLine($"Bank: {PrintTokenPoolShort(game.State.TokensAvailable)}");
             var purseValues = game.State.CurrentPlayer.Purse.Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
-            Console.WriteLine("Purse: " + string.Join(", ", purseValues));
+            Console.WriteLine($"Purse ({game.State.CurrentPlayer.Purse.SumValues()}): " + string.Join(", ", purseValues));
 
             Console.Write("Bonuses: "); PrintTokenPoolShortWithColours(game.State.CurrentPlayer.GetDiscount()); Console.WriteLine();
-            //Console.WriteLine($"Bonuses: {PrintTokenPoolShort(game.State.CurrentPlayer.GetDiscount())}");
-            var spendingPower = game.State.CurrentPlayer.Purse.MergeWith(game.State.CurrentPlayer.GetDiscount()).Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
-            Console.WriteLine("Can afford: " + string.Join(", ", spendingPower));
+            var spendingPower = game.State.CurrentPlayer.Purse.MergeWith(game.State.CurrentPlayer.GetDiscount());
+            Console.Write("Can afford: "); PrintTokenPoolShortWithColoursAsNumers(spendingPower); Console.WriteLine();
         }
 
         private void PrintTokenPoolShortWithColours(IReadOnlyDictionary<TokenColour, int> tokenPool)
         {
             foreach (var kvp in tokenPool)
             {
+                if (kvp.Value == 0) continue;
                 var str = new string(FromCoinColour(kvp.Key)[0], kvp.Value);
                 Write(str + " ", ToConsole(kvp.Key));
+            }
+        }
+
+        private void PrintTokenPoolShortWithColoursAsNumers(IReadOnlyDictionary<TokenColour, int> tokenPool)
+        {
+            foreach (var kvp in tokenPool)
+            {
+                if (kvp.Value == 0) continue;
+                Write(kvp.Value + " ", ToConsole(kvp.Key));
             }
         }
 
@@ -154,6 +162,7 @@ namespace Splendor.ConsoleRunner
                 var tier = int.Parse(args[0].ToString());                
                 var cardIndex = int.Parse(args[2].ToString());
                 var card = state.Tiers.Single(t => t.Tier == tier).ColumnSlots[cardIndex];
+                if(card == null) throw new ArgumentException("There's no card in that slot. The tier {tier} deck has been exhasted.");
                 var payment = args.Length > 3 ? TokenPoolFromInput(args.Substring(3)) : BuyCard.CreateDefaultPaymentOrNull(state.CurrentPlayer, card);
                 if (payment == null) throw new ArgumentException("You cannot afford this card or did not specify sufficient payment.");
                 return new BuyCard(card, payment);
@@ -215,7 +224,11 @@ namespace Splendor.ConsoleRunner
 
         public void PrintCardLine(Card card, IReadOnlyDictionary<TokenColour, int> budget)
         {
-            if (card == null) Console.WriteLine("[Empty]");
+            if (card == null)
+            {
+                Console.WriteLine("[Empty]");
+                return;
+            }
             var tierMarker = new string('·', card.Tier);
             Console.Write($"{card.VictoryPoints}pt {card.BonusGiven}{tierMarker} ");
             bool first = true;

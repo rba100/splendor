@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -39,9 +40,16 @@ namespace Splendor.Core.Actions
             var nextTokensAvailable = gameState.TokensAvailable.CreateCopy();
 
             nextTiers.Remove(tier);
-            var (nextTier, cardTaken) = tier.CloneAndTakeFaceDownCard();
-            nextTiers.Add(nextTier);
-            playerReserved.Add(cardTaken);
+            try
+            {
+                var (nextTier, cardTaken) = tier.CloneAndTakeFaceDownCard();
+                nextTiers.Add(nextTier);
+                playerReserved.Add(cardTaken);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RulesViolationException("There are no face down cards remaining in tier " + Tier);
+            }
 
             if (gameState.TokensAvailable[TokenColour.Gold] > 1)
             {
