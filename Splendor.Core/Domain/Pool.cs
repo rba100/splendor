@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Splendor.Core
 {
@@ -8,7 +9,10 @@ namespace Splendor.Core
         Pool Clone();
         Pool DeficitFor(IPool other);
         Pool MergeWith(IPool other);
-        int Gold { get;}
+        IEnumerable<TokenColour> ColoursInPool();
+        int Sum { get; }
+        bool IsZero { get; }
+        int Gold { get; }
         int White { get; }
         int Blue { get; }
         int Red { get; }
@@ -16,6 +20,9 @@ namespace Splendor.Core
         int Black { get; }
     }
 
+    /// <summary>
+    /// When passed as IPool, class is treated as frozen by convention.
+    /// </summary>
     public sealed class Pool : IPool
     {
         public Pool(int gold, int white, int blue, int red, int green, int black)
@@ -38,10 +45,13 @@ namespace Splendor.Core
         public int Red { get; private set; }
         public int Green { get; private set; }
         public int Black { get; private set; }
-        
+
+        public bool IsZero => Gold == 0 && White == 0 && Blue == 0 && Red == 0 && Green == 0 && Black == 0;
+
         public int this[TokenColour index]    // Indexer declaration  
         {
-            get {
+            get
+            {
                 switch (index)
                 {
                     case TokenColour.Gold:
@@ -59,7 +69,8 @@ namespace Splendor.Core
                     default: throw new ArgumentOutOfRangeException();
                 }
             }
-            set {
+            set
+            {
                 switch (index)
                 {
                     case TokenColour.Gold:
@@ -97,10 +108,10 @@ namespace Splendor.Core
 
         public Pool DeficitFor(IPool other)
         {
-            var gold  = other.Gold  - Gold;  gold  = gold  < 0 ? 0 : gold;
+            var gold = other.Gold - Gold; gold = gold < 0 ? 0 : gold;
             var white = other.White - White; white = white < 0 ? 0 : white;
-            var blue  = other.Blue  - Blue;  blue  = blue  < 0 ? 0 : blue;
-            var red   = other.Red   - Red;   red   = red   < 0 ? 0 : red;
+            var blue = other.Blue - Blue; blue = blue < 0 ? 0 : blue;
+            var red = other.Red - Red; red = red < 0 ? 0 : red;
             var green = other.Green - Green; green = green < 0 ? 0 : green;
             var black = other.Black - Black; black = black < 0 ? 0 : black;
 
@@ -112,5 +123,18 @@ namespace Splendor.Core
                 green,
                 black);
         }
+
+        public IEnumerable<TokenColour> ColoursInPool()
+        {
+            if (Gold > 0) yield return TokenColour.Gold;
+            if (White > 0) yield return TokenColour.White;
+            if (Blue > 0) yield return TokenColour.Blue;
+            if (Red > 0) yield return TokenColour.Red;
+            if (Green > 0) yield return TokenColour.Green;
+            if (Black > 0) yield return TokenColour.Black;
+        }
+
+        public int Sum => Gold + White + Blue + Red + Green + Black;
+
     }
 }
