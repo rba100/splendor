@@ -112,13 +112,18 @@ namespace Splendor.ConsoleRunner
             }
         }
 
-        private string GetBuyIndicator(Card card, IReadOnlyDictionary<TokenColour, int> budget)
+        private char GetBuyIndicator(Card card, IReadOnlyDictionary<TokenColour, int> budget)
         {
-            var buyIndicator = card == null 
-                ? " " 
-                : BuyCard.CanAffordCard(budget, card) 
-                   ? "*" 
-                   : budget.SumValues() < 3 ? "·" : " ";
+            if (card == null) return ' ';
+
+            // '*' can afford
+            // '·' can almost afford
+            // ' ' simply cannot afford
+
+            var buyIndicator = BuyCard.CanAffordCard(budget, card)
+                   ? '*'
+                   : budget.GetDeficitFor(card.Cost).SumValues() <= 3 ? '·' : ' ';
+
             return buyIndicator;
         }
 
@@ -229,8 +234,9 @@ namespace Splendor.ConsoleRunner
                 Console.WriteLine("[Empty]");
                 return;
             }
+            var padding = new string(' ', 8 - card.BonusGiven.ToString().Length - card.Tier);
             var tierMarker = new string('·', card.Tier);
-            Console.Write($"{card.VictoryPoints}pt {card.BonusGiven}{tierMarker} ");
+            Console.Write($"{card.VictoryPoints}pt {card.BonusGiven}{tierMarker}{padding}");
             bool first = true;
             foreach(var row in card.Cost.Where(c => c.Value > 0))
             {
