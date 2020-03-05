@@ -31,7 +31,7 @@ namespace Splendor
 
             var nobleCount = playerCount + 1;
 
-            var tokenBank = new Dictionary<TokenColour, int>();
+            var tokenBank = new Pool();
 
             tokenBank[TokenColour.Gold] = 5;
             tokenBank[TokenColour.White] = startingTokensPerColour;

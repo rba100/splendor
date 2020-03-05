@@ -60,7 +60,7 @@ namespace Splendor.Core
         private void AssignNobles()
         {
             var currentPlayerBonuses = State.CurrentPlayer.Bonuses;
-            if (currentPlayerBonuses.SumValues() < 8) return;
+            if (currentPlayerBonuses.Sum < 8) return;
 
             var nextNobles = new List<Noble>(State.Nobles);
             foreach (var noble in State.Nobles)
@@ -68,7 +68,7 @@ namespace Splendor.Core
                 bool ruledOut = false;
                 foreach (var colour in noble.Cost.Colours())
                 {
-                    if (!currentPlayerBonuses.ContainsKey(colour) || noble.Cost[colour] > currentPlayerBonuses[colour])
+                    if (noble.Cost[colour] > currentPlayerBonuses[colour])
                     {
                         ruledOut = true; break;
                     }

@@ -54,7 +54,7 @@ namespace Splendor.Core.AI
             }
 
             // Fourth, I check if I've got loads of coins and if so, I buy any card I can afford
-            if (me.Purse.Values.Sum() > 8)
+            if (me.Purse.Sum > 8)
             {
                 foreach (var card in allFaceUpCards.Where(CanBuy))
                 {
@@ -64,24 +64,24 @@ namespace Splendor.Core.AI
             }
 
             // Fifth, I top up my coins, favouring colours needed by the most accessible card.
-            var coloursAvailable = gameState.TokensAvailable.Where(kvp => kvp.Value > 0 && kvp.Key != TokenColour.Gold).Select(c=>c.Key).ToList();
-            var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Values.Sum(), 3), coloursAvailable.Count);           
+            var coloursAvailable = gameState.TokensAvailable.Colours().Where(col => col != TokenColour.Gold).ToList();
+            var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Sum, 3), coloursAvailable.Count);           
 
             if (coinsCountICanTake > 0)
             {
                 if (bestCardStudy != null)
                 {
-                    var coloursNeeded = bestCardStudy.Deficit.Where(kvp => kvp.Value > 0).Select(kvp => kvp.Key).ToList();
+                    var coloursNeeded = bestCardStudy.Deficit.Colours().ToArray();
                     coloursAvailable = coloursAvailable.OrderByDescending(col => coloursNeeded.Contains(col)).ToList();
                 }
                 else
                 {
                     coloursAvailable.Shuffle();
                 }
-                var transaction = Utility.CreateEmptyTokenPool();
-                if (bestCardStudy.Deficit.Any(kvp => kvp.Value >= 2) && coinsCountICanTake > 1)
+                var transaction = new Pool();
+                if (bestCardStudy.Deficit.Colours().Any(col => bestCardStudy.Deficit[col] >= 2) && coinsCountICanTake > 1)
                 {
-                    var neededColour = bestCardStudy.Deficit.First(kvp => kvp.Value >= 2).Key;
+                    var neededColour = bestCardStudy.Deficit.Colours().First(col => bestCardStudy.Deficit[col] >= 2);
                     if (gameState.TokensAvailable[neededColour] > 3)
                     {
                         transaction[neededColour] = 2;
@@ -112,14 +112,14 @@ namespace Splendor.Core.AI
             {
                 var cost = card.Cost;
                 if (cost == null) continue;
-                var deficit = Utility.CreateEmptyTokenPool();
+                var deficit = new Pool();
                 int scarcity = 0;
                 foreach(var colour in cost.Colours())
                 {
                     deficit[colour] = Math.Max(0, cost[colour] - me.Budget[colour]);
                     scarcity += Math.Max(0, deficit[colour] - state.TokensAvailable[colour]);
                 }
-                var rating = deficit.Values.Sum() + scarcity;
+                var rating = deficit.Sum + scarcity;
                 yield return new CardFeasibilityStudy { Deficit = deficit, DifficultyRating = rating, Card = card };
             }
         }
@@ -129,7 +129,7 @@ namespace Splendor.Core.AI
             var me = gameState.CurrentPlayer;
             if (me.ReservedCards.Count == 3) return null;
 
-            var colourToGiveUp = me.Purse.Where(kvp => kvp.Value > 0 && kvp.Key != TokenColour.Gold).Select(kvp => kvp.Key).FirstOrDefault();
+            var colourToGiveUp = me.Purse.Colours().Where(col => col != TokenColour.Gold).FirstOrDefault();
             var firstTier = gameState.Tiers.Single(t => t.Tier == 1);
             if (firstTier.HasFaceDownCardsRemaining)
             {
@@ -141,7 +141,7 @@ namespace Splendor.Core.AI
         private class CardFeasibilityStudy
         {
             public int DifficultyRating { get; set; }
-            public IDictionary<TokenColour, int> Deficit { get; set; }
+            public IPool Deficit { get; set; }
             public Card Card { get; set; }
         }
     }

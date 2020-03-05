@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using TokenPool = System.Collections.Generic.IReadOnlyDictionary<Splendor.TokenColour, int>;
-
 namespace Splendor.Core.AI
 {
     public class ObservantStupidSplendorAi : ISpendorAi
@@ -49,7 +47,7 @@ namespace Splendor.Core.AI
             CardFeasibilityStudy myNextTargetCard = null;
             if (_options.LooksAhead)
             {
-                var targetDiscount = Utility.CreateEmptyTokenPool();
+                var targetDiscount = new Pool();
                 targetDiscount[myTargetCard.Card.BonusGiven] = 1;
                 var nextBudget = me.Budget.MergeWith(targetDiscount);
                 myNextTargetCard = AnalyseCards(nextBudget, faceUpAndMyReserved.Except(new[] { myTargetCard.Card }).ToArray(), gameState, coloursForNoble)
@@ -64,14 +62,13 @@ namespace Splendor.Core.AI
             if (_options.IsTheiving) foreach (var player in gameState.Players.OrderByDescending(p => p == me))
                 {
                     var score = player.VictoryPoints;
-                    var otherPlayerDiscount = player.Bonuses;
 
                     var nobleDangerMap = new List<TokenColour>();
                     foreach (var noble in gameState.Nobles)
                     {
-                        var deficit = otherPlayerDiscount.GetDeficitFor(noble.Cost);
-                        if (deficit.SumValues() != 1) continue;
-                        nobleDangerMap.Add(deficit.NonZeroColours().Single());
+                        var deficit = player.Bonuses.DeficitFor(noble.Cost);
+                        if (deficit.Sum != 1) continue;
+                        nobleDangerMap.Add(deficit.Colours().Single());
                     }
 
                     if (score < 10 && !nobleDangerMap.Any()) continue;
@@ -103,9 +100,9 @@ namespace Splendor.Core.AI
             }
 
             // If I have 9 or more coins buy any reasonable card I can at all
-            if (me.Purse.Values.Sum() > 8)
+            if (me.Purse.Sum > 8)
             {
-                foreach (var study in myOrderedCardStudy.Where(s => s.Deficit.SumValues() == 0))
+                foreach (var study in myOrderedCardStudy.Where(s => s.Deficit.Sum == 0))
                 {
                     var payment = BuyCard.CreateDefaultPaymentOrNull(me, study.Card);
                     return new BuyCard(study.Card, payment);
@@ -114,7 +111,7 @@ namespace Splendor.Core.AI
 
             // Take some coins - but if there are coins to return then favour reserving a card
             var takeTokens = GetTakeTokens(gameState, myTargetCard, myNextTargetCard);
-            if (takeTokens != null && !takeTokens.TokensToReturn.NonZeroColours().Any()) return takeTokens;
+            if (takeTokens != null && !takeTokens.TokensToReturn.Colours().Any()) return takeTokens;
 
             // Do a reserve
             if (!me.ReservedCards.Contains(myTargetCard.Card) && me.ReservedCards.Count < 3)
@@ -136,15 +133,15 @@ namespace Splendor.Core.AI
 
             var me = gameState.CurrentPlayer;
 
-            var coloursAvailable = gameState.TokensAvailable.Where(kvp => kvp.Value > 0 && kvp.Key != TokenColour.Gold).Select(c => c.Key).ToList();
-            var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Values.Sum(), 3), coloursAvailable.Count);
+            var coloursAvailable = gameState.TokensAvailable.Colours().Where(col => col != TokenColour.Gold).ToList();
+            var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Sum, 3), coloursAvailable.Count);
 
             if (coinsCountICanTake > 0)
             {
                 if (firstChoice != null)
                 {
-                    var coloursNeeded = firstChoice.Deficit.NonZeroColours().ToList();
-                    var coloursNeeded2 = secondChoice?.Deficit.NonZeroColours().ToList();
+                    var coloursNeeded = firstChoice.Deficit.Colours().ToList();
+                    var coloursNeeded2 = secondChoice?.Deficit.Colours().ToList();
                     var ordering = coloursAvailable.OrderByDescending(col => coloursNeeded.Contains(col));
                     if (secondChoice != null) ordering = ordering.ThenByDescending(col => coloursNeeded2.Contains(col));
                     coloursAvailable = ordering.ToList();
@@ -153,14 +150,14 @@ namespace Splendor.Core.AI
                 {
                     coloursAvailable.Shuffle();
                 }
-                var transaction = Utility.CreateEmptyTokenPool();
+                var transaction = new Pool();
 
                 if (_options.CanTakeTwo
-                    && firstChoice.Deficit.Any(kvp => kvp.Value >= 2)
-                    && firstChoice.Deficit.SumValues() == 2
+                    && firstChoice.Deficit.Colours().Any(col => firstChoice.Deficit[col] >= 2)
+                    && firstChoice.Deficit.Sum == 2
                     && coinsCountICanTake > 1)
                 {
-                    var neededColour = firstChoice.Deficit.First(kvp => kvp.Value >= 2).Key;
+                    var neededColour = firstChoice.Deficit.Colours().First(col => firstChoice.Deficit[col] >= 2);
                     if (gameState.TokensAvailable[neededColour] > 3)
                     {
                         transaction[neededColour] = 2;
@@ -174,14 +171,14 @@ namespace Splendor.Core.AI
             // otherwise just swap a single coin towards what we need
             if (coloursAvailable.Count == 0) return null;
             var colourToTake = coloursAvailable.First();
-            var colourToGiveBack = me.Purse.NonZeroColours()
+            var colourToGiveBack = me.Purse.Colours()
                                            .OrderBy(c => c == TokenColour.Gold)
                                            .Where(c => c != colourToTake)
                                            .Cast<TokenColour?>()
                                            .FirstOrDefault();
             if (!colourToGiveBack.HasValue) return null;
-            var take = Utility.CreateEmptyTokenPool();
-            var give = Utility.CreateEmptyTokenPool();
+            var take = new Pool();
+            var give = new Pool();
 
             take[colourToTake] = 1;
             give[colourToGiveBack.Value] = 1;
@@ -197,8 +194,8 @@ namespace Splendor.Core.AI
             int cheapestNobleDef = 99;
             foreach (var noble in gameState.Nobles)
             {
-                var deficitColours = me.Purse.GetDeficitFor(noble.Cost);
-                var deficitSum = me.Purse.GetDeficitFor(noble.Cost).SumValues();
+                var deficitColours = me.Purse.DeficitFor(noble.Cost);
+                var deficitSum = me.Purse.DeficitFor(noble.Cost).Sum;
 
                 if (deficitSum < cheapestNobleDef)
                 {
@@ -209,25 +206,24 @@ namespace Splendor.Core.AI
             return cheapestNoble?.Cost.Colours().ToArray() ?? new TokenColour[0];
         }
 
-        private IEnumerable<CardFeasibilityStudy> AnalyseCards(TokenPool budget, Card[] cards, GameState state, TokenColour[] coloursForNoble)
+        private IEnumerable<CardFeasibilityStudy> AnalyseCards(IPool budget, Card[] cards, GameState state, TokenColour[] coloursForNoble)
         {
             var coloursNeeded = ColoursByUsefulness(budget, cards, state.CurrentPlayer);
-            var coloursWithoutFourOf = state.CurrentPlayer.Bonuses
-                                                          .Where(kvp=>kvp.Value < 4)
-                                                          .Select(kvp=>kvp.Key).ToArray();
+            var bonuses = state.CurrentPlayer.Bonuses;
+            var coloursWithoutFourOf = bonuses.Colours().Where(col => bonuses[col] < 4).ToArray();
 
             foreach (var card in cards)
             {
                 var cost = card.Cost;
                 if (cost == null) continue;
-                var deficit = Utility.CreateEmptyTokenPool();
+                var deficit = new Pool();
                 int scarcity = 0;
                 foreach (var colour in cost.Colours())
                 {
                     deficit[colour] = Math.Max(0, cost[colour] - budget[colour]);
                     scarcity += Math.Max(0, deficit[colour] - state.TokensAvailable[colour]);
                 }
-                var repulsion = deficit.Values.Sum() + scarcity * 1;
+                var repulsion = deficit.Sum + scarcity * 1;
 
                 if (_options.AimsAtNobles 
                     && coloursWithoutFourOf.Contains(card.BonusGiven) 
@@ -240,9 +236,9 @@ namespace Splendor.Core.AI
             }
         }
 
-        private TokenColour[] ColoursByUsefulness(TokenPool budget, IEnumerable<Card> cards, Player player)
+        private TokenColour[] ColoursByUsefulness(IPool budget, IEnumerable<Card> cards, Player player)
         {
-            var colourChart = Utility.CreateEmptyTokenPool();
+            var colourChart = new Pool();
 
             int[] tiersToExamine = new[] { 1, 2, 3 };
             if (_options.PhasesGame)
@@ -253,14 +249,13 @@ namespace Splendor.Core.AI
 
             foreach (var card in cards.Where(c => tiersToExamine.Contains(c.Tier)))
             {
-                var deficit = budget.GetDeficitFor(card.Cost);
-                foreach (var colour in deficit.NonZeroColours()) colourChart[colour] += 1;
+                var deficit = budget.DeficitFor(card.Cost);
+                foreach (var colour in deficit.Colours()) colourChart[colour] += 1;
             }
 
-            return colourChart
-                .Where(kvp => kvp.Key != TokenColour.Gold)
-                .OrderByDescending(kvp => kvp.Value)
-                .Select(kvp => kvp.Key)
+            return colourChart.Colours()
+                .Where(col => col != TokenColour.Gold)
+                .OrderByDescending(col => colourChart[col])
                 .ToArray();
         }
 
@@ -280,7 +275,7 @@ namespace Splendor.Core.AI
         private class CardFeasibilityStudy
         {
             public int Repulsion { get; set; }
-            public IReadOnlyDictionary<TokenColour, int> Deficit { get; set; }
+            public IPool Deficit { get; set; }
             public Card Card { get; set; }
         }
     }

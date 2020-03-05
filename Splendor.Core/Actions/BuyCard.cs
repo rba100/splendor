@@ -13,9 +13,9 @@ namespace Splendor.Core.Actions
     public class BuyCard : IAction
     {
         public Card Card { get; }
-        public IReadOnlyDictionary<TokenColour, int> Payment { get; }
+        public IPool Payment { get; }
 
-        public BuyCard(Card card, IReadOnlyDictionary<TokenColour, int> payment)
+        public BuyCard(Card card, IPool payment)
         {
             Card = card ?? throw new ArgumentNullException(nameof(card));
             Payment = payment ?? throw new ArgumentNullException(nameof(payment));
@@ -23,7 +23,7 @@ namespace Splendor.Core.Actions
 
         public override string ToString()
         {
-            var costs = Payment?.Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
+            var costs = Payment?.Colours().Select(col => $"{Payment[col]} {col}").ToList();
             if (costs?.Count() == 0) return $"Buying [{Card}] for free.";
             return costs == null ? $"Buying {Card}" : $"Buying [{Card}] with {string.Join(", ", costs)}";
         }
@@ -58,7 +58,7 @@ namespace Splendor.Core.Actions
             playerCardsInPlay.Add(Card);
 
             //  - Payment
-            foreach(var colour in Payment.Keys)
+            foreach(var colour in Payment.Colours())
             {
                 playerPurse[colour] -= Payment[colour];
                 nextTokensAvailable[colour] += Payment[colour];
@@ -74,15 +74,15 @@ namespace Splendor.Core.Actions
             return CreateDefaultPaymentOrNull(player, card) != null;
         }
 
-        public static bool CanAffordCard(IReadOnlyDictionary<TokenColour, int> budget, Card card)
+        public static bool CanAffordCard(IPool budget, Card card)
         {
             return CreateDefaultPaymentOrNull(budget, card) != null;
         }
 
-        public static IReadOnlyDictionary<TokenColour, int> CreateDefaultPaymentOrNull(IReadOnlyDictionary<TokenColour, int> budget, Card card)
+        public static IPool CreateDefaultPaymentOrNull(IPool budget, Card card)
         {
-            Dictionary<TokenColour, int> payment = null;
-            Dictionary<TokenColour, int> available = budget.CreateCopy();
+            Pool payment = null;
+            var available = budget.CreateCopy();
             var costRemaining = card.Cost.CreateCopy();
 
             foreach (var colour in costRemaining.Colours())
@@ -93,7 +93,7 @@ namespace Splendor.Core.Actions
                     return null;
                 }
 
-                payment = payment ?? Utility.CreateEmptyTokenPool();
+                payment = payment ?? new Pool();
 
                 if (costRemaining[colour] < available[colour])
                 {
@@ -113,13 +113,13 @@ namespace Splendor.Core.Actions
         }
 
 
-        public static IReadOnlyDictionary<TokenColour, int> CreateDefaultPaymentOrNull(Player player, Card card)
+        public static IPool CreateDefaultPaymentOrNull(Player player, Card card)
         {
-            var payment = Utility.CreateEmptyTokenPool();
+            var payment = new Pool();
             var available = player.Purse.CreateCopy();
             var costRemaining = card.Cost.CreateCopy();
 
-            foreach (var colour in player.Bonuses.Keys)
+            foreach (var colour in player.Bonuses.Colours())
             {
                 costRemaining[colour] = Math.Max(costRemaining[colour] - player.Bonuses[colour], 0);
             }
@@ -161,7 +161,7 @@ namespace Splendor.Core.Actions
             var available = gameState.CurrentPlayer.Purse.CreateCopy();
             var costRemaining = Card.Cost.CreateCopy();
 
-            foreach (var colour in gameState.CurrentPlayer.Bonuses.Keys)
+            foreach (var colour in gameState.CurrentPlayer.Bonuses.Colours())
             {
                 costRemaining[colour] = Math.Max(0, costRemaining[colour] - gameState.CurrentPlayer.Bonuses[colour]);
             }

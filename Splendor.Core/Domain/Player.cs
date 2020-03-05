@@ -14,7 +14,7 @@ namespace Splendor
         internal Player(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            Purse = Utility.CreateEmptyTokenPool();
+            Purse = new Pool();
             Nobles = new List<Noble>();
             ReservedCards = new List<Card>();
             CardsInPlay = new List<Card>();
@@ -25,7 +25,7 @@ namespace Splendor
         }
 
         private Player(string name,
-                       IReadOnlyDictionary<TokenColour, int> purse,
+                       IPool purse,
                        IReadOnlyCollection<Card> reservedCards, 
                        IReadOnlyCollection<Card> cardsInPlay,
                        IReadOnlyCollection<Noble> nobles)
@@ -41,7 +41,7 @@ namespace Splendor
             VictoryPoints = GetVictoryPoints();
         }
 
-        public Player Clone(IReadOnlyDictionary<TokenColour, int> withPurse = null,
+        public Player Clone(IPool withPurse = null,
                             IReadOnlyCollection<Card> withReservedCards = null,
                             IReadOnlyCollection<Card> withCardsInPlay = null,
                             IReadOnlyCollection<Noble> withNobles = null)
@@ -70,19 +70,19 @@ namespace Splendor
                               nobles);
         }
 
-        public IReadOnlyDictionary<TokenColour, int> Purse { get; private set; }
+        public IPool Purse { get; private set; }
         public IReadOnlyCollection<Card> ReservedCards { get; private set; }
         public IReadOnlyCollection<Card> CardsInPlay { get; private set; }
         public IReadOnlyCollection<Noble> Nobles { get; private set; }
-        public IReadOnlyDictionary<TokenColour, int> Budget { get; private set; }
-        public IReadOnlyDictionary<TokenColour, int> Bonuses { get; private set; }
+        public IPool Budget { get; private set; }
+        public IPool Bonuses { get; private set; }
         public int VictoryPoints { get; private set; }
 
-        private IReadOnlyDictionary<TokenColour, int> GetDiscount()
+        private IPool GetDiscount()
         {
-            return Enum.GetValues(typeof(TokenColour))
-                       .OfType<TokenColour>()
-                       .ToDictionary(col => col, col => CardsInPlay.Count(c => c.BonusGiven == col));
+            var pool = new Pool();
+            foreach (var c in CardsInPlay) pool[c.BonusGiven]++;
+            return pool;
         }
 
         private int GetVictoryPoints()

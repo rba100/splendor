@@ -50,11 +50,11 @@ namespace Splendor.Core.Actions
 
             if (gameState.TokensAvailable[TokenColour.Gold] > 1)
             {
-                if (player.Purse.Values.Sum() >= 10)
+                if (player.Purse.Sum >= 10)
                 {
                     var colourToReturn = ColourToReturnIfMaxCoins.HasValue
                         ? ColourToReturnIfMaxCoins.Value
-                        : player.Purse.First(kvp => kvp.Key != TokenColour.Gold && kvp.Value > 0).Key;
+                        : player.Purse.Colours().First(col => col != TokenColour.Gold);
 
                     if (player.Purse[colourToReturn] < 1 && ColourToReturnIfMaxCoins != TokenColour.Gold)
                     {

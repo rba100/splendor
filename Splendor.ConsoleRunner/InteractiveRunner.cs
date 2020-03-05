@@ -64,7 +64,8 @@ namespace Splendor.ConsoleRunner
 
         private void PrintState(IGame game)
         {
-            var budget = game.State.CurrentPlayer.Budget;
+            var player = game.State.CurrentPlayer;
+            var budget = player.Budget;
             Console.Write("Nobles: ");
             Console.WriteLine(string.Join(",", game.State.Nobles.Select(n => n.Name).ToArray()));
             foreach(var tier in game.State.Tiers.OrderByDescending(t => t.Tier))
@@ -85,32 +86,31 @@ namespace Splendor.ConsoleRunner
             }
 
             Console.Write("Bank: "); PrintTokenPoolShortWithColours(game.State.TokensAvailable); Console.WriteLine();
-            var purseValues = game.State.CurrentPlayer.Purse.Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
-            Console.WriteLine($"Purse ({game.State.CurrentPlayer.Purse.SumValues()}): " + string.Join(", ", purseValues));
+            var purseValues = player.Purse.Colours().Select(col => $"{player.Purse[col]} {col}").ToList();
+            Console.WriteLine($"Purse ({game.State.CurrentPlayer.Purse.Sum}): " + string.Join(", ", purseValues));
             Console.Write("Bonuses: "); PrintTokenPoolShortWithColours(game.State.CurrentPlayer.Bonuses); Console.WriteLine();
             Console.Write("Can afford: "); PrintTokenPoolShortWithColoursAsNumers(game.State.CurrentPlayer.Budget); Console.WriteLine();
         }
 
-        private void PrintTokenPoolShortWithColours(IReadOnlyDictionary<TokenColour, int> tokenPool)
+        private void PrintTokenPoolShortWithColours(IPool tokenPool)
         {
-            foreach (var kvp in tokenPool)
+            foreach (var col in tokenPool.Colours())
             {
-                if (kvp.Value == 0) continue;
-                var str = new string(FromCoinColour(kvp.Key)[0], kvp.Value);
-                Write(str + " ", ToConsole(kvp.Key));
+                var str = new string(FromCoinColour(col)[0], tokenPool[col]);
+                Write(str + " ", ToConsole(col));
             }
         }
 
-        private void PrintTokenPoolShortWithColoursAsNumers(IReadOnlyDictionary<TokenColour, int> tokenPool)
+        private void PrintTokenPoolShortWithColoursAsNumers(IPool tokenPool)
         {
-            foreach (var kvp in tokenPool)
+            foreach (var col in tokenPool.Colours())
             {
-                if (kvp.Value == 0) continue;
-                Write(kvp.Value + " ", ToConsole(kvp.Key));
+                if (tokenPool[col] == 0) continue;
+                Write(tokenPool[col] + " ", ToConsole(col));
             }
         }
 
-        private char GetBuyIndicator(Card card, IReadOnlyDictionary<TokenColour, int> budget)
+        private char GetBuyIndicator(Card card, IPool budget)
         {
             if (card == null) return ' ';
 
@@ -120,7 +120,7 @@ namespace Splendor.ConsoleRunner
 
             var buyIndicator = BuyCard.CanAffordCard(budget, card)
                    ? '*'
-                   : budget.GetDeficitFor(card.Cost).SumValues() <= 3 ? '·' : ' ';
+                   : budget.DeficitFor(card.Cost).Sum <= 3 ? '·' : ' ';
 
             return buyIndicator;
         }
@@ -146,7 +146,7 @@ namespace Splendor.ConsoleRunner
                 var whiteSpace = i.IndexOf(' ');
                 var codes = i.Substring(whiteSpace);
                 var tokens = TokenPoolFromInput(codes);
-                return new TakeTokens(tokens, Utility.CreateEmptyTokenPool());
+                return new TakeTokens(tokens, new Pool());
             };
 
             if (i.StartsWith("b"))
@@ -186,9 +186,9 @@ namespace Splendor.ConsoleRunner
             throw new NotImplementedException("Don't know that one.");
         }
 
-        private Dictionary<TokenColour, int> TokenPoolFromInput(string input)
+        private IPool TokenPoolFromInput(string input)
         {
-            var tokens = Utility.CreateEmptyTokenPool();
+            var tokens = new Pool();
             foreach (char c in input.Trim().Replace(" ", ""))
             {
                 switch (c)
@@ -225,7 +225,7 @@ namespace Splendor.ConsoleRunner
             Console.ForegroundColor = old;
         }
 
-        public void PrintCardLine(Card card, IReadOnlyDictionary<TokenColour, int> budget)
+        public void PrintCardLine(Card card, IPool budget)
         {
             if (card == null)
             {

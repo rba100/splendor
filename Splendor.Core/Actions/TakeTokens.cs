@@ -9,19 +9,19 @@ namespace Splendor.Core.Actions
 {
     public class TakeTokens : IAction
     {
-        public IReadOnlyDictionary<TokenColour, int> TokensToTake { get; }
-        public IReadOnlyDictionary<TokenColour, int> TokensToReturn { get; }
+        public IPool TokensToTake { get; }
+        public IPool TokensToReturn { get; }
 
-        public TakeTokens(IReadOnlyDictionary<TokenColour, int> tokensToTake,
-                         IReadOnlyDictionary<TokenColour, int> tokensToReturn = null)
+        public TakeTokens(IPool tokensToTake,
+                          IPool tokensToReturn = null)
         {
             TokensToTake = tokensToTake ?? throw new ArgumentNullException(nameof(tokensToTake));
-            TokensToReturn = tokensToReturn ?? Utility.CreateEmptyTokenPool();
+            TokensToReturn = tokensToReturn ?? new Pool();
         }
 
         public override string ToString()
         {
-            var things = TokensToTake.Where(c => c.Value > 0).Select(kvp => (kvp.Value == 1 ? "" : $"{kvp.Value} ") + $"{kvp.Key}");
+            var things = TokensToTake.Colours().Select(col => (TokensToTake[col] == 1 ? "" : $"{TokensToTake[col]} ") + $"{col}");
             return "Taking " + string.Join(", ", things);
         }
 
@@ -34,7 +34,7 @@ namespace Splendor.Core.Actions
             var nextPlayerTokens = gameState.CurrentPlayer.Purse.CreateCopy();
 
             // Perform transaction
-            foreach (var colour in gameState.TokensAvailable.Keys.ToArray())
+            foreach (var colour in TokensToTake.Colours().Union(TokensToReturn.Colours()).ToArray())
             {
                 // Take coins
                 nextAvailableTokens[colour] -= TokensToTake[colour];
@@ -54,11 +54,11 @@ namespace Splendor.Core.Actions
         {
             var player = gameState.CurrentPlayer;
 
-            if (TokensToTake.Values.Sum() > 3)
+            if (TokensToTake.Sum > 3)
             {
                 throw new RulesViolationException("You can only take up to three different tokens, or two of the same if there are four of that type available.");
             }
-            else if (TokensToTake.Values.Any(v=>v > 2))
+            else if (TokensToTake.Colours().Any(col => TokensToTake[col] > 2))
             {
                 throw new RulesViolationException("You can only take up to two tokens of any one colour.");
             }
@@ -68,31 +68,31 @@ namespace Splendor.Core.Actions
                 throw new RulesViolationException("You can't take gold tokens, except when reserving cards.");
             }
 
-            if (TokensToTake.Any(kvp => kvp.Value == 2)) // If two taken
+            if (TokensToTake.Colours().Any(col => TokensToTake[col] == 2)) // If two taken
             {
-                var doubleCoinColour = TokensToTake.Single(c => c.Value == 2).Key;
-
-                // No other tokens can be taken
-                if (TokensToTake.Count(kvp => kvp.Value == 0) != TokensToTake.Count - 1)
+                if (TokensToTake.Colours().Count() > 1)
                 {
                     throw new RulesViolationException("You can take two tokens of the same colour only if you take just those two tokens.");
                 }
+                
+                var doubleCoinColour = TokensToTake.Colours().Single();
+
                 if (gameState.TokensAvailable[doubleCoinColour] < 4)
                 {
                     throw new RulesViolationException("You can only take two tokens if there are four or more available.");
                 }
             }
 
-            var totalCoinsAfterTransaction = player.Purse.Values.Sum() + TokensToTake.Values.Sum() - TokensToReturn.Values.Sum();
+            var totalCoinsAfterTransaction = player.Purse.Sum + TokensToTake.Sum - TokensToReturn.Sum;
             if (totalCoinsAfterTransaction > 10) throw new RulesViolationException("A player cannot end a turn with more than 10 tokens.");
 
-            foreach (var colour in TokensToTake.Keys)
+            foreach (var colour in TokensToTake.Colours())
             {
                 if (gameState.TokensAvailable[colour] < TokensToTake[colour])
                     throw new RulesViolationException($"There aren't enough {colour} tokens to take.");
             }
 
-            foreach (var colour in TokensToReturn.Keys)
+            foreach (var colour in TokensToReturn.Colours())
             {
                 if (player.Purse[colour] + TokensToTake[colour] < TokensToReturn[colour])
                     throw new RulesViolationException($"The player doesn't have enough {colour} tokens to give back.");

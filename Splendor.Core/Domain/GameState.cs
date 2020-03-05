@@ -7,7 +7,7 @@ namespace Splendor
 {
     public class GameState
     {
-        public GameState(IReadOnlyDictionary<TokenColour, int> coinsAvailable, ICollection<Noble> nobles, IReadOnlyCollection<BoardTier> tiers, IReadOnlyCollection<Player> players, int currentPlayerIndex)
+        public GameState(IPool coinsAvailable, ICollection<Noble> nobles, IReadOnlyCollection<BoardTier> tiers, IReadOnlyCollection<Player> players, int currentPlayerIndex)
         {
             TokensAvailable = coinsAvailable ?? throw new ArgumentNullException(nameof(coinsAvailable));
             Nobles = nobles ?? throw new ArgumentNullException(nameof(nobles));
@@ -16,7 +16,7 @@ namespace Splendor
             _currentPlayerIndex = currentPlayerIndex;
         }
 
-        public IReadOnlyDictionary<TokenColour, int> TokensAvailable { get; private set; }
+        public IPool TokensAvailable { get; private set; }
         public ICollection<Noble> Nobles { get; private set; }
         public IReadOnlyCollection<BoardTier> Tiers { get; private set; }
         public IReadOnlyCollection<Player> Players { get; private set; }
@@ -24,7 +24,7 @@ namespace Splendor
 
         private int _currentPlayerIndex = 0;
 
-        public GameState Clone(IReadOnlyDictionary<TokenColour, int> withTokensAvailable = null, ICollection<Noble> withNobles = null, IReadOnlyCollection<BoardTier> withTiers = null, IReadOnlyCollection<Player> withPlayers = null, int? currentPlayerIndex = null)
+        public GameState Clone(IPool withTokensAvailable = null, ICollection<Noble> withNobles = null, IReadOnlyCollection<BoardTier> withTiers = null, IReadOnlyCollection<Player> withPlayers = null, int? currentPlayerIndex = null)
         {
             return new GameState(
                 withTokensAvailable ?? TokensAvailable,
