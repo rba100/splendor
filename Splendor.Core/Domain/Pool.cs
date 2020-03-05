@@ -27,6 +27,13 @@ namespace Splendor.Core
     {
         public Pool(int gold, int white, int blue, int red, int green, int black)
         {
+            if (gold < 0) throw new ArgumentOutOfRangeException();
+            if (white < 0) throw new ArgumentOutOfRangeException();
+            if (blue < 0) throw new ArgumentOutOfRangeException();
+            if (red < 0) throw new ArgumentOutOfRangeException();
+            if (green < 0) throw new ArgumentOutOfRangeException();
+            if (black < 0) throw new ArgumentOutOfRangeException();
+
             Gold = gold;
             White = white;
             Blue = blue;
@@ -71,6 +78,8 @@ namespace Splendor.Core
             }
             set
             {
+                if (value < 0) throw new ArgumentOutOfRangeException();
+
                 switch (index)
                 {
                     case TokenColour.Gold:
