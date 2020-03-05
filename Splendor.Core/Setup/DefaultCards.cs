@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Splendor.Core;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Splendor
@@ -142,13 +143,7 @@ namespace Splendor
 
         private Card CreateFromStats(TokenColour colour, int tier, int points, int black, int white, int red, int blue, int green)
         {
-            var costs = new Dictionary<TokenColour, int>();
-            costs[TokenColour.Black] = black;
-            costs[TokenColour.White] = white;
-            costs[TokenColour.Red] = red;
-            costs[TokenColour.Blue] = blue;
-            costs[TokenColour.Green] = green;
-            costs[TokenColour.Gold] = 0;
+            var costs = new Pool(0, white, blue, red, green, black);
             return new Card(tier, points, costs, colour);
         }
     }

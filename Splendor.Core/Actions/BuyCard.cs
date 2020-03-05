@@ -83,9 +83,9 @@ namespace Splendor.Core.Actions
         {
             Dictionary<TokenColour, int> payment = null;
             Dictionary<TokenColour, int> available = budget.CreateCopy();
-            Dictionary<TokenColour, int> costRemaining = card.Cost.CreateCopy();
+            var costRemaining = card.Cost.CreateCopy();
 
-            foreach (var colour in costRemaining.Keys)
+            foreach (var colour in costRemaining.Colours())
             {
                 if (costRemaining[colour] < 1) continue;
                 if (costRemaining[colour] > available[colour] + available[TokenColour.Gold])
@@ -124,7 +124,7 @@ namespace Splendor.Core.Actions
                 costRemaining[colour] = Math.Max(costRemaining[colour] - player.Bonuses[colour], 0);
             }
 
-            foreach (var colour in costRemaining.Keys)
+            foreach (var colour in costRemaining.Colours())
             {
                 if (costRemaining[colour] < 1) continue;
                 if (costRemaining[colour] > available[colour] + available[TokenColour.Gold])
@@ -163,10 +163,10 @@ namespace Splendor.Core.Actions
 
             foreach (var colour in gameState.CurrentPlayer.Bonuses.Keys)
             {
-                costRemaining[colour] = Math.Min(costRemaining[colour] - gameState.CurrentPlayer.Bonuses[colour], 0);
+                costRemaining[colour] = Math.Max(0, costRemaining[colour] - gameState.CurrentPlayer.Bonuses[colour]);
             }
 
-            foreach (var colour in costRemaining.Keys)
+            foreach (var colour in costRemaining.Colours())
             {
                 if (costRemaining[colour] < 1) continue;
                 if (costRemaining[colour] > available[colour] + available[TokenColour.Gold])

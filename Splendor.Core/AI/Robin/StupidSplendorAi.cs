@@ -114,7 +114,7 @@ namespace Splendor.Core.AI
                 if (cost == null) continue;
                 var deficit = Utility.CreateEmptyTokenPool();
                 int scarcity = 0;
-                foreach(var colour in cost.Keys)
+                foreach(var colour in cost.Colours())
                 {
                     deficit[colour] = Math.Max(0, cost[colour] - me.Budget[colour]);
                     scarcity += Math.Max(0, deficit[colour] - state.TokensAvailable[colour]);

@@ -236,13 +236,14 @@ namespace Splendor.ConsoleRunner
             var tierMarker = new string('·', card.Tier);
             Console.Write($"{card.VictoryPoints}pt {card.BonusGiven}{tierMarker}{padding}");
             bool first = true;
-            foreach(var row in card.Cost.Where(c => c.Value > 0))
+            foreach(var colour in card.Cost.Colours())
             {
+                var value = card.Cost[colour];
                 if (!first) Console.Write(", ");
                 first = false;
-                var canAfford = budget[row.Key] >= row.Value;
-                var colour = canAfford ? ConsoleColor.White : ConsoleColor.Gray;
-                Write($"{row.Value} {row.Key}", colour);
+                var canAfford = budget[colour] >= value;
+                var displayCol = canAfford ? ConsoleColor.White : ConsoleColor.Gray;
+                Write($"{value} {colour}", displayCol);
             }
             Console.WriteLine();
         }

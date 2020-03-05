@@ -6,10 +6,10 @@ namespace Splendor.Core
     public interface IPool
     {
         int this[TokenColour index] { get; }
-        Pool Clone();
+        Pool CreateCopy();
         Pool DeficitFor(IPool other);
         Pool MergeWith(IPool other);
-        IEnumerable<TokenColour> ColoursInPool();
+        IEnumerable<TokenColour> Colours();
         int Sum { get; }
         bool IsZero { get; }
         int Gold { get; }
@@ -92,7 +92,7 @@ namespace Splendor.Core
             }
         }
 
-        public Pool Clone()
+        public Pool CreateCopy()
         {
             return new Pool(Gold, White, Blue, Red, Green, Black);
         }
@@ -126,7 +126,7 @@ namespace Splendor.Core
                 black);
         }
 
-        public IEnumerable<TokenColour> ColoursInPool()
+        public IEnumerable<TokenColour> Colours()
         {
             if (Gold > 0) yield return TokenColour.Gold;
             if (White > 0) yield return TokenColour.White;

@@ -1,4 +1,5 @@
 ﻿
+using Splendor.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ namespace Splendor
 {
     public class Card
     {
-        internal Card(int tier, int victoryPoints, IReadOnlyDictionary<TokenColour, int> cost, TokenColour givesDiscount)
+        internal Card(int tier, int victoryPoints, IPool cost, TokenColour givesDiscount)
         {
             Tier = tier;
             VictoryPoints = victoryPoints;
@@ -18,13 +19,13 @@ namespace Splendor
         public override string ToString()
         {
             var tierMarker = new string('·', Tier);
-            var costs = Cost.Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
+            var costs = Cost.Colours().Select(col => $"{Cost[col]} {col}").ToList();
             return $"{VictoryPoints}pt {BonusGiven}{tierMarker} {string.Join(",", costs)}";
         }
 
         public int Tier { get; private set; }
         public int VictoryPoints { get; private set; }
-        public IReadOnlyDictionary<TokenColour, int> Cost { get; private set; }
+        public IPool Cost { get; private set; }
         public TokenColour BonusGiven { get; private set; }
     }
 }
