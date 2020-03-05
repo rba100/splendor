@@ -45,19 +45,39 @@ namespace Splendor.Core
             return dictionary.ToDictionary(d => d.Key, d => d.Value);
         }
 
-        public static Dictionary<T, int> MergeWith<T>(this IReadOnlyDictionary<T, int> dictionary, IReadOnlyDictionary<T, int> other)
+        public static Dictionary<TokenColour, int> MergeWith(this IReadOnlyDictionary<TokenColour, int> dictionary, IReadOnlyDictionary<TokenColour, int> other)
         {
-            var newDict = dictionary.Keys.Union(other.Keys).ToDictionary(col => col, col => 0);
-            foreach (var kvp in dictionary) newDict[kvp.Key] += kvp.Value;
-            foreach (var kvp in other) newDict[kvp.Key] += kvp.Value;
-            return newDict;
+            //var newDict = dictionary.Keys.Union(other.Keys).ToDictionary(col => col, col => 0);
+            //foreach (var kvp in dictionary) newDict[kvp.Key] += kvp.Value;
+            //foreach (var kvp in other) newDict[kvp.Key] += kvp.Value;
+            //return newDict;
+
+            return new Dictionary<TokenColour, int>
+            {
+                { TokenColour.Gold, dictionary[TokenColour.Gold] + other[TokenColour.Gold] },
+                { TokenColour.White, dictionary[TokenColour.White] + other[TokenColour.White] },
+                { TokenColour.Red, dictionary[TokenColour.Red] + other[TokenColour.Red] },
+                { TokenColour.Blue, dictionary[TokenColour.Blue] + other[TokenColour.Blue] },
+                { TokenColour.Green, dictionary[TokenColour.Green] + other[TokenColour.Green] },
+                { TokenColour.Black, dictionary[TokenColour.Black] + other[TokenColour.Black] }
+            };
         }
 
         public static Dictionary<TokenColour, int> GetDeficitFor(this IReadOnlyDictionary<TokenColour, int> dictionary, IReadOnlyDictionary<TokenColour, int> other)
         {
-            var newDict = dictionary.Keys.Union(other.Keys).ToDictionary(col => col, col => 0);
-            foreach (var kvp in dictionary) newDict[kvp.Key] = Math.Max(0, other[kvp.Key] - dictionary[kvp.Key]);
-            return newDict;
+            return new Dictionary<TokenColour, int>
+            {
+                { TokenColour.Gold,  Math.Max(0, other[TokenColour.Gold]  - dictionary[TokenColour.Gold] ) },
+                { TokenColour.White, Math.Max(0, other[TokenColour.White] - dictionary[TokenColour.White]) },
+                { TokenColour.Red,   Math.Max(0, other[TokenColour.Red]   - dictionary[TokenColour.Red]  ) },
+                { TokenColour.Blue,  Math.Max(0, other[TokenColour.Blue]  - dictionary[TokenColour.Blue] ) },
+                { TokenColour.Green, Math.Max(0, other[TokenColour.Green] - dictionary[TokenColour.Green]) },
+                { TokenColour.Black, Math.Max(0, other[TokenColour.Black] - dictionary[TokenColour.Black]) }
+            };
+
+            //var newDict = dictionary.Keys.Union(other.Keys).ToDictionary(col => col, col => 0);
+            //foreach (var kvp in dictionary) newDict[kvp.Key] = Math.Max(0, other[kvp.Key] - dictionary[kvp.Key]);
+            //return newDict;
         }
 
         public static int SumValues(this IReadOnlyDictionary<TokenColour, int> dictionary)
