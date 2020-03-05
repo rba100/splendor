@@ -11,9 +11,9 @@ namespace Splendor.ConsoleRunner
     {
         static void Main(string[] args)
         {
-            Interactive();
+            //Interactive();
             //Run1();
-            //Run(numberOfGames: 2000, useParallelism: true);
+            Run(numberOfGames: 2000, useParallelism: true);
         }
 
         static void Interactive()
@@ -27,9 +27,9 @@ namespace Splendor.ConsoleRunner
         {
             var aiPlayers = new ISpendorAi[]
             {
-                new NobleButStupidSplendorAi("Noble"),
+                new StupidSplendorAi("Stupid1"),
                 new ObservantStupidSplendorAi("Observant"),
-                new StupidSplendorAi("Stupid"),
+                new StupidSplendorAi("Stupid2"),
             };
 
             var runner = new AiGameRunner(aiPlayers, Console.WriteLine);
@@ -47,7 +47,7 @@ namespace Splendor.ConsoleRunner
             {
                 { new StupidSplendorAi("Stupid"), 0},
                 { new ObservantStupidSplendorAi("Observant"), 0},
-                { new NobleButStupidSplendorAi("Noble"), 0},
+                { new StupidSplendorAi("Noble"), 0},
             };
             var ais = scoreBoard.Select(p => p.Key).ToArray();
             var range = Enumerable.Range(0, numberOfGames);
