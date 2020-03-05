@@ -40,12 +40,12 @@ namespace Splendor.Core.AI
             foreach (var player in _game.State.Players)
             {
                 var ai = _players.Single(p => p.Name == player.Name);
-                var score = player.VictoryPoints();
+                var score = player.VictoryPoints;
                 var s = score == 1 ? "" : "s";
                 var nobles = player.Nobles.Count();
                 var ns = nobles == 1 ? "" : "s";
                 var nobleNames = nobles > 0 ? ": " + string.Join(", ", player.Nobles.Select(n => n.Name)) : "";
-                var bonuses = string.Join(", ", player.GetDiscount().Where(kvp => kvp.Key != TokenColour.Gold)
+                var bonuses = string.Join(", ", player.Bonuses.Where(kvp => kvp.Key != TokenColour.Gold)
                                                                     .Select(kvp=> $"{kvp.Value} {kvp.Key}"));
                 m_Log($"{ai.Name} — {score} point{s} ({nobles} noble{ns}{nobleNames}) (Bonuses {bonuses})");
                 results.Add(ai, score);

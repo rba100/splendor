@@ -108,7 +108,7 @@ namespace Splendor.Core.AI
 
         private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player me, IEnumerable<Card> cards, GameState state)
         {
-            var budget = me.Purse.CreateCopy().MergeWith(me.GetDiscount());
+            var budget = me.Purse.CreateCopy().MergeWith(me.Bonuses);
             foreach (var card in cards)
             {
                 var cost = card.Cost;

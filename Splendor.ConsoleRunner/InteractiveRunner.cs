@@ -55,7 +55,7 @@ namespace Splendor.ConsoleRunner
 
                 var updatedTurnPlayer = game.State.Players.Single(p => p.Name == turnPlayer.Name);
 
-                Console.WriteLine($"{updatedTurnPlayer.Name} {updatedTurnPlayer.VictoryPoints()}pts, {action}");
+                Console.WriteLine($"{updatedTurnPlayer.Name} {updatedTurnPlayer.VictoryPoints}pts, {action}");
             }
             Console.WriteLine("****************************************");
             Console.WriteLine(game.TopPlayer.Name + " wins!");
@@ -64,7 +64,7 @@ namespace Splendor.ConsoleRunner
 
         private void PrintState(IGame game)
         {
-            var budget = game.State.CurrentPlayer.GetDiscount().MergeWith(game.State.CurrentPlayer.Purse);
+            var budget = game.State.CurrentPlayer.Bonuses.MergeWith(game.State.CurrentPlayer.Purse);
             Console.Write("Nobles: ");
             Console.WriteLine(string.Join(",", game.State.Nobles.Select(n => n.Name).ToArray()));
             foreach(var tier in game.State.Tiers.OrderByDescending(t => t.Tier))
@@ -88,8 +88,8 @@ namespace Splendor.ConsoleRunner
             var purseValues = game.State.CurrentPlayer.Purse.Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
             Console.WriteLine($"Purse ({game.State.CurrentPlayer.Purse.SumValues()}): " + string.Join(", ", purseValues));
 
-            Console.Write("Bonuses: "); PrintTokenPoolShortWithColours(game.State.CurrentPlayer.GetDiscount()); Console.WriteLine();
-            var spendingPower = game.State.CurrentPlayer.Purse.MergeWith(game.State.CurrentPlayer.GetDiscount());
+            Console.Write("Bonuses: "); PrintTokenPoolShortWithColours(game.State.CurrentPlayer.Bonuses); Console.WriteLine();
+            var spendingPower = game.State.CurrentPlayer.Purse.MergeWith(game.State.CurrentPlayer.Bonuses);
             Console.Write("Can afford: "); PrintTokenPoolShortWithColoursAsNumers(spendingPower); Console.WriteLine();
         }
 

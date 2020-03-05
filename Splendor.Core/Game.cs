@@ -38,7 +38,7 @@ namespace Splendor.Core
             // Identify end game
             var endOfRound = State.Players.Last().Name == State.CurrentPlayer.Name;
             if (endOfRound) RoundsCompleted++;
-            IsGameFinished = endOfRound && State.Players.Any(p => p.VictoryPoints() >= c_PointsForWin);
+            IsGameFinished = endOfRound && State.Players.Any(p => p.VictoryPoints >= c_PointsForWin);
 
             // Increment player
             State = State.CloneWithIncrementedCurrentPlayer();
@@ -48,7 +48,7 @@ namespace Splendor.Core
         {
             get
             {
-                return State.Players.OrderByDescending(p => p.VictoryPoints())
+                return State.Players.OrderByDescending(p => p.VictoryPoints)
                                     .ThenByDescending(p => p.CardsInPlay.Count).First();
             }
         }
@@ -59,7 +59,7 @@ namespace Splendor.Core
         /// </summary>
         private void AssignNobles()
         {
-            var currentPlayerBonuses = State.CurrentPlayer.GetDiscount();
+            var currentPlayerBonuses = State.CurrentPlayer.Bonuses;
             if (currentPlayerBonuses.SumValues() < 8) return;
 
             var nextNobles = new List<Noble>(State.Nobles);

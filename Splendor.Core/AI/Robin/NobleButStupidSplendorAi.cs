@@ -130,7 +130,7 @@ namespace Splendor.Core.AI
 
         private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player me, IEnumerable<Card> cards, GameState state, TokenColour[] favouriteColours)
         {
-            Dictionary<TokenColour,int> budget = me.Purse.MergeWith(me.GetDiscount());
+            Dictionary<TokenColour,int> budget = me.Purse.MergeWith(me.Bonuses);
             foreach (var card in cards)
             {
                 var cost = card.Cost;

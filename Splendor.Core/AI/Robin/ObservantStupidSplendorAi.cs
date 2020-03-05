@@ -24,9 +24,8 @@ namespace Splendor.Core.AI
             /* PRECALCULATIONS */
 
             var me = gameState.CurrentPlayer;
-            var myScore = me.VictoryPoints();
+            var myScore = me.VictoryPoints;
             var otherPlayers = gameState.Players.Where(p => p != me).ToArray();
-            var myBudget = me.GetDiscount().MergeWith(me.Purse);
 
             bool CanBuy(Card card) => BuyCard.CanAffordCard(me, card);
 
@@ -41,7 +40,7 @@ namespace Splendor.Core.AI
 
             var cardsICanBuy = faceUpAndMyReserved.Where(CanBuy);
 
-            var myOrderedCardStudy = AnalyseCards(myBudget, faceUpAndMyReserved, gameState, coloursForNoble)
+            var myOrderedCardStudy = AnalyseCards(me.Budget, faceUpAndMyReserved, gameState, coloursForNoble)
                     .OrderBy(s => s.Repulsion)
                     .ThenByDescending(s => coloursForNoble.Contains(s.Card.BonusGiven)).ToArray(); // Costs us nothing
 
@@ -52,7 +51,7 @@ namespace Splendor.Core.AI
             {
                 var targetDiscount = Utility.CreateEmptyTokenPool();
                 targetDiscount[myTargetCard.Card.BonusGiven] = 1;
-                var nextBudget = myBudget.MergeWith(targetDiscount);
+                var nextBudget = me.Budget.MergeWith(targetDiscount);
                 myNextTargetCard = AnalyseCards(nextBudget, faceUpAndMyReserved.Except(new[] { myTargetCard.Card }).ToArray(), gameState, coloursForNoble)
                     .OrderBy(s => s.Repulsion)
                     .ThenByDescending(s => coloursForNoble.Contains(s.Card.BonusGiven)).ToArray()
@@ -64,8 +63,8 @@ namespace Splendor.Core.AI
             // Check to see if a player can win (including me)
             if (_options.IsTheiving) foreach (var player in gameState.Players.OrderByDescending(p => p == me))
                 {
-                    var score = player.VictoryPoints();
-                    var otherPlayerDiscount = player.GetDiscount();
+                    var score = player.VictoryPoints;
+                    var otherPlayerDiscount = player.Bonuses;
 
                     var nobleDangerMap = new List<TokenColour>();
                     foreach (var noble in gameState.Nobles)
@@ -213,7 +212,7 @@ namespace Splendor.Core.AI
         private IEnumerable<CardFeasibilityStudy> AnalyseCards(TokenPool budget, Card[] cards, GameState state, TokenColour[] coloursForNoble)
         {
             var coloursNeeded = ColoursByUsefulness(budget, cards, state.CurrentPlayer);
-            var coloursWithoutFourOf = state.CurrentPlayer.GetDiscount()
+            var coloursWithoutFourOf = state.CurrentPlayer.Bonuses
                                                           .Where(kvp=>kvp.Value < 4)
                                                           .Select(kvp=>kvp.Key).ToArray();
 
@@ -248,7 +247,7 @@ namespace Splendor.Core.AI
             int[] tiersToExamine = new[] { 1, 2, 3 };
             if (_options.PhasesGame)
             {
-                var lateGame = player.VictoryPoints() > 5;
+                var lateGame = player.VictoryPoints > 5;
                 tiersToExamine = lateGame ? new[] { 2, 3 } : new[] { 1, 2 };
             }
 

@@ -81,9 +81,9 @@ namespace Splendor.Core.Actions
 
         public static IReadOnlyDictionary<TokenColour, int> CreateDefaultPaymentOrNull(IReadOnlyDictionary<TokenColour, int> budget, Card card)
         {
-            var payment = Utility.CreateEmptyTokenPool();
-            var available = budget.CreateCopy();
-            var costRemaining = card.Cost.CreateCopy();
+            Dictionary<TokenColour, int> payment = null;
+            Dictionary<TokenColour, int> available = budget.CreateCopy();
+            Dictionary<TokenColour, int> costRemaining = card.Cost.CreateCopy();
 
             foreach (var colour in costRemaining.Keys)
             {
@@ -92,6 +92,8 @@ namespace Splendor.Core.Actions
                 {
                     return null;
                 }
+
+                payment = payment ?? Utility.CreateEmptyTokenPool();
 
                 if (costRemaining[colour] < available[colour])
                 {
@@ -114,14 +116,12 @@ namespace Splendor.Core.Actions
         public static IReadOnlyDictionary<TokenColour, int> CreateDefaultPaymentOrNull(Player player, Card card)
         {
             var payment = Utility.CreateEmptyTokenPool();
-
             var available = player.Purse.CreateCopy();
-            var discount = player.GetDiscount();
             var costRemaining = card.Cost.CreateCopy();
 
-            foreach (var colour in discount.Keys)
+            foreach (var colour in player.Bonuses.Keys)
             {
-                costRemaining[colour] = Math.Max(costRemaining[colour] - discount[colour], 0);
+                costRemaining[colour] = Math.Max(costRemaining[colour] - player.Bonuses[colour], 0);
             }
 
             foreach (var colour in costRemaining.Keys)
@@ -160,11 +160,10 @@ namespace Splendor.Core.Actions
         {
             var available = gameState.CurrentPlayer.Purse.CreateCopy();
             var costRemaining = Card.Cost.CreateCopy();
-            var discount = gameState.CurrentPlayer.GetDiscount();
 
-            foreach (var colour in discount.Keys)
+            foreach (var colour in gameState.CurrentPlayer.Bonuses.Keys)
             {
-                costRemaining[colour] = Math.Min(costRemaining[colour] - discount[colour], 0);
+                costRemaining[colour] = Math.Min(costRemaining[colour] - gameState.CurrentPlayer.Bonuses[colour], 0);
             }
 
             foreach (var colour in costRemaining.Keys)

@@ -18,18 +18,27 @@ namespace Splendor
             Nobles = new List<Noble>();
             ReservedCards = new List<Card>();
             CardsInPlay = new List<Card>();
+
+            Bonuses = GetDiscount();
+            Budget = Bonuses.MergeWith(Purse);
+            VictoryPoints = GetVictoryPoints();
         }
 
         private Player(string name,
                        IReadOnlyDictionary<TokenColour, int> purse,
                        IReadOnlyCollection<Card> reservedCards, 
                        IReadOnlyCollection<Card> cardsInPlay,
-                       IReadOnlyCollection<Noble> nobles) : this(name)
+                       IReadOnlyCollection<Noble> nobles)
         {
+            Name = name;
             Purse = purse ?? throw new ArgumentNullException(nameof(purse));
             ReservedCards = reservedCards ?? throw new ArgumentNullException(nameof(reservedCards));
             CardsInPlay = cardsInPlay ?? throw new ArgumentNullException(nameof(cardsInPlay));
             Nobles = nobles ?? throw new ArgumentNullException(nameof(nobles));
+
+            Bonuses = GetDiscount();
+            Budget = Bonuses.MergeWith(Purse);
+            VictoryPoints = GetVictoryPoints();
         }
 
         public Player Clone(IReadOnlyDictionary<TokenColour, int> withPurse = null,
@@ -65,15 +74,18 @@ namespace Splendor
         public IReadOnlyCollection<Card> ReservedCards { get; private set; }
         public IReadOnlyCollection<Card> CardsInPlay { get; private set; }
         public IReadOnlyCollection<Noble> Nobles { get; private set; }
+        public IReadOnlyDictionary<TokenColour, int> Budget { get; private set; }
+        public IReadOnlyDictionary<TokenColour, int> Bonuses { get; private set; }
+        public int VictoryPoints { get; private set; }
 
-        public IReadOnlyDictionary<TokenColour, int> GetDiscount()
+        private IReadOnlyDictionary<TokenColour, int> GetDiscount()
         {
             return Enum.GetValues(typeof(TokenColour))
                        .OfType<TokenColour>()
                        .ToDictionary(col => col, col => CardsInPlay.Count(c => c.BonusGiven == col));
         }
 
-        public int VictoryPoints()
+        private int GetVictoryPoints()
         {
             return CardsInPlay
                 .Select(n => n.VictoryPoints)
