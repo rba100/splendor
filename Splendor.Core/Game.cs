@@ -66,7 +66,7 @@ namespace Splendor.Core
             foreach (var noble in State.Nobles)
             {
                 bool ruledOut = false;
-                foreach (var colour in noble.Cost.Keys)
+                foreach (var colour in noble.Cost.Colours())
                 {
                     if (!currentPlayerBonuses.ContainsKey(colour) || noble.Cost[colour] > currentPlayerBonuses[colour])
                     {

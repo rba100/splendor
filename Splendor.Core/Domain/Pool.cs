@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Splendor.Core
+namespace Splendor
 {
     public interface IPool
     {

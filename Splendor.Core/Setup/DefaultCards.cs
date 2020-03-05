@@ -130,21 +130,14 @@ namespace Splendor
 
         public Noble CreateFromStats(int victoryPoints, int black, int white, int red, int blue, int green)
         {
-            var dict = new Dictionary<TokenColour, int>();
-            dict[TokenColour.Black] = black;
-            dict[TokenColour.White] = white;
-            dict[TokenColour.Red] = red;
-            dict[TokenColour.Blue] = blue;
-            dict[TokenColour.Green] = green;
-            dict[TokenColour.Gold] = 0;
-            return new Noble(victoryPoints, dict);
+            var cost = new Pool(0, white, blue, red, green, black);
+            return new Noble(victoryPoints, cost);
         }
-
 
         private Card CreateFromStats(TokenColour colour, int tier, int points, int black, int white, int red, int blue, int green)
         {
-            var costs = new Pool(0, white, blue, red, green, black);
-            return new Card(tier, points, costs, colour);
+            var cost = new Pool(0, white, blue, red, green, black);
+            return new Card(tier, points, cost, colour);
         }
     }
 }

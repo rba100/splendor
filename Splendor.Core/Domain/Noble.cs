@@ -7,22 +7,21 @@ namespace Splendor
 {
     public class Noble
     {
-        internal Noble(int victoryPoints, IReadOnlyDictionary<TokenColour, int> cost, string name = null)
+        internal Noble(int victoryPoints, IPool cost, string name = null)
         {
             Cost = cost ?? throw new ArgumentNullException(nameof(cost));
             VictoryPoints = victoryPoints;
             Name = name ?? AutoName();
         }
 
-        public IReadOnlyDictionary<TokenColour, int> Cost { get; private set; }
+        public IPool Cost { get; private set; }
         public int VictoryPoints { get; private set; }
 
         public string Name { get; private set; }
 
         private string AutoName()
         {
-            var colours = Cost.Where(kvp => kvp.Value > 0).Select(kvp => kvp.Key);
-            return string.Join("", colours.Select(FromCoinColour));
+            return string.Join("", Cost.Colours().Select(FromCoinColour));
         }
 
         private string FromCoinColour(TokenColour col)

@@ -206,7 +206,7 @@ namespace Splendor.Core.AI
                     cheapestNoble = noble;
                 }
             }
-            return cheapestNoble?.Cost.NonZeroColours() ?? new TokenColour[0];
+            return cheapestNoble?.Cost.Colours().ToArray() ?? new TokenColour[0];
         }
 
         private IEnumerable<CardFeasibilityStudy> AnalyseCards(TokenPool budget, Card[] cards, GameState state, TokenColour[] coloursForNoble)
