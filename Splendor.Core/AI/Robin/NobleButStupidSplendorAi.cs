@@ -130,7 +130,6 @@ namespace Splendor.Core.AI
 
         private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player me, IEnumerable<Card> cards, GameState state, TokenColour[] favouriteColours)
         {
-            Dictionary<TokenColour,int> budget = me.Purse.MergeWith(me.Bonuses);
             foreach (var card in cards)
             {
                 var cost = card.Cost;
@@ -139,7 +138,7 @@ namespace Splendor.Core.AI
                 int scarcity = 0;
                 foreach (var colour in cost.Keys)
                 {
-                    deficit[colour] = Math.Max(0, cost[colour] - budget[colour]);
+                    deficit[colour] = Math.Max(0, cost[colour] - me.Budget[colour]);
                     scarcity += Math.Max(0, deficit[colour] - state.TokensAvailable[colour]);
                 }
                 var repulsion = deficit.Values.Sum() + scarcity;

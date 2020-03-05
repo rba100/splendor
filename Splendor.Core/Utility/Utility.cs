@@ -29,9 +29,15 @@ namespace Splendor.Core
 
         public static Dictionary<TokenColour,int> CreateEmptyTokenPool()
         {
-            return Enum.GetValues(typeof(TokenColour))
-                       .OfType<TokenColour>()
-                       .ToDictionary(col => col, col => 0);
+            return new Dictionary<TokenColour, int>
+            {
+                { TokenColour.Gold, 0 },
+                { TokenColour.White, 0 },
+                { TokenColour.Red, 0 },
+                { TokenColour.Blue, 0 },
+                { TokenColour.Green, 0 },
+                { TokenColour.Black, 0 }
+            };
         }
 
         public static Dictionary<T, T2> CreateCopy<T, T2>(this IReadOnlyDictionary<T, T2> dictionary)

@@ -64,7 +64,7 @@ namespace Splendor.ConsoleRunner
 
         private void PrintState(IGame game)
         {
-            var budget = game.State.CurrentPlayer.Bonuses.MergeWith(game.State.CurrentPlayer.Purse);
+            var budget = game.State.CurrentPlayer.Budget;
             Console.Write("Nobles: ");
             Console.WriteLine(string.Join(",", game.State.Nobles.Select(n => n.Name).ToArray()));
             foreach(var tier in game.State.Tiers.OrderByDescending(t => t.Tier))
@@ -87,10 +87,8 @@ namespace Splendor.ConsoleRunner
             Console.Write("Bank: "); PrintTokenPoolShortWithColours(game.State.TokensAvailable); Console.WriteLine();
             var purseValues = game.State.CurrentPlayer.Purse.Where(c => c.Value > 0).Select(kvp => $"{kvp.Value} {kvp.Key}").ToList();
             Console.WriteLine($"Purse ({game.State.CurrentPlayer.Purse.SumValues()}): " + string.Join(", ", purseValues));
-
             Console.Write("Bonuses: "); PrintTokenPoolShortWithColours(game.State.CurrentPlayer.Bonuses); Console.WriteLine();
-            var spendingPower = game.State.CurrentPlayer.Purse.MergeWith(game.State.CurrentPlayer.Bonuses);
-            Console.Write("Can afford: "); PrintTokenPoolShortWithColoursAsNumers(spendingPower); Console.WriteLine();
+            Console.Write("Can afford: "); PrintTokenPoolShortWithColoursAsNumers(game.State.CurrentPlayer.Budget); Console.WriteLine();
         }
 
         private void PrintTokenPoolShortWithColours(IReadOnlyDictionary<TokenColour, int> tokenPool)
