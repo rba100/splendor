@@ -9,7 +9,13 @@ namespace Splendor
         Pool CreateCopy();
         Pool DeficitFor(IPool other);
         Pool MergeWith(IPool other);
-        IEnumerable<TokenColour> Colours();
+        IPool WithoutGold();
+
+        /// <summary>
+        /// Returns the colours with non-zero values.
+        /// </summary>
+        /// <returns></returns>
+        IEnumerable<TokenColour> Colours(bool includeGold = true);
         int Sum { get; }
         bool IsZero { get; }
         int Gold { get; }
@@ -126,14 +132,19 @@ namespace Splendor
                 black);
         }
 
-        public IEnumerable<TokenColour> Colours()
+        public IEnumerable<TokenColour> Colours(bool includeGold = true)
         {
-            if (Gold > 0) yield return TokenColour.Gold;
+            if (includeGold && Gold > 0) yield return TokenColour.Gold;
             if (White > 0) yield return TokenColour.White;
             if (Blue > 0) yield return TokenColour.Blue;
             if (Red > 0) yield return TokenColour.Red;
             if (Green > 0) yield return TokenColour.Green;
             if (Black > 0) yield return TokenColour.Black;
+        }
+
+        public IPool WithoutGold()
+        {
+            return new Pool(0, White, Blue, Red, Green, Black);
         }
 
         public int Sum => Gold + White + Blue + Red + Green + Black;

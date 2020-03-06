@@ -7,8 +7,6 @@ namespace Splendor.Core
 {
     public static class Utility
     {
-        private static readonly Random s_Rng = new Random();
-
         /// <summary>
         /// Mutates a list, reordering the contents at random.
         /// </summary>
@@ -16,11 +14,12 @@ namespace Splendor.Core
         /// <param name="list"></param>
         public static void Shuffle<T>(this IList<T> list)
         {
+            var r = new Random();
             int n = list.Count;
             while (n > 1)
             {
                 n--;
-                int k = s_Rng.Next(n + 1);
+                int k = r.Next(n + 1);
                 T value = list[k];
                 list[k] = list[n];
                 list[n] = value;

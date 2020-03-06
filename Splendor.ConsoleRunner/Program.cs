@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+using Splendor.Core;
 using Splendor.Core.AI;
 
 namespace Splendor.ConsoleRunner
@@ -13,7 +14,7 @@ namespace Splendor.ConsoleRunner
         {
             //Interactive();
             //Run1();
-            Run(numberOfGames: 2000, useParallelism: true);
+            Run(numberOfGames: 20000, useParallelism: true);
         }
 
         static void Interactive()
@@ -25,11 +26,15 @@ namespace Splendor.ConsoleRunner
 
         static void Run1()
         {
+            var aiOptions = new AiOptions
+            {
+                CanTakeTwo = true
+            };
             var aiPlayers = new ISpendorAi[]
             {
-                new StupidSplendorAi("Stupid1"),
-                new ObservantStupidSplendorAi("Observant"),
-                new StupidSplendorAi("Stupid2"),
+                new ObservantStupidSplendorAi("Stupid1"),
+                new ObservantStupidSplendorAi("Observant",aiOptions),
+                new ObservantStupidSplendorAi("Stupid2"),
             };
 
             var runner = new AiGameRunner(aiPlayers, Console.WriteLine);
@@ -43,18 +48,25 @@ namespace Splendor.ConsoleRunner
         {
             int tenPercent = numberOfGames / 10;
 
+            var aiOptions = new AiOptions
+            {
+                PhasesGame = true
+            };
+
             var scoreBoard = new Dictionary<ISpendorAi, int>
             {
-                { new StupidSplendorAi("Stupid"), 0},
-                { new ObservantStupidSplendorAi("Observant"), 0},
-                { new StupidSplendorAi("Noble"), 0},
+                { new ObservantStupidSplendorAi("Vanilla"), 0},
+                { new ObservantStupidSplendorAi("Test Subject", aiOptions), 0},
+                { new ObservantStupidSplendorAi("Austere"), 0},
             };
-            var ais = scoreBoard.Select(p => p.Key).ToArray();
+            var ais = scoreBoard.Select(r => r.Key).ToArray();
             var range = Enumerable.Range(0, numberOfGames);
 
             Dictionary<ISpendorAi,int> runGame(int iteration) {
                 if (iteration % tenPercent == 0) Console.Write(".");
-                return new AiGameRunner(ais, _ => { }).Run();
+                var a = ais.ToList();
+                a.Shuffle();
+                return new AiGameRunner(a, _ => { }).Run();
             };
 
             var resultsSet = useParallelism

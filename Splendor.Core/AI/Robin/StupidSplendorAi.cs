@@ -64,7 +64,7 @@ namespace Splendor.Core.AI
             }
 
             // Fifth, I top up my coins, favouring colours needed by the most accessible card.
-            var coloursAvailable = gameState.TokensAvailable.Colours().Where(col => col != TokenColour.Gold).ToList();
+            var coloursAvailable = gameState.TokensAvailable.Colours(includeGold: false).ToList();
             var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Sum, 3), coloursAvailable.Count);           
 
             if (coinsCountICanTake > 0)
@@ -129,7 +129,7 @@ namespace Splendor.Core.AI
             var me = gameState.CurrentPlayer;
             if (me.ReservedCards.Count == 3) return null;
 
-            var colourToGiveUp = me.Purse.Colours().Where(col => col != TokenColour.Gold).FirstOrDefault();
+            var colourToGiveUp = me.Purse.Colours(includeGold: false).FirstOrDefault();
             var firstTier = gameState.Tiers.Single(t => t.Tier == 1);
             if (firstTier.HasFaceDownCardsRemaining)
             {

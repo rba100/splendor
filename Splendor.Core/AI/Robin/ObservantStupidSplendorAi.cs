@@ -44,18 +44,6 @@ namespace Splendor.Core.AI
 
             var myTargetCard = myOrderedCardStudy.FirstOrDefault();
 
-            CardFeasibilityStudy myNextTargetCard = null;
-            if (_options.LooksAhead)
-            {
-                var targetDiscount = new Pool();
-                targetDiscount[myTargetCard.Card.BonusGiven] = 1;
-                var nextBudget = me.Budget.MergeWith(targetDiscount);
-                myNextTargetCard = AnalyseCards(nextBudget, faceUpAndMyReserved.Except(new[] { myTargetCard.Card }).ToArray(), gameState, coloursForNoble)
-                    .OrderBy(s => s.Repulsion)
-                    .ThenByDescending(s => coloursForNoble.Contains(s.Card.BonusGiven)).ToArray()
-                    .FirstOrDefault();
-            }
-
             /* BEHAVIOUR */
 
             // Check to see if a player can win (including me)
@@ -99,8 +87,8 @@ namespace Splendor.Core.AI
                 return new BuyCard(myTargetCard.Card, BuyCard.CreateDefaultPaymentOrNull(me, myTargetCard.Card));
             }
 
-            // If I have 9 or more coins buy any reasonable card I can at all
-            if (me.Purse.Sum > 8)
+            // If I have 9 or more coins, or there aren't many coins left to take, buy any reasonable card I can at all
+            if (me.Purse.Sum > 8 || gameState.TokensAvailable.Colours(includeGold: false).Count() < 3)
             {
                 foreach (var study in myOrderedCardStudy.Where(s => s.Deficit.Sum == 0))
                 {
@@ -110,6 +98,18 @@ namespace Splendor.Core.AI
             }
 
             // Take some coins - but if there are coins to return then favour reserving a card
+            CardFeasibilityStudy myNextTargetCard = null;
+            if (_options.LooksAhead)
+            {
+                var targetDiscount = new Pool();
+                targetDiscount[myTargetCard.Card.BonusGiven] = 1;
+                var nextBudget = me.Budget.MergeWith(targetDiscount);
+                myNextTargetCard = AnalyseCards(nextBudget, faceUpAndMyReserved.Except(new[] { myTargetCard.Card }).ToArray(), gameState, coloursForNoble)
+                    .OrderBy(s => s.Repulsion)
+                    .ThenByDescending(s => coloursForNoble.Contains(s.Card.BonusGiven)).ToArray()
+                    .FirstOrDefault();
+            }
+            
             var takeTokens = GetTakeTokens(gameState, myTargetCard, myNextTargetCard);
             if (takeTokens != null && !takeTokens.TokensToReturn.Colours().Any()) return takeTokens;
 
@@ -133,7 +133,7 @@ namespace Splendor.Core.AI
 
             var me = gameState.CurrentPlayer;
 
-            var coloursAvailable = gameState.TokensAvailable.Colours().Where(col => col != TokenColour.Gold).ToList();
+            var coloursAvailable = gameState.TokensAvailable.Colours(includeGold: false).ToList();
             var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Sum, 3), coloursAvailable.Count);
 
             if (coinsCountICanTake > 0)
@@ -150,6 +150,7 @@ namespace Splendor.Core.AI
                 {
                     coloursAvailable.Shuffle();
                 }
+
                 var transaction = new Pool();
 
                 if (_options.CanTakeTwo
@@ -241,22 +242,19 @@ namespace Splendor.Core.AI
             var colourChart = new Pool();
 
             int[] tiersToExamine = new[] { 1, 2, 3 };
-            if (_options.PhasesGame)
-            {
-                var lateGame = player.VictoryPoints > 5;
-                tiersToExamine = lateGame ? new[] { 2, 3 } : new[] { 1, 2 };
-            }
+            var lateGame = player.CardsInPlay.Count > 10;
+
+            // Double the weighting for colours that give victory point cards
+            // if late game.
+            var victoryMultiplier = _options.PhasesGame && lateGame ? 2 : 1;
 
             foreach (var card in cards.Where(c => tiersToExamine.Contains(c.Tier)))
             {
                 var deficit = budget.DeficitFor(card.Cost);
-                foreach (var colour in deficit.Colours()) colourChart[colour] += 1;
+                foreach (var colour in deficit.Colours()) colourChart[colour] += 1 * (card.VictoryPoints > 0 ? victoryMultiplier : 1);
             }
 
-            return colourChart.Colours()
-                .Where(col => col != TokenColour.Gold)
-                .OrderByDescending(col => colourChart[col])
-                .ToArray();
+            return colourChart.Colours().OrderByDescending(col => colourChart[col]).ToArray();
         }
 
         private ReserveFaceDownCard ChooseRandomCardOrNull(GameState gameState)
@@ -284,9 +282,9 @@ namespace Splendor.Core.AI
     {
         public bool IsTheiving { get; set; } = true;
         public bool LooksAhead { get; set; } = true;
-        public bool AimsAtNobles { get; set; } = false;
         public bool CanTakeTwo { get; set; } = true;
 
+        public bool AimsAtNobles { get; set; } = false;
         public bool PhasesGame { get; set; } = false;
     }
 }
