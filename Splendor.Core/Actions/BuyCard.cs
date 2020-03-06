@@ -43,7 +43,7 @@ namespace Splendor.Core.Actions
             var playerCardsInPlay = new List<Card>(player.CardsInPlay);
             var playerReserved = new List<Card>(player.ReservedCards);
             var playerPurse = player.Purse.CreateCopy();
-            var nextTokensAvailable = gameState.TokensAvailable.CreateCopy();
+            var nextTokensAvailable = gameState.Bank.CreateCopy();
 
             if (isFromHand)
             {

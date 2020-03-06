@@ -37,7 +37,7 @@ namespace Splendor.Core.Actions
             var playerCardsInPlay = new List<Card>(player.CardsInPlay);
             var playerReserved = new List<Card>(player.ReservedCards);
             var playerPurse = player.Purse.CreateCopy();
-            var nextTokensAvailable = gameState.TokensAvailable.CreateCopy();
+            var nextTokensAvailable = gameState.Bank.CreateCopy();
 
             nextTiers.Remove(tier);
             try
@@ -51,7 +51,7 @@ namespace Splendor.Core.Actions
                 throw new RulesViolationException("There are no face down cards remaining in tier " + Tier);
             }
 
-            if (gameState.TokensAvailable[TokenColour.Gold] > 1)
+            if (gameState.Bank[TokenColour.Gold] > 1)
             {
                 if (player.Purse.Sum >= 10)
                 {

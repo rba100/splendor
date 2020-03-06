@@ -85,7 +85,7 @@ namespace Splendor.ConsoleRunner
                 PrintCardLine(card, budget);
             }
 
-            Console.Write("Bank: "); PrintTokenPoolShortWithColours(game.State.TokensAvailable); Console.WriteLine();
+            Console.Write("Bank: "); PrintTokenPoolShortWithColours(game.State.Bank); Console.WriteLine();
             var purseValues = player.Purse.Colours().Select(col => $"{player.Purse[col]} {col}").ToList();
             Console.WriteLine($"Purse ({game.State.CurrentPlayer.Purse.Sum}): " + string.Join(", ", purseValues));
             Console.Write("Bonuses: "); PrintTokenPoolShortWithColours(game.State.CurrentPlayer.Bonuses); Console.WriteLine();

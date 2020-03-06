@@ -38,7 +38,7 @@ namespace Splendor.Core.AI
 
             var cardsICanBuy = faceUpAndMyReserved.Where(CanBuy);
 
-            var myOrderedCardStudy = AnalyseCards(me.Budget, faceUpAndMyReserved, gameState, coloursForNoble)
+            var myOrderedCardStudy = AnalyseCards(me, faceUpAndMyReserved, gameState, coloursForNoble)
                     .OrderBy(s => s.Repulsion)
                     .ThenByDescending(s => coloursForNoble.Contains(s.Card.BonusGiven)).ToArray(); // Costs us nothing
 
@@ -82,15 +82,15 @@ namespace Splendor.Core.AI
             }
 
             // Buy favourite card if possible
-            if (cardsICanBuy.Contains(myTargetCard.Card))
+            if (myTargetCard.DeficitWithGold == 0)
             {
                 return new BuyCard(myTargetCard.Card, BuyCard.CreateDefaultPaymentOrNull(me, myTargetCard.Card));
             }
 
             // If I have 9 or more coins, or there aren't many coins left to take, buy any reasonable card I can at all
-            if (me.Purse.Sum > 8 || gameState.TokensAvailable.Colours(includeGold: false).Count() < 3)
+            if (me.Purse.Sum > 8 || gameState.Bank.Colours(includeGold: false).Count() < 3)
             {
-                foreach (var study in myOrderedCardStudy.Where(s => s.Deficit.Sum == 0))
+                foreach (var study in myOrderedCardStudy.Where(s => s.DeficitWithGold == 0))
                 {
                     var payment = BuyCard.CreateDefaultPaymentOrNull(me, study.Card);
                     return new BuyCard(study.Card, payment);
@@ -103,8 +103,10 @@ namespace Splendor.Core.AI
             {
                 var targetDiscount = new Pool();
                 targetDiscount[myTargetCard.Card.BonusGiven] = 1;
-                var nextBudget = me.Budget.MergeWith(targetDiscount);
-                myNextTargetCard = AnalyseCards(nextBudget, faceUpAndMyReserved.Except(new[] { myTargetCard.Card }).ToArray(), gameState, coloursForNoble)
+                var nextCards = me.CardsInPlay.ToList();
+                nextCards.Add(myTargetCard.Card);
+                var nextMe = me.Clone(withCardsInPlay: nextCards);
+                myNextTargetCard = AnalyseCards(nextMe, faceUpAndMyReserved.Except(new[] { myTargetCard.Card }).ToArray(), gameState, coloursForNoble)
                     .OrderBy(s => s.Repulsion)
                     .ThenByDescending(s => coloursForNoble.Contains(s.Card.BonusGiven)).ToArray()
                     .FirstOrDefault();
@@ -133,7 +135,7 @@ namespace Splendor.Core.AI
 
             var me = gameState.CurrentPlayer;
 
-            var coloursAvailable = gameState.TokensAvailable.Colours(includeGold: false).ToList();
+            var coloursAvailable = gameState.Bank.Colours(includeGold: false).ToList();
             var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Sum, 3), coloursAvailable.Count);
 
             if (coinsCountICanTake > 0)
@@ -159,7 +161,7 @@ namespace Splendor.Core.AI
                     && coinsCountICanTake > 1)
                 {
                     var neededColour = firstChoice.Deficit.Colours().First(col => firstChoice.Deficit[col] >= 2);
-                    if (gameState.TokensAvailable[neededColour] > 3)
+                    if (gameState.Bank[neededColour] > 3)
                     {
                         transaction[neededColour] = 2;
                         return new TakeTokens(transaction);
@@ -207,34 +209,40 @@ namespace Splendor.Core.AI
             return cheapestNoble?.Cost.Colours().ToArray() ?? new TokenColour[0];
         }
 
-        private IEnumerable<CardFeasibilityStudy> AnalyseCards(IPool budget, Card[] cards, GameState state, TokenColour[] coloursForNoble)
+        private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player player, Card[] cards, GameState state, TokenColour[] coloursForNoble)
         {
-            var coloursNeeded = ColoursByUsefulness(budget, cards, state.CurrentPlayer);
-            var bonuses = state.CurrentPlayer.Bonuses;
-            var coloursWithoutFourOf = bonuses.Colours().Where(col => bonuses[col] < 4).ToArray();
-
+            var coloursWithoutFourOf = player.Bonuses.Colours().Where(col => player.Bonuses[col] < 4).ToArray();
+            var bonusDesirability = GetBonusDesirability(player, cards);
             foreach (var card in cards)
             {
-                var cost = card.Cost;
-                if (cost == null) continue;
-                var deficit = new Pool();
-                int scarcity = 0;
-                foreach (var colour in cost.Colours())
-                {
-                    deficit[colour] = Math.Max(0, cost[colour] - budget[colour]);
-                    scarcity += Math.Max(0, deficit[colour] - state.TokensAvailable[colour]);
-                }
-                var repulsion = deficit.Sum + scarcity * 1;
-
-                if (_options.AimsAtNobles 
-                    && coloursWithoutFourOf.Contains(card.BonusGiven) 
-                    && coloursForNoble.Contains(card.BonusGiven)) repulsion -= 1;
-
-                if (coloursNeeded.Contains(card.BonusGiven)) repulsion -= 2;
-                if (card.VictoryPoints > 0) repulsion -= 1;
-
-                yield return new CardFeasibilityStudy { Deficit = deficit, Repulsion = repulsion, Card = card };
+                yield return GetCardStudy(card, state.CurrentPlayer, state.Bank, bonusDesirability);
             }
+        }
+
+        private CardFeasibilityStudy GetCardStudy(Card card, Player player, IPool bank, IPool bonusDesirability = null)
+        {
+            bonusDesirability = bonusDesirability ?? new Pool();
+            var deficit = player.Budget.DeficitFor(card.Cost);
+            var deficitSum = Math.Max(0, deficit.Sum - player.Purse.Gold);
+            var scarcity = bank.DeficitFor(deficit).Sum;
+            var repulsion = 0m
+                + deficitSum 
+                + _options.Biases.FromScarcity(scarcity)
+                - _options.Biases.FromVictoryPoints(card.VictoryPoints)
+                - _options.Biases.FromColourRequirements(bonusDesirability, card.BonusGiven);
+
+            return new CardFeasibilityStudy { Card = card, Deficit = deficit, Repulsion = repulsion, DeficitWithGold = deficitSum };
+        }
+
+        private IPool GetBonusDesirability(Player player, Card[] cards)
+        {
+            var pool = new Pool();
+            foreach(var card in cards.Where(c=>c.VictoryPoints > 1))
+            {
+                var colours = player.Bonuses.DeficitFor(card.Cost).Colours();
+                foreach(var colour in colours) pool[colour]++;
+            }
+            return pool;
         }
 
         private TokenColour[] ColoursByUsefulness(IPool budget, IEnumerable<Card> cards, Player player)
@@ -272,8 +280,9 @@ namespace Splendor.Core.AI
 
         private class CardFeasibilityStudy
         {
-            public int Repulsion { get; set; }
+            public decimal Repulsion { get; set; }
             public IPool Deficit { get; set; }
+            public int DeficitWithGold { get; set; }
             public Card Card { get; set; }
         }
     }
@@ -286,5 +295,14 @@ namespace Splendor.Core.AI
 
         public bool AimsAtNobles { get; set; } = false;
         public bool PhasesGame { get; set; } = false;
+
+        public BiasValues Biases { get; } = new BiasValues();
+    }
+
+    public class BiasValues
+    {
+        public Func<int, decimal> FromVictoryPoints { get; set; } = vp => vp * 0.5m;
+        public Func<int, decimal> FromScarcity { get; set; } = s => s * 10m;
+        public Func<IPool, TokenColour, decimal> FromColourRequirements { get; set; } = (cr,col) => cr[col] * 0.5m;
     }
 }

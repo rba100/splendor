@@ -44,11 +44,11 @@ namespace Splendor.Core.Actions
             nextTiers.Add(nextTier.Clone(withCardTaken: Card));
             var playerReserved = new List<Card>(player.ReservedCards);
             var playerPurse = player.Purse.CreateCopy();
-            var nextTokensAvailable = gameState.TokensAvailable.CreateCopy();
+            var nextTokensAvailable = gameState.Bank.CreateCopy();
 
             playerReserved.Add(Card);
 
-            if (gameState.TokensAvailable[TokenColour.Gold] > 1)
+            if (gameState.Bank[TokenColour.Gold] > 1)
             {
                 if (player.Purse.Sum >= 10)
                 {

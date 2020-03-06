@@ -30,7 +30,7 @@ namespace Splendor.Core.Actions
             // Enforce rules
             Validate(gameState);
 
-            var nextAvailableTokens = gameState.TokensAvailable.CreateCopy();
+            var nextAvailableTokens = gameState.Bank.CreateCopy();
             var nextPlayerTokens = gameState.CurrentPlayer.Purse.CreateCopy();
 
             // Perform transaction
@@ -77,7 +77,7 @@ namespace Splendor.Core.Actions
                 
                 var doubleCoinColour = TokensToTake.Colours().Single();
 
-                if (gameState.TokensAvailable[doubleCoinColour] < 4)
+                if (gameState.Bank[doubleCoinColour] < 4)
                 {
                     throw new RulesViolationException("You can only take two tokens if there are four or more available.");
                 }
@@ -88,7 +88,7 @@ namespace Splendor.Core.Actions
 
             foreach (var colour in TokensToTake.Colours())
             {
-                if (gameState.TokensAvailable[colour] < TokensToTake[colour])
+                if (gameState.Bank[colour] < TokensToTake[colour])
                     throw new RulesViolationException($"There aren't enough {colour} tokens to take.");
             }
 

@@ -14,7 +14,6 @@ namespace Splendor
         /// <summary>
         /// Returns the colours with non-zero values.
         /// </summary>
-        /// <returns></returns>
         IEnumerable<TokenColour> Colours(bool includeGold = true);
         int Sum { get; }
         bool IsZero { get; }
@@ -114,6 +113,9 @@ namespace Splendor
                 Black + other.Black);
         }
 
+        /// <summary>
+        /// Does not take into account gold-as-wildcard.
+        /// </summary>
         public Pool DeficitFor(IPool other)
         {
             var gold = other.Gold - Gold; gold = gold < 0 ? 0 : gold;

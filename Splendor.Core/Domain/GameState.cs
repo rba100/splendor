@@ -9,14 +9,14 @@ namespace Splendor
     {
         public GameState(IPool coinsAvailable, ICollection<Noble> nobles, IReadOnlyCollection<BoardTier> tiers, IReadOnlyCollection<Player> players, int currentPlayerIndex)
         {
-            TokensAvailable = coinsAvailable ?? throw new ArgumentNullException(nameof(coinsAvailable));
+            Bank = coinsAvailable ?? throw new ArgumentNullException(nameof(coinsAvailable));
             Nobles = nobles ?? throw new ArgumentNullException(nameof(nobles));
             Tiers = tiers ?? throw new ArgumentNullException(nameof(tiers));
             Players = players ?? throw new ArgumentNullException(nameof(players));
             _currentPlayerIndex = currentPlayerIndex;
         }
 
-        public IPool TokensAvailable { get; private set; }
+        public IPool Bank { get; private set; }
         public ICollection<Noble> Nobles { get; private set; }
         public IReadOnlyCollection<BoardTier> Tiers { get; private set; }
         public IReadOnlyCollection<Player> Players { get; private set; }
@@ -27,7 +27,7 @@ namespace Splendor
         public GameState Clone(IPool withTokensAvailable = null, ICollection<Noble> withNobles = null, IReadOnlyCollection<BoardTier> withTiers = null, IReadOnlyCollection<Player> withPlayers = null, int? currentPlayerIndex = null)
         {
             return new GameState(
-                withTokensAvailable ?? TokensAvailable,
+                withTokensAvailable ?? Bank,
                 withNobles ?? Nobles,
                 withTiers ?? Tiers,
                 withPlayers ?? Players,
@@ -37,7 +37,7 @@ namespace Splendor
         public GameState CloneWithIncrementedCurrentPlayer()
         {
             return new GameState(
-                TokensAvailable,
+                Bank,
                 Nobles,
                 Tiers,
                 Players,

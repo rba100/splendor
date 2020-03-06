@@ -24,12 +24,10 @@ namespace Splendor.ConsoleRunner
             Console.ReadLine();
         }
 
-        static void Run1()
+        static void RunDetailed()
         {
-            var aiOptions = new AiOptions
-            {
-                CanTakeTwo = true
-            };
+            var aiOptions = new AiOptions{};
+            aiOptions.Biases.FromVictoryPoints = vp => vp * 1;
             var aiPlayers = new ISpendorAi[]
             {
                 new ObservantStupidSplendorAi("Stupid1"),
@@ -48,16 +46,15 @@ namespace Splendor.ConsoleRunner
         {
             int tenPercent = numberOfGames / 10;
 
-            var aiOptions = new AiOptions
-            {
-                PhasesGame = true
-            };
+            var aiOptions = new AiOptions { };
+
+            var droneOptions = new AiOptions { };
 
             var scoreBoard = new Dictionary<ISpendorAi, int>
             {
-                { new ObservantStupidSplendorAi("Vanilla"), 0},
                 { new ObservantStupidSplendorAi("Test Subject", aiOptions), 0},
-                { new ObservantStupidSplendorAi("Austere"), 0},
+                { new ObservantStupidSplendorAi("Drone1", droneOptions), 0},
+           //     { new ObservantStupidSplendorAi("Drone2", droneOptions), 0},
             };
             var ais = scoreBoard.Select(r => r.Key).ToArray();
             var range = Enumerable.Range(0, numberOfGames);

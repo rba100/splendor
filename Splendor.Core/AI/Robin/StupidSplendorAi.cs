@@ -64,7 +64,7 @@ namespace Splendor.Core.AI
             }
 
             // Fifth, I top up my coins, favouring colours needed by the most accessible card.
-            var coloursAvailable = gameState.TokensAvailable.Colours(includeGold: false).ToList();
+            var coloursAvailable = gameState.Bank.Colours(includeGold: false).ToList();
             var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Sum, 3), coloursAvailable.Count);           
 
             if (coinsCountICanTake > 0)
@@ -82,7 +82,7 @@ namespace Splendor.Core.AI
                 if (bestCardStudy.Deficit.Colours().Any(col => bestCardStudy.Deficit[col] >= 2) && coinsCountICanTake > 1)
                 {
                     var neededColour = bestCardStudy.Deficit.Colours().First(col => bestCardStudy.Deficit[col] >= 2);
-                    if (gameState.TokensAvailable[neededColour] > 3)
+                    if (gameState.Bank[neededColour] > 3)
                     {
                         transaction[neededColour] = 2;
                         return new TakeTokens(transaction);
@@ -117,7 +117,7 @@ namespace Splendor.Core.AI
                 foreach(var colour in cost.Colours())
                 {
                     deficit[colour] = Math.Max(0, cost[colour] - me.Budget[colour]);
-                    scarcity += Math.Max(0, deficit[colour] - state.TokensAvailable[colour]);
+                    scarcity += Math.Max(0, deficit[colour] - state.Bank[colour]);
                 }
                 var rating = deficit.Sum + scarcity;
                 yield return new CardFeasibilityStudy { Deficit = deficit, DifficultyRating = rating, Card = card };
