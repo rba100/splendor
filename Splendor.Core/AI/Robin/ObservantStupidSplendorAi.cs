@@ -263,8 +263,6 @@ namespace Splendor.Core.AI
         /// Performs a random reserve as a last resort.
         /// </summary>
         public bool RandomReserves { get; set; } = true;
-
-        public bool AimsAtNobles { get; set; } = false;
         public bool PhasesGame { get; set; } = false;        
 
         /// <summary>
