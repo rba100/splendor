@@ -27,8 +27,6 @@ namespace Splendor.Core.AI
 
             bool CanBuy(Card card) => BuyCard.CanAffordCard(me, card);
 
-            var coloursForNoble = GetColoursForCheapestNoble(gameState);
-
             var allFaceUpCards = gameState.Tiers.SelectMany(t => t.ColumnSlots)
                                                 .Select(s => s.Value)
                                                 .Where(card => card != null)
@@ -38,9 +36,8 @@ namespace Splendor.Core.AI
 
             var cardsICanBuy = faceUpAndMyReserved.Where(CanBuy);
 
-            var myOrderedCardStudy = AnalyseCards(me, faceUpAndMyReserved, gameState, coloursForNoble)
-                    .OrderBy(s => s.Repulsion)
-                    .ThenByDescending(s => coloursForNoble.Contains(s.Card.BonusGiven)).ToArray(); // Costs us nothing
+            var myOrderedCardStudy = AnalyseCards(me, faceUpAndMyReserved, gameState)
+                    .OrderBy(s => s.Repulsion);
 
             var myTargetCard = myOrderedCardStudy.FirstOrDefault();
 
@@ -105,9 +102,8 @@ namespace Splendor.Core.AI
                 var nextCards = me.CardsInPlay.ToList();
                 nextCards.Add(myTargetCard.Card);
                 var nextMe = me.Clone(withCardsInPlay: nextCards);
-                myNextTargetCard = AnalyseCards(nextMe, faceUpAndMyReserved.Except(new[] { myTargetCard.Card }).ToArray(), gameState, coloursForNoble)
+                myNextTargetCard = AnalyseCards(nextMe, faceUpAndMyReserved.Except(new[] { myTargetCard.Card }).ToArray(), gameState)
                     .OrderBy(s => s.Repulsion)
-                    .ThenByDescending(s => coloursForNoble.Contains(s.Card.BonusGiven)).ToArray()
                     .FirstOrDefault();
             }
 
@@ -211,17 +207,19 @@ namespace Splendor.Core.AI
             return cheapestNoble?.Cost.Colours().ToArray() ?? new TokenColour[0];
         }
 
-        private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player player, Card[] cards, GameState state, TokenColour[] coloursForNoble)
+        private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player player, Card[] cards, GameState state)
         {
             var coloursWithoutFourOf = player.Bonuses.Colours().Where(col => player.Bonuses[col] < 4).ToArray();
+            var coloursByNobility = state.Nobles.Select(n => player.Bonuses.DeficitFor(n.Cost)).Aggregate(new Pool(), (c, n) => c.MergeWith(n));
             var bonusDesirability = GetBonusDesirability(player, cards);
+
             foreach (var card in cards)
             {
-                yield return GetCardStudy(card, state.CurrentPlayer, state.Bank, bonusDesirability);
+                yield return GetCardStudy(card, state.CurrentPlayer, state.Bank, bonusDesirability, coloursByNobility);
             }
         }
 
-        private CardFeasibilityStudy GetCardStudy(Card card, Player player, IPool bank, IPool bonusDesirability = null)
+        private CardFeasibilityStudy GetCardStudy(Card card, Player player, IPool bank, IPool bonusDesirability = null, Pool coloursByNobility = null)
         {
             bonusDesirability = bonusDesirability ?? new Pool();
             var deficit = player.Budget.DeficitFor(card.Cost);
@@ -231,7 +229,8 @@ namespace Splendor.Core.AI
                 + deficitSum 
                 + _options.Biases.FromScarcity(scarcity)
                 - _options.Biases.FromVictoryPoints(card.VictoryPoints)
-                - _options.Biases.FromColourRequirements(bonusDesirability, card.BonusGiven);
+                - _options.Biases.FromCardBonus(bonusDesirability, card.BonusGiven)
+                - _options.Biases.FromNobleDeficit(coloursByNobility[card.BonusGiven]);
 
             return new CardFeasibilityStudy { Card = card, Deficit = deficit, Repulsion = repulsion, DeficitWithGold = deficitSum };
         }
@@ -247,35 +246,16 @@ namespace Splendor.Core.AI
             return pool;
         }
 
-        private TokenColour[] ColoursByUsefulness(IPool budget, IEnumerable<Card> cards, Player player)
-        {
-            var colourChart = new Pool();
-
-            int[] tiersToExamine = new[] { 1, 2, 3 };
-            var lateGame = player.CardsInPlay.Count > 10;
-
-            // Double the weighting for colours that give victory point cards
-            // if late game.
-            var victoryMultiplier = _options.PhasesGame && lateGame ? 2 : 1;
-
-            foreach (var card in cards.Where(c => tiersToExamine.Contains(c.Tier)))
-            {
-                var deficit = budget.DeficitFor(card.Cost);
-                foreach (var colour in deficit.Colours()) colourChart[colour] += 1 * (card.VictoryPoints > 0 ? victoryMultiplier : 1);
-            }
-
-            return colourChart.Colours().OrderByDescending(col => colourChart[col]).ToArray();
-        }
-
         private ReserveFaceDownCard ChooseRandomCardOrNull(GameState gameState)
         {
             var me = gameState.CurrentPlayer;
             if (me.ReservedCards.Count == 3) return null;
+            int tier = me.VictoryPoints < 5 ? 1 : me.VictoryPoints < 10 ? 2 : 3;
 
-            var firstTier = gameState.Tiers.Single(t => t.Tier == 1);
+            var firstTier = gameState.Tiers.Single(t => t.Tier == tier);
             if (firstTier.HasFaceDownCardsRemaining)
             {
-                return new ReserveFaceDownCard(1);
+                return new ReserveFaceDownCard(tier);
             }
             return null;
         }
@@ -315,6 +295,7 @@ namespace Splendor.Core.AI
     {
         public Func<int, decimal> FromVictoryPoints { get; set; } = vp => vp * 0.5m;
         public Func<int, decimal> FromScarcity { get; set; } = s => s * 10m;
-        public Func<IPool, TokenColour, decimal> FromColourRequirements { get; set; } = (cr,col) => cr[col] * 0.5m;
+        public Func<int, decimal> FromNobleDeficit { get; set; } = d => (d - 2) / 3m;
+        public Func<IPool, TokenColour, decimal> FromCardBonus { get; set; } = (cr,col) => cr[col] * 0.5m;
     }
 }
