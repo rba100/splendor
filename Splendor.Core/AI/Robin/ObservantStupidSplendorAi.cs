@@ -187,30 +187,14 @@ namespace Splendor.Core.AI
             return new TakeTokens(take, give);
         }
 
-        private TokenColour[] GetColoursForCheapestNoble(GameState gameState)
-        {
-            var me = gameState.CurrentPlayer;
-
-            Noble cheapestNoble = null;
-            int cheapestNobleDef = 99;
-            foreach (var noble in gameState.Nobles)
-            {
-                var deficitColours = me.Purse.DeficitFor(noble.Cost);
-                var deficitSum = me.Purse.DeficitFor(noble.Cost).Sum;
-
-                if (deficitSum < cheapestNobleDef)
-                {
-                    cheapestNobleDef = deficitSum;
-                    cheapestNoble = noble;
-                }
-            }
-            return cheapestNoble?.Cost.Colours().ToArray() ?? new TokenColour[0];
-        }
-
         private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player player, Card[] cards, GameState state)
         {
             var coloursWithoutFourOf = player.Bonuses.Colours().Where(col => player.Bonuses[col] < 4).ToArray();
+
+            //This feature is broken but whatever I'm doing here is somehow beneficial?!
             var coloursByNobility = state.Nobles.Select(n => player.Bonuses.DeficitFor(n.Cost)).Aggregate(new Pool(), (c, n) => c.MergeWith(n));
+
+            var coloursForNobles = state.Nobles.SelectMany(n => n.Cost.Colours()).GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
             var bonusDesirability = GetBonusDesirability(player, cards);
 
             foreach (var card in cards)
@@ -228,9 +212,9 @@ namespace Splendor.Core.AI
             var repulsion = 0m
                 + deficitSum 
                 + _options.Biases.FromScarcity(scarcity)
-                - _options.Biases.FromVictoryPoints(card.VictoryPoints)
-                - _options.Biases.FromCardBonus(bonusDesirability, card.BonusGiven)
-                - _options.Biases.FromNobleDeficit(coloursByNobility[card.BonusGiven]);
+                + _options.Biases.FromVictoryPoints(card.VictoryPoints)
+                + _options.Biases.FromCardBonus(bonusDesirability, card.BonusGiven)
+                + _options.Biases.FromNobleDeficit(coloursByNobility[card.BonusGiven]);
 
             return new CardFeasibilityStudy { Card = card, Deficit = deficit, Repulsion = repulsion, DeficitWithGold = deficitSum };
         }
@@ -293,9 +277,14 @@ namespace Splendor.Core.AI
 
     public class BiasValues
     {
-        public Func<int, decimal> FromVictoryPoints { get; set; } = vp => vp * 0.5m;
+        // Bias values modify 'repulsion'. I.e. good things have low or negative values
+        public Func<int, decimal> FromVictoryPoints { get; set; } = vp => -vp * 0.5m;
         public Func<int, decimal> FromScarcity { get; set; } = s => s * 10m;
-        public Func<int, decimal> FromNobleDeficit { get; set; } = d => (d - 2) / 3m;
-        public Func<IPool, TokenColour, decimal> FromCardBonus { get; set; } = (cr,col) => cr[col] * 0.5m;
+
+        /// <summary>
+        /// This feature is broken but is somehow beneficial.
+        /// </summary>
+        public Func<int, decimal> FromNobleDeficit { get; set; } = d => (2-d) / 3m;
+        public Func<IPool, TokenColour, decimal> FromCardBonus { get; set; } = (cr,col) => -cr[col] * 0.5m;
     }
 }
