@@ -53,7 +53,7 @@ namespace Splendor.ConsoleRunner
             {
                 { new ObservantStupidSplendorAi("Test Subject", aiOptions), 0},
                 { new ObservantStupidSplendorAi("Drone1", droneOptions), 0},
-           //     { new ObservantStupidSplendorAi("Drone2", droneOptions), 0},
+                //{ new StupidSplendorAi("Drone2"), 0},
             };
             var ais = scoreBoard.Select(r => r.Key).ToArray();
             var range = Enumerable.Range(0, numberOfGames);
