@@ -61,19 +61,20 @@ namespace Splendor.Core.AI
 
                     if (score < 10 && !nobleDangerMap.Any()) continue;
 
-                    var riskCards = allFaceUpCards.Where(c => c.VictoryPoints + score + (nobleDangerMap.Contains(c.BonusGiven) ? 3 : 0) >= 15)
-                                                  .Where(c => BuyCard.CanAffordCard(player, c))
-                                                  .OrderByDescending(c => c.VictoryPoints + (nobleDangerMap.Contains(c.BonusGiven) ? 3 : 0))
-                                                  .ToArray();
+                    var winCards = allFaceUpCards.Where(c => c.VictoryPoints + score + (nobleDangerMap.Contains(c.BonusGiven) ? 3 : 0) >= 15)
+                                                 .Where(c => BuyCard.CanAffordCard(player, c))
+                                                 .OrderByDescending(c => c.VictoryPoints + (nobleDangerMap.Contains(c.BonusGiven) ? 3 : 0))
+                                                 .ToArray();
 
-                    if (riskCards.Length == 0) continue;
-                    if (player != me && riskCards.Length > 1) break; // We're screwed if he has more than one winning move.
-                    var riskCard = riskCards.First();
-                    if (cardsICanBuy.Contains(riskCard)) return new BuyCard(riskCard, BuyCard.CreateDefaultPaymentOrNull(me, riskCard));
-                    if (player != me && me.ReservedCards.Count < 3) return new ReserveCard(riskCard);
+                    if (winCards.Length == 0) continue;
+                    if (player != me && winCards.Length > 1) break; // We're screwed if he has more than one winning move.
+                    var winningCard = winCards.First();
+                    if (cardsICanBuy.Contains(winningCard)) return new BuyCard(winningCard, BuyCard.CreateDefaultPaymentOrNull(me, winningCard));
+                    if (player != me && me.ReservedCards.Count < 3) return new ReserveCard(winningCard);
                 }
 
             // Buy a 2 or greater victory point card if possible
+            if(_options.Greedy)
             foreach (var card in cardsICanBuy.Where(c => c.VictoryPoints > 1)
                                              .OrderByDescending(c => c.VictoryPoints))
             {
@@ -97,12 +98,10 @@ namespace Splendor.Core.AI
                 }
             }
 
-            // Take some coins - but if there are coins to return then favour reserving a card
+            /* more precalc */
             CardFeasibilityStudy myNextTargetCard = null;
             if (_options.LooksAhead)
             {
-                var targetDiscount = new Pool();
-                targetDiscount[myTargetCard.Card.BonusGiven] = 1;
                 var nextCards = me.CardsInPlay.ToList();
                 nextCards.Add(myTargetCard.Card);
                 var nextMe = me.Clone(withCardsInPlay: nextCards);
@@ -111,7 +110,8 @@ namespace Splendor.Core.AI
                     .ThenByDescending(s => coloursForNoble.Contains(s.Card.BonusGiven)).ToArray()
                     .FirstOrDefault();
             }
-            
+
+            // Take some coins - but if there are coins to return then favour reserving a card
             var takeTokens = GetTakeTokens(gameState, myTargetCard, myNextTargetCard);
             if (takeTokens != null && !takeTokens.TokensToReturn.Colours().Any()) return takeTokens;
 
@@ -121,9 +121,9 @@ namespace Splendor.Core.AI
                 return new ReserveCard(myTargetCard.Card);
             }
 
-            // Do a random reserve
+            // Do a random reserve if not maxxed out.
             var action = ChooseRandomCardOrNull(gameState);
-            if (action != null) return action;
+            if (action != null && _options.RandomReserves) return action;
 
             // do the give/take coins if possible
             return takeTokens ?? (IAction)new NoAction();
@@ -135,48 +135,50 @@ namespace Splendor.Core.AI
 
             var me = gameState.CurrentPlayer;
 
-            var coloursAvailable = gameState.Bank.Colours(includeGold: false).ToList();
-            var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Sum, 3), coloursAvailable.Count);
+            var coloursByPreference = gameState.Bank.Colours(includeGold: false).ToList();
+
+            var coinsCountICanTake = Math.Min(Math.Min(10 - me.Purse.Sum, 3), coloursByPreference.Count);
+
+            if (firstChoice != null)
+            {
+                var coloursNeeded = firstChoice.Deficit.Colours().ToList();
+                var coloursNeeded2 = secondChoice?.Deficit.Colours().ToList();
+                var ordering = coloursByPreference.OrderByDescending(col => coloursNeeded.Contains(col));
+                if (secondChoice != null) ordering = ordering.ThenByDescending(col => coloursNeeded2.Contains(col));
+                coloursByPreference = ordering.ToList();
+            }
+            else
+            {
+                coloursByPreference.Shuffle();
+            }
 
             if (coinsCountICanTake > 0)
             {
-                if (firstChoice != null)
-                {
-                    var coloursNeeded = firstChoice.Deficit.Colours().ToList();
-                    var coloursNeeded2 = secondChoice?.Deficit.Colours().ToList();
-                    var ordering = coloursAvailable.OrderByDescending(col => coloursNeeded.Contains(col));
-                    if (secondChoice != null) ordering = ordering.ThenByDescending(col => coloursNeeded2.Contains(col));
-                    coloursAvailable = ordering.ToList();
-                }
-                else
-                {
-                    coloursAvailable.Shuffle();
-                }
+                var deficitColours = firstChoice.Deficit.Colours().ToArray();
 
                 var transaction = new Pool();
 
                 if (_options.CanTakeTwo
-                    && firstChoice.Deficit.Colours().Any(col => firstChoice.Deficit[col] >= 2)
-                    && firstChoice.Deficit.Sum == 2
+                    && deficitColours.Length == 1
+                    && deficitColours.Any(col => firstChoice.Deficit[col] >= 2)
                     && coinsCountICanTake > 1)
                 {
-                    var neededColour = firstChoice.Deficit.Colours().First(col => firstChoice.Deficit[col] >= 2);
+                    var neededColour = deficitColours.Single();
                     if (gameState.Bank[neededColour] > 3)
                     {
                         transaction[neededColour] = 2;
                         return new TakeTokens(transaction);
                     }
                 }
-                foreach (var colour in coloursAvailable.Take(coinsCountICanTake)) transaction[colour] = 1;
+                foreach (var colour in coloursByPreference.Take(coinsCountICanTake)) transaction[colour] = 1;
                 return new TakeTokens(transaction);
             }
 
             // otherwise just swap a single coin towards what we need
-            if (coloursAvailable.Count == 0) return null;
-            var colourToTake = coloursAvailable.First();
+            if (coloursByPreference.Count == 0) return null;
+            var colourToTake = coloursByPreference.First();
             var colourToGiveBack = me.Purse.Colours()
-                                           .OrderBy(c => c == TokenColour.Gold)
-                                           .Where(c => c != colourToTake)
+                                           .OrderBy(c => c == TokenColour.Gold || c == colourToTake)
                                            .Cast<TokenColour?>()
                                            .FirstOrDefault();
             if (!colourToGiveBack.HasValue) return null;
@@ -293,8 +295,18 @@ namespace Splendor.Core.AI
         public bool LooksAhead { get; set; } = true;
         public bool CanTakeTwo { get; set; } = true;
 
+        /// <summary>
+        /// Performs a random reserve as a last resort.
+        /// </summary>
+        public bool RandomReserves { get; set; } = true;
+
         public bool AimsAtNobles { get; set; } = false;
-        public bool PhasesGame { get; set; } = false;
+        public bool PhasesGame { get; set; } = false;        
+
+        /// <summary>
+        /// Buys a victory point card if able, ignoring other actions.
+        /// </summary>
+        public bool Greedy { get; set; } = false;
 
         public BiasValues Biases { get; } = new BiasValues();
     }

@@ -47,7 +47,6 @@ namespace Splendor.ConsoleRunner
             int tenPercent = numberOfGames / 10;
 
             var aiOptions = new AiOptions { };
-
             var droneOptions = new AiOptions { };
 
             var scoreBoard = new Dictionary<ISpendorAi, int>
