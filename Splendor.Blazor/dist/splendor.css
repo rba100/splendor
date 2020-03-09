@@ -13,17 +13,9 @@
     vertical-align: top;
 }
 
-@keyframes wobble
-{
-    25%  { transform: rotate(-2deg) }
-    50%  { transform: rotate(0)     }
-    75%  { transform: rotate(2deg)  }
-    100% { transform: rotate(0)     }
-}
-
 .splendor-canbuy
 {
-    animation: wobble 1s linear infinite;
+    box-shadow: 0.5vmin 0.5vmin gold;
 }
 
 .splendor-card:hover
@@ -34,7 +26,8 @@
 .splendor-canbuy:hover
 {
     opacity:    1;
-    box-shadow: 0.5vmin 0.5vmin darkorange;
+    box-shadow: none;
+    transform:  scale(1.2)
 }
 
 .splendor-cost
