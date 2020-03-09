@@ -1,0 +1,44 @@
+﻿
+@using static Splendor.TokenColour;
+
+<div class="splendor-card @CardColour(Model.BonusGiven) @CanBuyClass">
+    
+    @foreach(var colour in Model.Cost.Colours())
+    {
+        <div class="splendor-cost @CostColour(colour)"
+             style="color: @(colour is Black ? "white" : "black")">
+
+            @Model.Cost[colour]
+        </div>
+    }
+
+</div>
+
+@functions
+{
+    [Parameter]
+    public Splendor.Card Model { get; set; }
+
+    [Parameter]
+    public bool CanBuy { get; set; }
+
+    private string CanBuyClass => CanBuy ? "splendor-canbuy" : null;
+
+    private static string CardColour(TokenColour colour) => colour switch
+    {
+        White => "background-color--grey--3",
+        Red   => "background-color--red--6",
+        Blue  => "background-color--blue--5",
+        Green => "background-color--green--5",
+        _     => "background-color--black"
+    };
+
+    private static string CostColour(TokenColour colour) => colour switch
+    {
+        White => "background-color--white",
+        Red   => "background-color--red--5",
+        Blue  => "background-color--blue--4",
+        Green => "background-color--green--4",
+        _     => "background-color--grey--9"
+    };
+}

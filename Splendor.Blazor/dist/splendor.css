@@ -1,0 +1,49 @@
+﻿
+/* ReSharper disable CssBrowserCompatibility */
+.splendor-card
+{
+    width:          10vmin;
+    height:         12vmin;
+    margin:         2vmin;
+    border-radius:  1vmin;
+    border:         0.25vmin solid gray;
+    box-shadow:     0.5vmin 0.5vmin lightgray;
+    display:        inline-block;
+    padding:        0.5vmin;
+    vertical-align: top;
+}
+
+@keyframes wobble
+{
+    25%  { transform: rotate(-2deg) }
+    50%  { transform: rotate(0)     }
+    75%  { transform: rotate(2deg)  }
+    100% { transform: rotate(0)     }
+}
+
+.splendor-canbuy
+{
+    animation: wobble 1s linear infinite;
+}
+
+.splendor-card:hover
+{
+    opacity: 0.5;
+}
+
+.splendor-canbuy:hover
+{
+    opacity:    1;
+    box-shadow: 0.5vmin 0.5vmin darkorange;
+}
+
+.splendor-cost
+{
+    display:       inline-block;
+    margin:        0.5vmin;
+    width:         2.6vmin;
+    height:        2.6vmin;
+    text-align:    center;
+    border-radius: 100%;
+}
+/* ReSharper restore CssBrowserCompatibility */

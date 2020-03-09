@@ -1,0 +1,22 @@
+﻿@using Splendor.Core.Actions
+
+@foreach(var tier in Tiers.Reverse())
+{
+    <div>
+
+        @foreach (var card in tier.ColumnSlots.Values)
+        {
+            <Card Model="@card" CanBuy="@BuyCard.CanAffordCard(Budget, card)" />
+        }
+
+    </div>
+}
+
+@functions
+{
+    [Parameter]
+    public IReadOnlyCollection<BoardTier> Tiers { get; set; }
+
+    [Parameter]
+    public IPool Budget { get; set; }
+}
