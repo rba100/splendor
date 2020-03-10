@@ -9,7 +9,7 @@ namespace Splendor.Core
     {
         public string Name { get; }
 
-        internal Player(string name)
+        public Player(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Purse = new Pool();
