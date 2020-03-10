@@ -5,13 +5,13 @@
     </PropertyGroup>
     <ItemGroup>
         <None Remove=".gitignore" />
-        <Content Include="dist/index.html">
+        <Content Include="Dist/Index.html">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Include="dist/splendor.css">
+        <Content Include="Dist/Splendor.css">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Include="dist/web.config">
+        <Content Include="Dist/Web.config">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
