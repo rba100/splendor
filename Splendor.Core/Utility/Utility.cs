@@ -30,21 +30,5 @@ namespace Splendor.Core
         {
             return dictionary.ToDictionary(d => d.Key, d => d.Value);
         }
-
-        public static IEnumerable<TokenColour[]> GetAllThreeColourCombinations(IEnumerable<TokenColour> colours)
-        {
-            var clrs = colours.ToArray();
-            if (clrs.Length < 3) yield break;
-            for (int i = 0; i < clrs.Length - 2; i++)
-            {
-                for (int j = i + 1; j < clrs.Length - 1; j++)
-                {
-                    for (int k = j + 1; k < clrs.Length; k++)
-                    {
-                        yield return new TokenColour[] { clrs[i], clrs[j], clrs[k] };
-                    }
-                }
-            }
-        }
     }
 }
