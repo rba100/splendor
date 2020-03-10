@@ -1,0 +1,19 @@
+﻿
+<div class="splendor-bank">
+
+    @foreach(var colour in Model.Colours())
+    {
+        <div class="splendor-cost @colour.TokenColour()"
+             style="color: @(colour is TokenColour.Black ? "white" : "black")">
+
+            @Model[colour]
+        </div>
+    }
+
+</div>
+
+@functions
+{
+    [Parameter]
+    public IPool Model { get; set; }
+}

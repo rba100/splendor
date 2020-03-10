@@ -1,7 +1,5 @@
 ﻿
-@using static Splendor.TokenColour;
-
-<div class="splendor-card @CardColour(Model.BonusGiven) @CanBuyClass">
+<div class="splendor-card @Model.BonusGiven.CardColour() @CanBuyClass">
 
     <div class="splendor-points" style="visibility: @PointsVisibility">
         @Model.VictoryPoints
@@ -9,8 +7,8 @@
     
     @foreach(var colour in Model.Cost.Colours())
     {
-        <div class="splendor-cost @CostColour(colour)"
-             style="color: @(colour is Black ? "white" : "black")">
+        <div class="splendor-cost @colour.TokenColour()"
+             style="color: @(colour is TokenColour.Black ? "white" : "black")">
 
             @Model.Cost[colour]
         </div>
@@ -30,22 +28,4 @@
                                                                : "hidden";
 
     private string CanBuyClass => CanBuy ? "splendor-canbuy" : null;
-
-    private static string CardColour(TokenColour colour) => colour switch
-    {
-        White => "background-color--grey--3",
-        Red   => "background-color--red--6",
-        Blue  => "background-color--blue--5",
-        Green => "background-color--green--5",
-        _     => "background-color--black"
-    };
-
-    private static string CostColour(TokenColour colour) => colour switch
-    {
-        White => "background-color--white",
-        Red   => "background-color--red--5",
-        Blue  => "background-color--blue--4",
-        Green => "background-color--green--4",
-        _     => "background-color--grey--9"
-    };
 }

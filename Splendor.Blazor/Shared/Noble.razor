@@ -1,12 +1,10 @@
 ﻿
-@using static Splendor.TokenColour;
-
 <div class="splendor-noble">
     
     @foreach(var colour in Model.Cost.Colours())
     {
-        <div class="splendor-bonus @BonusColour(colour)"
-             style="color: @(colour is Black ? "white" : "black")">
+        <div class="splendor-bonus @colour.CardColour()"
+             style="color: @(colour is TokenColour.Black ? "white" : "black")">
 
             @Model.Cost[colour]
         </div>
@@ -18,13 +16,4 @@
 {
     [Parameter]
     public Splendor.Noble Model { get; set; }
-
-    private static string BonusColour(TokenColour colour) => colour switch
-    {
-        White => "background-color--grey--3",
-        Red   => "background-color--red--6",
-        Blue  => "background-color--blue--5",
-        Green => "background-color--green--5",
-        _     => "background-color--black"
-    };
 }

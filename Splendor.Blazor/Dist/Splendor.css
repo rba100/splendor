@@ -86,4 +86,14 @@
     text-align:    center;
     border-radius: 0.5vmin;
 }
+
+.splendor-bank
+{
+    margin:        2vmin;
+    padding:       0 1vmin;
+    width:         54vmin;
+    background:    lightgrey;
+    border-radius: 0.5vmin;
+    text-align: center;
+}
 /* ReSharper restore CssBrowserCompatibility */
