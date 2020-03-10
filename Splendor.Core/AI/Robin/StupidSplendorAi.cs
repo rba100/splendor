@@ -107,7 +107,7 @@ namespace Splendor.Core.AI
         }
 
         private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player me, IEnumerable<Card> cards, GameState state)
-        {
+        { 
             foreach (var card in cards)
             {
                 var cost = card.Cost;

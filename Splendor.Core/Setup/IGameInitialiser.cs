@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Splendor
+namespace Splendor.Core
 {
     public interface IGameInitialiser
     {

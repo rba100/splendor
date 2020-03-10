@@ -13,8 +13,8 @@ namespace Splendor.ConsoleRunner
         static void Main(string[] args)
         {
             //Interactive();
-            //Run1();
-            Run(numberOfGames: 20000, useParallelism: true);
+            RunDetailed();
+            //Run(numberOfGames: 20000, useParallelism: true);
         }
 
         static void Interactive()
@@ -27,7 +27,6 @@ namespace Splendor.ConsoleRunner
         static void RunDetailed()
         {
             var aiOptions = new AiOptions{};
-            aiOptions.Biases.FromVictoryPoints = vp => vp * 1;
             var aiPlayers = new ISpendorAi[]
             {
                 new ObservantStupidSplendorAi("Stupid1"),

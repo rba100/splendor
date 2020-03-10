@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Splendor.Core.Domain
+namespace Splendor.Core
 {
     public class RulesViolationException : Exception
     {

@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Splendor.Core.Domain;
-
 namespace Splendor.Core.Actions
 {
     /// <summary>
@@ -81,68 +79,59 @@ namespace Splendor.Core.Actions
 
         public static IPool CreateDefaultPaymentOrNull(IPool budget, Card card)
         {
-            Pool payment = null;
-            var available = budget.CreateCopy();
-            var costRemaining = card.Cost.CreateCopy();
+            Pool payment = new Pool();
+            var goldRemaining = budget.Gold;
 
-            foreach (var colour in costRemaining.Colours())
+            foreach (var colour in card.Cost.Colours())
             {
-                if (costRemaining[colour] < 1) continue;
-                if (costRemaining[colour] > available[colour] + available[TokenColour.Gold])
+                if (card.Cost[colour] < 1) continue;
+                if (card.Cost[colour] > budget[colour] + goldRemaining)
                 {
                     return null;
                 }
 
-                payment = payment ?? new Pool();
-
-                if (costRemaining[colour] < available[colour])
+                if (card.Cost[colour] <= budget[colour])
                 {
-                    payment[colour] = costRemaining[colour];
+                    payment[colour] = card.Cost[colour];
                 }
                 else
                 {
-                    var goldNeeded = costRemaining[colour] - available[colour];
-                    payment[colour] = available[colour];
+                    var goldNeeded = card.Cost[colour] - budget[colour];
+                    payment[colour] = budget[colour];
 
                     payment[TokenColour.Gold] += goldNeeded;
-                    available[TokenColour.Gold] -= goldNeeded;
+                    goldRemaining -= goldNeeded;
                 }
             }
 
             return payment;
         }
 
-
         public static IPool CreateDefaultPaymentOrNull(Player player, Card card)
         {
             var payment = new Pool();
-            var available = player.Purse.CreateCopy();
-            var costRemaining = card.Cost.CreateCopy();
-
-            foreach (var colour in player.Bonuses.Colours())
-            {
-                costRemaining[colour] = Math.Max(costRemaining[colour] - player.Bonuses[colour], 0);
-            }
+            var costRemaining = player.Bonuses.DeficitFor(card.Cost);
+            var goldRemaining = player.Purse.Gold;
 
             foreach (var colour in costRemaining.Colours())
             {
                 if (costRemaining[colour] < 1) continue;
-                if (costRemaining[colour] > available[colour] + available[TokenColour.Gold])
+                if (costRemaining[colour] > player.Purse[colour] + goldRemaining)
                 {
                     return null;
                 }
 
-                if (costRemaining[colour] < available[colour])
+                if (costRemaining[colour] < player.Purse[colour])
                 {
                     payment[colour] = costRemaining[colour];
                 }
                 else
                 {
-                    var goldNeeded = costRemaining[colour] - available[colour];
-                    payment[colour] = available[colour];
+                    var goldNeeded = costRemaining[colour] - player.Purse[colour];
+                    payment[colour] = player.Purse[colour];
 
                     payment[TokenColour.Gold] += goldNeeded;
-                    available[TokenColour.Gold] -= goldNeeded;
+                    goldRemaining -= goldNeeded;
                 }
             }
 
