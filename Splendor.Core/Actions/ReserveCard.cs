@@ -18,7 +18,7 @@ namespace Splendor.Core.Actions
 
         public override string ToString()
         {
-            return $"Reserved {Card}";
+            return $"Reserving {Card}";
         }
 
         public GameState Execute(GameState gameState)
