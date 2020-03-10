@@ -3,4 +3,6 @@
 
 @inject GameState GameState
 
-<Market Tiers="@GameState.Tiers" Budget="@GameState.CurrentPlayer.Budget" />
+<Market Nobles = "@GameState.Nobles.ToArray()"
+        Tiers  = "@GameState.Tiers"
+        Budget = "@GameState.CurrentPlayer.Budget" />

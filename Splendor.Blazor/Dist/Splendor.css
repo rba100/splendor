@@ -34,9 +34,56 @@
 {
     display:       inline-block;
     margin:        0.5vmin;
-    width:         2.6vmin;
-    height:        2.6vmin;
+    width:         2.8vmin;
+    height:        2.8vmin;
     text-align:    center;
     border-radius: 100%;
+}
+
+.splendor-points
+{
+    margin:        0.125vmin 0 0.5vmin 2.8vmin;
+    width:         2.8vmin;
+    height:        2.8vmin;
+    text-align:    center;
+    background:    radial-gradient(circle at 50%, gold, transparent);
+    border-radius: 100%;
+}
+
+.splendor-noble
+{
+    width:          10vmin;
+    height:         10vmin;
+    margin:         2vmin;
+    border-radius:  1vmin;
+    border:         0.25vmin solid gray;
+    box-shadow:     0.5vmin 0.5vmin lightgray;
+    display:        inline-block;
+    padding:        0.5vmin;
+    vertical-align: top;
+    background:     radial-gradient(circle at 50%, white, lightgrey);
+}
+
+.splendor-noble:after
+{
+    content:       "3";
+    float:         right;
+    margin:        0.5vmin;
+    margin-right:  1vmin;
+    width:         2.8vmin;
+    height:        2.8vmin;
+    text-align:    center;
+    background:    radial-gradient(circle at 50%, gold, transparent);
+    border-radius: 100%;
+}
+
+.splendor-bonus
+{
+    display:       inline-block;
+    margin:        0.5vmin;
+    width:         2.8vmin;
+    height:        2.8vmin;
+    text-align:    center;
+    border-radius: 0.5vmin;
 }
 /* ReSharper restore CssBrowserCompatibility */

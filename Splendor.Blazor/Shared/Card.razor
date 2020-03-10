@@ -2,6 +2,10 @@
 @using static Splendor.TokenColour;
 
 <div class="splendor-card @CardColour(Model.BonusGiven) @CanBuyClass">
+
+    <div class="splendor-points" style="visibility: @PointsVisibility">
+        @Model.VictoryPoints
+    </div>
     
     @foreach(var colour in Model.Cost.Colours())
     {
@@ -21,6 +25,9 @@
 
     [Parameter]
     public bool CanBuy { get; set; }
+
+    private string PointsVisibility => Model.VictoryPoints > 0 ? "visible"
+                                                               : "hidden";
 
     private string CanBuyClass => CanBuy ? "splendor-canbuy" : null;
 

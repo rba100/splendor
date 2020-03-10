@@ -1,6 +1,12 @@
-﻿@using Splendor.Core.Actions
+﻿
+@using Splendor.Core.Actions
 
-@foreach(var tier in Tiers.Reverse())
+@foreach(var noble in Nobles)
+{
+    <Noble Model="@noble" />
+}
+
+@foreach (var tier in Tiers.Reverse())
 {
     <div>
 
@@ -14,6 +20,9 @@
 
 @functions
 {
+    [Parameter]
+    public IReadOnlyCollection<Splendor.Noble> Nobles { get; set; }
+
     [Parameter]
     public IReadOnlyCollection<BoardTier> Tiers { get; set; }
 
