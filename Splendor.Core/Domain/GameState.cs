@@ -51,8 +51,6 @@ namespace Splendor.Core
                     nextPlayers.Add(player);
                 else nextPlayers.Add(p);
 
-            var cp = CurrentPlayer.Name == player.Name ? player : CurrentPlayer;
-
             return Clone(withPlayers: nextPlayers);
         }
     }
