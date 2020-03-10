@@ -20,7 +20,9 @@ namespace Splendor.Core.Actions
         public override string ToString()
         {
             var things = TokensToTake.Colours().Select(col => (TokensToTake[col] == 1 ? "" : $"{TokensToTake[col]} ") + $"{col}");
-            return "Taking " + string.Join(", ", things);
+            var thingsBack = TokensToReturn.Colours().Select(col => (TokensToReturn[col] == 1 ? "" : $"{TokensToReturn[col]} ") + $"{col}");
+            var returning = TokensToReturn.Sum == 0 ? "" : $", returning {string.Join(", ", thingsBack)}";
+            return $"Taking {string.Join(", ", things)}{returning}";
         }
 
         public GameState Execute(GameState gameState)
