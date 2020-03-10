@@ -8,4 +8,13 @@
         Budget      = "@GameState.CurrentPlayer.Budget"
         CanReserve  = "@(GameState.CurrentPlayer.ReservedCards.Count < 3)"/>
 
-<Bank Model="@GameState.Bank"></Bank>
+<Bank Model="@GameState.Bank" />
+
+<Player Model="@GameState.CurrentPlayer" MyTurn="true" />
+
+@foreach (var player in GameState.Players)
+{
+    if (player == GameState.CurrentPlayer) { continue; }
+
+    <Player Model="@player" MyTurn="false" />
+}

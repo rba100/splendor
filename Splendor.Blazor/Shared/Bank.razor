@@ -1,19 +1,41 @@
 ﻿
+@using static TokenColour;
+
 <div class="splendor-bank">
 
-    @foreach(var colour in Model.Colours())
+    @foreach (var colour in Model.Colours(includeGold: false))
     {
-        <div class="splendor-cost"
-             style="color: @colour.TextColour(); background: @colour.TokenColour()">
+        <div class="splendor-cost @SelectedClass(colour) splendor-cantake"
+             style="color: @colour.TextColour(); background: @colour.TokenColour()"
+             @onclick="@(_ => ToggleSelect(colour))">
 
             @Model[colour]
         </div>
     }
 
+    @if (Model.Gold > 0)
+    {
+        <div class="splendor-cost @SelectedClass(Gold)"
+             style="color: @Gold.TextColour(); background: @Gold.TokenColour()">
+
+            @Model[Gold]
+        </div>
+    }
+
 </div>
 
-@functions
+@code
 {
     [Parameter]
     public IPool Model { get; set; }
+
+    private string SelectedClass(TokenColour c) => m_ColoursSelected.Contains(c)
+                                                 ? "splendor-selected" : null;
+    private void ToggleSelect(TokenColour c)
+    {
+        if (!m_ColoursSelected.Remove(c)) m_ColoursSelected.Add(c);
+    }
+
+    private readonly ISet<TokenColour> m_ColoursSelected =
+        new SortedSet<TokenColour>();
 }

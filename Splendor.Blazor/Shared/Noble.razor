@@ -1,7 +1,7 @@
 ﻿
 <div class="splendor-noble">
-    
-    @foreach(var colour in Model.Cost.Colours())
+
+    @foreach (var colour in Model.Cost.Colours())
     {
         <div class="splendor-bonus"
              style="color: @colour.TextColour(); background: @colour.CardColour()">
@@ -12,7 +12,7 @@
 
 </div>
 
-@functions
+@code
 {
     [Parameter]
     public Splendor.Noble Model { get; set; }

@@ -1,0 +1,51 @@
+﻿
+<div class="splendor-player @Selected">
+
+    <div class="splendor-points">
+        @Model.VictoryPoints
+    </div>
+
+    <h3 class="splendor-player-name">@Model.Name</h3>
+
+    <div style="display: inline-block">
+
+        @foreach (var (name, pool) in Pools)
+        {
+            <div>
+                <div class="splendor-pool-label">@name:</div> 
+
+                @foreach (var colour in Colours)
+                {
+                    <div class="splendor-cost"
+                         style="color: @colour.TextColour(); background: @colour.TokenColour(); visibility: @Visibility(pool[colour])">
+
+                        @pool[colour]
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+</div>
+
+@code
+{
+    [Parameter]
+    public Splendor.Player Model { get; set; }
+
+    [Parameter]
+    public bool MyTurn { get; set; }
+
+    private string Selected => MyTurn ? "splendor-selected" : null;
+
+    private IEnumerable<(string label, IPool pool)> Pools =>
+        new [] { ("Tokens",         Model.Purse  ),
+                 ("Bonuses",        Model.Bonuses),
+                 ("\u2234 Budget",  Model.Budget ) };
+
+    private IEnumerable<TokenColour> Colours =>
+        Model.Budget.Colours(includeGold: false).Append(TokenColour.Gold);
+
+    private static string Visibility(int count) => count > 0 ? "visible"
+                                                             : "hidden";
+}

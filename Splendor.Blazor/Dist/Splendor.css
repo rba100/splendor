@@ -99,12 +99,26 @@ body
 
 .splendor-bank
 {
-    margin:        2vmin;
-    padding:       0 1vmin;
-    width:         68.5vmin;
-    background:    lightgrey;
-    border-radius: 0.5vmin;
-    text-align:    center;
+    margin:          2vmin;
+    padding:         0 1vmin;
+    width:           66.5vmin;
+    background:      lightgrey;
+    border-radius:   0.5vmin;
+    height:          6vmin;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+}
+
+.splendor-bank .splendor-cost
+{
+    border: 0.4vmin solid transparent;
+}
+
+.splendor-bank .splendor-cost.splendor-selected
+{
+    transform: scale(1.2);
+    border:    0.4vmin solid yellow;
 }
 
 .splendor-card-stack
@@ -115,5 +129,39 @@ body
                                           #909090 1vmin,
                                           #808080 1vmin,
                                           #808080 2vmin);
+}
+
+.splendor-player-name
+{
+    text-align:    center;
+    margin-bottom: 1vmin;
+}
+
+.splendor-player
+{
+    margin:        2vmin;
+    padding:       0 1vmin;
+    width:         66.5vmin;
+    background:    lightgrey;
+    border-radius: 0.5vmin;
+}
+
+.splendor-player .splendor-points
+{
+    position:   absolute;
+    margin:     0;
+    margin-top: 1vmin;
+}
+
+.splendor-player.splendor-selected
+{
+    background: radial-gradient(circle at 50%, lightblue, grey);
+}
+
+.splendor-pool-label
+{
+    width:      10vmin;
+    display:    inline-block;
+    text-align: right;
 }
 /* ReSharper restore CssBrowserCompatibility */

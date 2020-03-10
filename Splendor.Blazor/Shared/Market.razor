@@ -3,7 +3,7 @@
 
 <div class="splendor-nobles">
 
-    @foreach(var noble in Nobles)
+    @foreach (var noble in Nobles)
     {
         <Noble Model="@noble" />
     }
@@ -27,7 +27,7 @@
     </div>
 }
 
-@functions
+@code
 {
     [Parameter]
     public IReadOnlyCollection<Splendor.Noble> Nobles { get; set; }
