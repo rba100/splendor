@@ -3,8 +3,9 @@
 
 @inject GameState GameState
 
-<Market Nobles = "@GameState.Nobles.ToArray()"
-        Tiers  = "@GameState.Tiers"
-        Budget = "@GameState.CurrentPlayer.Budget" />
+<Market Nobles      = "@GameState.Nobles.ToArray()"
+        Tiers       = "@GameState.Tiers"
+        Budget      = "@GameState.CurrentPlayer.Budget"
+        CanReserve  = "@(GameState.CurrentPlayer.ReservedCards.Count < 3)"/>
 
 <Bank Model="@GameState.Bank"></Bank>

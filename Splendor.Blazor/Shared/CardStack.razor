@@ -1,0 +1,17 @@
+﻿
+<div class="splendor-card splendor-card-stack @CanTakeClass"
+     style="visibility: @Visibility">
+</div>
+
+@functions
+{
+    [Parameter]
+    public bool HasCards { get; set; }
+
+    [Parameter]
+    public bool CanReserve { get; set; }
+
+    private string Visibility => HasCards ? "visible" : "hidden";
+
+    private string CanTakeClass => CanReserve ? "splendor-cantake" : null;
+}

@@ -1,5 +1,6 @@
 ﻿
-<div class="splendor-card @Model.BonusGiven.CardColour() @CanBuyClass">
+<div class="splendor-card @CanBuyClass @CanTakeClass"
+     style="background: @Model.BonusGiven.CardColour()"   >
 
     <div class="splendor-points" style="visibility: @PointsVisibility">
         @Model.VictoryPoints
@@ -7,8 +8,8 @@
     
     @foreach(var colour in Model.Cost.Colours())
     {
-        <div class="splendor-cost @colour.TokenColour()"
-             style="color: @(colour is TokenColour.Black ? "white" : "black")">
+        <div class="splendor-cost"
+             style="color: @colour.TextColour(); background: @colour.TokenColour()">
 
             @Model.Cost[colour]
         </div>
@@ -24,8 +25,14 @@
     [Parameter]
     public bool CanBuy { get; set; }
 
+    [Parameter]
+    public bool CanReserve { get; set; }
+
     private string PointsVisibility => Model.VictoryPoints > 0 ? "visible"
                                                                : "hidden";
 
     private string CanBuyClass => CanBuy ? "splendor-canbuy" : null;
+
+    private string CanTakeClass => CanBuy || CanReserve
+                                 ? "splendor-cantake" : null;
 }

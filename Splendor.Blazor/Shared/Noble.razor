@@ -3,8 +3,8 @@
     
     @foreach(var colour in Model.Cost.Colours())
     {
-        <div class="splendor-bonus @colour.CardColour()"
-             style="color: @(colour is TokenColour.Black ? "white" : "black")">
+        <div class="splendor-bonus"
+             style="color: @colour.TextColour(); background: @colour.CardColour()">
 
             @Model.Cost[colour]
         </div>

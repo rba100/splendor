@@ -1,18 +1,27 @@
 ﻿
 @using Splendor.Core.Actions
 
-@foreach(var noble in Nobles)
-{
-    <Noble Model="@noble" />
-}
+<div class="splendor-nobles">
+
+    @foreach(var noble in Nobles)
+    {
+        <Noble Model="@noble" />
+    }
+
+</div>
 
 @foreach (var tier in Tiers.Reverse())
 {
     <div>
 
+        <CardStack HasCards   = "@tier.HasFaceDownCardsRemaining"
+                   CanReserve = "@CanReserve" />
+
         @foreach (var card in tier.ColumnSlots.Values)
         {
-            <Card Model="@card" CanBuy="@BuyCard.CanAffordCard(Budget, card)" />
+            <Card Model      = "@card"
+                  CanBuy     = "@BuyCard.CanAffordCard(Budget, card)"
+                  CanReserve = "@CanReserve" />
         }
 
     </div>
@@ -28,4 +37,7 @@
 
     [Parameter]
     public IPool Budget { get; set; }
+
+    [Parameter]
+    public bool CanReserve { get; set; }
 }
