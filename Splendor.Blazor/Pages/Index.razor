@@ -14,8 +14,9 @@
             CanReserve   = "@(GameState.CurrentPlayer.ReservedCards.Count < 3)"
             SubmitAction = "@ApplyAction" />
 
-    <Bank Model="@GameState.Bank" SubmitAction="@ApplyAction" />
-
+    <Bank Model             = "@GameState.Bank"
+          SubmitAction      = "@ApplyAction"
+          AddActionReaction = "@AddActionReaction" />
 </div>
 
 <div style="display: inline-block; vertical-align: top">
@@ -35,6 +36,9 @@
         .SkipWhile(p => p != GameState.CurrentPlayer)
         .Concat(GameState.Players.TakeWhile(p => p != GameState.CurrentPlayer));
 
+    private void AddActionReaction(Action reaction) =>
+        m_ActionReactions.Add(reaction);
+
     private void ApplyAction(IAction action)
     {
         if (action is null) return;
@@ -45,6 +49,10 @@
 
         GameState = game.State;
 
+        m_ActionReactions.ForEach(r => r());
+
         StateHasChanged();
     }
+
+    private readonly List<Action> m_ActionReactions = new List<Action>();
 }

@@ -35,6 +35,12 @@
     [Parameter]
     public Action<IAction> SubmitAction { get; set; }
 
+    [Parameter]
+    public Action<Action> AddActionReaction { get; set; }
+
+    protected override void OnInitialized() =>
+        AddActionReaction(m_ColoursSelected.Clear);
+
     private string SelectedClass(TokenColour c) => m_ColoursSelected.Contains(c)
                                                  ? "splendor-selected" : null;
     private void OnClick(TokenColour c)
