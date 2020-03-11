@@ -75,7 +75,7 @@
                                                              : "hidden";
     private IAction Buy(Splendor.Core.Card card)
     {
-        var payment = BuyCard.CreateDefaultPaymentOrNull(Model.Budget, card);
+        var payment = BuyCard.CreateDefaultPaymentOrNull(Model, card);
 
         return payment is null ? null : new BuyCard(card, payment);
     }
