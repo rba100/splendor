@@ -47,7 +47,7 @@ namespace Splendor.Core.Actions
 
             playerReserved.Add(Card);
 
-            if (gameState.Bank[TokenColour.Gold] > 1)
+            if (gameState.Bank[TokenColour.Gold] > 0)
             {
                 if (player.Purse.Sum >= 10)
                 {
