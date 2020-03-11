@@ -72,41 +72,6 @@ namespace Splendor.Core.Actions
             return CreateDefaultPaymentOrNull(player, card) != null;
         }
 
-        public static bool CanAffordCard(IPool budget, Card card)
-        {
-            return CreateDefaultPaymentOrNull(budget, card) != null;
-        }
-
-        public static IPool CreateDefaultPaymentOrNull(IPool budget, Card card)
-        {
-            Pool payment = new Pool();
-            var goldRemaining = budget.Gold;
-
-            foreach (var colour in card.Cost.Colours())
-            {
-                if (card.Cost[colour] < 1) continue;
-                if (card.Cost[colour] > budget[colour] + goldRemaining)
-                {
-                    return null;
-                }
-
-                if (card.Cost[colour] <= budget[colour])
-                {
-                    payment[colour] = card.Cost[colour];
-                }
-                else
-                {
-                    var goldNeeded = card.Cost[colour] - budget[colour];
-                    payment[colour] = budget[colour];
-
-                    payment[TokenColour.Gold] += goldNeeded;
-                    goldRemaining -= goldNeeded;
-                }
-            }
-
-            return payment;
-        }
-
         public static IPool CreateDefaultPaymentOrNull(Player player, Card card)
         {
             var payment = new Pool();
