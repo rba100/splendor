@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Blazor.Hosting;
 using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
+using Splendor.Core;
+
 using static Microsoft.AspNetCore.Blazor.Hosting.BlazorWebAssemblyHost;
 
 namespace Splendor.Blazor

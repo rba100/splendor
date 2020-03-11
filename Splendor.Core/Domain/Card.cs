@@ -1,14 +1,12 @@
 ﻿
-using Splendor.Core;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
-namespace Splendor
+namespace Splendor.Core
 {
     public class Card
     {
-        internal Card(int tier, int victoryPoints, IPool cost, TokenColour givesDiscount)
+        public Card(int tier, int victoryPoints, IPool cost, TokenColour givesDiscount)
         {
             Tier = tier;
             VictoryPoints = victoryPoints;

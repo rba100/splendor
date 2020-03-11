@@ -3,11 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Splendor
+namespace Splendor.Core
 {
     public class GameState
     {
-        public GameState(IPool coinsAvailable, ICollection<Noble> nobles, IReadOnlyCollection<BoardTier> tiers, IReadOnlyCollection<Player> players, int currentPlayerIndex)
+        public GameState(IPool coinsAvailable,
+                         ICollection<Noble> nobles, 
+                         IReadOnlyCollection<BoardTier> tiers,
+                         IReadOnlyCollection<Player> players, 
+                         int currentPlayerIndex)
         {
             Bank = coinsAvailable ?? throw new ArgumentNullException(nameof(coinsAvailable));
             Nobles = nobles ?? throw new ArgumentNullException(nameof(nobles));
@@ -24,7 +28,11 @@ namespace Splendor
 
         private int _currentPlayerIndex = 0;
 
-        public GameState Clone(IPool withTokensAvailable = null, ICollection<Noble> withNobles = null, IReadOnlyCollection<BoardTier> withTiers = null, IReadOnlyCollection<Player> withPlayers = null, int? currentPlayerIndex = null)
+        public GameState Clone(IPool withTokensAvailable = null,
+                               ICollection<Noble> withNobles = null,
+                               IReadOnlyCollection<BoardTier> withTiers = null,
+                               IReadOnlyCollection<Player> withPlayers = null, 
+                               int? currentPlayerIndex = null)
         {
             return new GameState(
                 withTokensAvailable ?? Bank,
@@ -44,14 +52,16 @@ namespace Splendor
                 (_currentPlayerIndex+1) % Players.Count);
         }
 
+        /// <summary>
+        /// Clones the state, but with the player collection modified to
+        /// include the supplied player in place of any player with the same Player.Name.
+        /// </summary>
         public GameState CloneWithPlayerReplacedByName(Player player)
         {
             var nextPlayers = new List<Player>();
             foreach (var p in Players) if (p.Name == player.Name)
                     nextPlayers.Add(player);
                 else nextPlayers.Add(p);
-
-            var cp = CurrentPlayer.Name == player.Name ? player : CurrentPlayer;
 
             return Clone(withPlayers: nextPlayers);
         }

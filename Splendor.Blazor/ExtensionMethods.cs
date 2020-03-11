@@ -1,5 +1,7 @@
 ﻿
-using static Splendor.TokenColour;
+using Splendor.Core;
+
+using static Splendor.Core.TokenColour;
 
 namespace Splendor.Blazor
 {

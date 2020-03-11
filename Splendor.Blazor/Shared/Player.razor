@@ -1,4 +1,5 @@
 ﻿
+@using Splendor.Core
 @using Splendor.Core.Actions
 
 <div class="splendor-player @Selected">
@@ -52,7 +53,7 @@
 @code
 {
     [Parameter]
-    public Splendor.Player Model { get; set; }
+    public Splendor.Core.Player Model { get; set; }
 
     [Parameter]
     public bool MyTurn { get; set; }
@@ -72,7 +73,7 @@
 
     private static string Visibility(int count) => count > 0 ? "visible"
                                                              : "hidden";
-    private IAction Buy(Splendor.Card card)
+    private IAction Buy(Splendor.Core.Card card)
     {
         var payment = BuyCard.CreateDefaultPaymentOrNull(Model.Budget, card);
 

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Splendor
+namespace Splendor.Core
 {
     public sealed class BoardTier
     {

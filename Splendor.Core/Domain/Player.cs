@@ -3,15 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Splendor.Core;
-
-namespace Splendor
+namespace Splendor.Core
 {
     public class Player
     {
         public string Name { get; }
 
-        internal Player(string name)
+        public Player(string name)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Purse = new Pool();

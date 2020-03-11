@@ -1,4 +1,5 @@
 ﻿
+@using Splendor.Core
 @using Splendor.Core.Actions
 
 <div class="splendor-nobles">
@@ -32,7 +33,7 @@
 @code
 {
     [Parameter]
-    public IReadOnlyCollection<Splendor.Noble> Nobles { get; set; }
+    public IReadOnlyCollection<Splendor.Core.Noble> Nobles { get; set; }
 
     [Parameter]
     public IReadOnlyCollection<BoardTier> Tiers { get; set; }
@@ -46,14 +47,14 @@
     [Parameter]
     public Action<IAction> SubmitAction { get; set; }
 
-    private IAction Buy(Splendor.Card card)
+    private IAction Buy(Splendor.Core.Card card)
     {
         var payment = BuyCard.CreateDefaultPaymentOrNull(Budget, card);
 
         return payment is null ? null : new BuyCard(card, payment);
     }
 
-    private IAction Reserve(Splendor.Card card) =>
+    private IAction Reserve(Splendor.Core.Card card) =>
         CanReserve ? new ReserveCard(card) : null;
 
     private IAction Reserve(int tier) =>

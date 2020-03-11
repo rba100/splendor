@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Splendor.Core.Domain;
-
 namespace Splendor.Core.Actions
 {
     public class ReserveFaceDownCard : IAction

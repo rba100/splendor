@@ -1,5 +1,4 @@
-﻿using Splendor.Core.Domain;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,7 +18,7 @@ namespace Splendor.Core.Actions
 
         public override string ToString()
         {
-            return $"Reserved {Card}";
+            return $"Reserving {Card}";
         }
 
         public GameState Execute(GameState gameState)
@@ -48,7 +47,7 @@ namespace Splendor.Core.Actions
 
             playerReserved.Add(Card);
 
-            if (gameState.Bank[TokenColour.Gold] > 1)
+            if (gameState.Bank[TokenColour.Gold] > 0)
             {
                 if (player.Purse.Sum >= 10)
                 {

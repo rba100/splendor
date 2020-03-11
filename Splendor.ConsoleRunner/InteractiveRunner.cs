@@ -146,7 +146,13 @@ namespace Splendor.ConsoleRunner
                 var whiteSpace = i.IndexOf(' ');
                 var codes = i.Substring(whiteSpace);
                 var tokens = TokenPoolFromInput(codes);
-                return new TakeTokens(tokens, new Pool());
+                IPool tokensToReturn = new Pool();
+                var commaIndex = codes.IndexOf(',');
+                if (commaIndex != -1)
+                {
+                    tokensToReturn = TokenPoolFromInput(codes.Substring(commaIndex+1));
+                }
+                return new TakeTokens(tokens, tokensToReturn);
             };
 
             if (i.StartsWith("b"))
@@ -176,11 +182,18 @@ namespace Splendor.ConsoleRunner
                 var whiteSpace = i.IndexOf(' ');
                 var args = i.Substring(whiteSpace).Trim();
                 var tier = int.Parse(args[0].ToString());
-                if (args.Length == 1) return new ReserveFaceDownCard(tier);
+                IPool tokensToReturn = new Pool();
+                var commaIndex = args.IndexOf(',');
+                if (commaIndex != -1)
+                {
+                    tokensToReturn = TokenPoolFromInput(args.Substring(commaIndex+1));
+                }
+                var colourToReturn = tokensToReturn.Colours().Cast<TokenColour?>().SingleOrDefault();
+                if (args.Length == 1) return new ReserveFaceDownCard(tier, colourToReturn);
                 if (args[1] != '-') throw new ArgumentException($"Syntax error. Usage: 'r 1-2' for reserving the second card in tier one.");                
-                var cardIndex = int.Parse(args[2].ToString());
+                var cardIndex = int.Parse(args[2].ToString());               
                 var card = state.Tiers.Single(t => t.Tier == tier).ColumnSlots[cardIndex];
-                return new ReserveCard(card);
+                return new ReserveCard(card, colourToReturn);
             }
 
             throw new NotImplementedException("Don't know that one.");
@@ -198,6 +211,7 @@ namespace Splendor.ConsoleRunner
                     case 'u': tokens[TokenColour.Blue] += 1; break;
                     case 'b': tokens[TokenColour.Black] += 1; break;
                     case 'w': tokens[TokenColour.White] += 1; break;
+                    case ',': return tokens;
                     default: throw new ArgumentException($"Unrecognised token symbol: '${c}'");
                 }
             }

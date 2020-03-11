@@ -1,8 +1,7 @@
-﻿using Splendor.Core;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Splendor
+namespace Splendor.Core
 {
     public class DefaultCards : IGameDataSource
     {
