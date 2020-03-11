@@ -49,7 +49,7 @@ namespace Splendor.Core.Actions
                 throw new RulesViolationException("There are no face down cards remaining in tier " + Tier);
             }
 
-            if (gameState.Bank[TokenColour.Gold] > 1)
+            if (gameState.Bank[TokenColour.Gold] > 0)
             {
                 if (player.Purse.Sum >= 10)
                 {
