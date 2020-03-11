@@ -14,8 +14,9 @@
 {
     <div>
 
-        <CardStack HasCards   = "@tier.HasFaceDownCardsRemaining"
-                   CanReserve = "@CanReserve" />
+        <CardStack HasCards     = "@tier.HasFaceDownCardsRemaining"
+                   Reserve      = "@Reserve(tier.Tier)"
+                   SubmitAction = "@(a => SubmitAction(a))" />
 
         @foreach (var card in tier.ColumnSlots.Values)
         {
@@ -54,4 +55,7 @@
 
     private IAction Reserve(Splendor.Card card) =>
         CanReserve ? new ReserveCard(card) : null;
+
+    private IAction Reserve(int tier) =>
+        CanReserve ? new ReserveFaceDownCard(tier) : null;
 }

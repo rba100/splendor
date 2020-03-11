@@ -1,6 +1,9 @@
 ﻿
+@using Splendor.Core.Actions
+
 <div class="splendor-card splendor-card-stack @CanTakeClass"
-     style="visibility: @Visibility">
+     style="visibility: @Visibility"
+     @onclick="@(() => SubmitAction(Reserve))">
 </div>
 
 @code
@@ -9,9 +12,12 @@
     public bool HasCards { get; set; }
 
     [Parameter]
-    public bool CanReserve { get; set; }
+    public IAction Reserve { get; set; }
+
+    [Parameter]
+    public Action<IAction> SubmitAction { get; set; }
 
     private string Visibility => HasCards ? "visible" : "hidden";
 
-    private string CanTakeClass => CanReserve ? "splendor-cantake" : null;
+    private string CanTakeClass => Reserve is null ? null : "splendor-cantake";
 }
