@@ -146,7 +146,7 @@ body
     border-radius: 0.5vmin;
 }
 
-.splendor-player .splendor-points
+.splendor-player > .splendor-points
 {
     position:   absolute;
     margin:     0;
@@ -160,8 +160,14 @@ body
 
 .splendor-pool-label
 {
-    width:      10vmin;
+    width:      11vmin;
     display:    inline-block;
     text-align: right;
+}
+
+.splendor-reserve
+{
+    width:     200%;
+    transform: scale(0.7) translate(-22.5%, -22.5%);
 }
 /* ReSharper restore CssBrowserCompatibility */

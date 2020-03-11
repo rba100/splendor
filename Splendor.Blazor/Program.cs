@@ -35,10 +35,10 @@ namespace Splendor.Blazor
                 {
                     var gameState = gameInitialiser.Create(playerNames);
 
-                    var purse = new Pool(1, 2, 2, 2, 2, 2);
+                    var purse = new Pool(1, 2, 1, 1, 2, 2);
 
                     var players = gameState.Players.Select
-                        (p => p.Clone(withPurse: purse));
+                        (p => p.Clone(withPurse: purse, withReservedCards: gameState.Tiers.First().ColumnSlots.Values.Take(3).ToArray()));
 
                     return gameState.Clone(withPlayers: players.ToArray());
                 });

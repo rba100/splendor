@@ -1,4 +1,6 @@
 ﻿
+@using Splendor.Core.Actions
+
 <div class="splendor-player @Selected">
 
     <div class="splendor-points">
@@ -26,6 +28,24 @@
         }
     </div>
 
+    <div style="display: inline-block; width: 28.5vmin; height: 10vmin; vertical-align: top">
+        <div class="splendor-reserve">
+
+            @foreach (var card in Model.ReservedCards)
+            {
+                if (MyTurn)
+                {
+                    <Card Model="@card"
+                          CanBuy="@BuyCard.CanAffordCard(Model.Budget, card)" />
+                }
+                else
+                {
+                    <CardStack CanReserve="false" HasCards="true" />
+                }
+            }
+        </div>
+    </div>
+
 </div>
 
 @code
@@ -39,9 +59,9 @@
     private string Selected => MyTurn ? "splendor-selected" : null;
 
     private IEnumerable<(string label, IPool pool)> Pools =>
-        new [] { ("Tokens",         Model.Purse  ),
-                 ("Bonuses",        Model.Bonuses),
-                 ("\u2234 Budget",  Model.Budget ) };
+        new [] { ($"{Model.Purse.Sum}   Tokens",  Model.Purse  ),
+                 ($"{Model.Bonuses.Sum} Bonuses", Model.Bonuses),
+                 ("\u2234 Budget",                Model.Budget ) };
 
     private IEnumerable<TokenColour> Colours =>
         Model.Budget.Colours(includeGold: false).Append(TokenColour.Gold);
