@@ -1,20 +1,50 @@
 ﻿
 @page "/"
 
+@using Splendor.Core
+@using Splendor.Core.Actions
+
 @inject GameState GameState
 
-<Market Nobles      = "@GameState.Nobles.ToArray()"
-        Tiers       = "@GameState.Tiers"
-        Budget      = "@GameState.CurrentPlayer.Budget"
-        CanReserve  = "@(GameState.CurrentPlayer.ReservedCards.Count < 3)"/>
+<div style="display: inline-block">
 
-<Bank Model="@GameState.Bank" />
+    <Market Nobles       = "@GameState.Nobles.ToArray()"
+            Tiers        = "@GameState.Tiers.OrderBy(t => t.Tier).ToArray()"
+            Budget       = "@GameState.CurrentPlayer.Budget"
+            CanReserve   = "@(GameState.CurrentPlayer.ReservedCards.Count < 3)"
+            SubmitAction = "@ApplyAction" />
 
-<Player Model="@GameState.CurrentPlayer" MyTurn="true" />
+    <Bank Model="@GameState.Bank" />
 
-@foreach (var player in GameState.Players)
+</div>
+
+<div style="display: inline-block; vertical-align: top">
+   
+    @foreach (var player in Players)
+    {
+        <Player Model        = "@player"
+                MyTurn       = "@(player == GameState.CurrentPlayer)"
+                SubmitAction = "@ApplyAction" />
+    }
+
+</div>
+
+@code
 {
-    if (player == GameState.CurrentPlayer) { continue; }
+    private IEnumerable<Splendor.Player> Players => GameState.Players
+        .SkipWhile(p => p != GameState.CurrentPlayer)
+        .Concat(GameState.Players.TakeWhile(p => p != GameState.CurrentPlayer));
 
-    <Player Model="@player" MyTurn="false" />
+    private void ApplyAction(IAction action)
+    {
+        if (action is null) return;
+
+        var game = new Game(GameState);
+
+        game.CommitTurn(action);
+
+        GameState = game.State;
+
+        StateHasChanged();
+    }
 }

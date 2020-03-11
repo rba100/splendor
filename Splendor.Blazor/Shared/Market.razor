@@ -19,9 +19,10 @@
 
         @foreach (var card in tier.ColumnSlots.Values)
         {
-            <Card Model      = "@card"
-                  CanBuy     = "@BuyCard.CanAffordCard(Budget, card)"
-                  CanReserve = "@CanReserve" />
+            <Card Model        = "@card"
+                  Buy          = "@Buy(card)"
+                  Reserve      = "@Reserve(card)"
+                  SubmitAction = "@(a => SubmitAction(a))" />
         }
 
     </div>
@@ -40,4 +41,17 @@
 
     [Parameter]
     public bool CanReserve { get; set; }
+
+    [Parameter]
+    public Action<IAction> SubmitAction { get; set; }
+
+    private IAction Buy(Splendor.Card card)
+    {
+        var payment = BuyCard.CreateDefaultPaymentOrNull(Budget, card);
+
+        return payment is null ? null : new BuyCard(card, payment);
+    }
+
+    private IAction Reserve(Splendor.Card card) =>
+        CanReserve ? new ReserveCard(card) : null;
 }

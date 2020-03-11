@@ -28,15 +28,16 @@
         }
     </div>
 
-    <div style="display: inline-block; width: 28.5vmin; height: 10vmin; vertical-align: top">
-        <div class="splendor-reserve">
+    <div class="splendor-reserve">
+        <div>
 
             @foreach (var card in Model.ReservedCards)
             {
                 if (MyTurn)
                 {
-                    <Card Model="@card"
-                          CanBuy="@BuyCard.CanAffordCard(Model.Budget, card)" />
+                    <Card Model        = "@card"
+                          Buy          = "@Buy(card)"
+                          SubmitAction = "@(a => SubmitAction(a))" />
                 }
                 else
                 {
@@ -56,6 +57,9 @@
     [Parameter]
     public bool MyTurn { get; set; }
 
+    [Parameter]
+    public Action<IAction> SubmitAction { get; set; }
+
     private string Selected => MyTurn ? "splendor-selected" : null;
 
     private IEnumerable<(string label, IPool pool)> Pools =>
@@ -68,4 +72,10 @@
 
     private static string Visibility(int count) => count > 0 ? "visible"
                                                              : "hidden";
+    private IAction Buy(Splendor.Card card)
+    {
+        var payment = BuyCard.CreateDefaultPaymentOrNull(Model.Budget, card);
+
+        return payment is null ? null : new BuyCard(card, payment);
+    }
 }

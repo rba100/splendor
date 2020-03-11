@@ -167,6 +167,15 @@ body
 
 .splendor-reserve
 {
+    display:        inline-block;
+    width:          28.5vmin;
+    height:         10vmin;
+    vertical-align: top;
+    float:          right;
+}
+
+.splendor-reserve > div
+{
     width:     200%;
     transform: scale(0.7) translate(-22.5%, -22.5%);
 }

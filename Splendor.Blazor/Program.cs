@@ -1,6 +1,4 @@
 ﻿
-using System.Linq;
-
 using Microsoft.AspNetCore.Blazor.Hosting;
 using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,19 +27,7 @@ namespace Splendor.Blazor
 
                 var playerNames = new [] { "James", "Robin", "Mat" };
 
-                //services.AddTransient(_ => gameInitialiser.Create(playerNames));
-
-                services.AddTransient(_ =>
-                {
-                    var gameState = gameInitialiser.Create(playerNames);
-
-                    var purse = new Pool(1, 2, 1, 1, 2, 2);
-
-                    var players = gameState.Players.Select
-                        (p => p.Clone(withPurse: purse, withReservedCards: gameState.Tiers.First().ColumnSlots.Values.Take(3).ToArray()));
-
-                    return gameState.Clone(withPlayers: players.ToArray());
-                });
+                services.AddTransient(_ => gameInitialiser.Create(playerNames));
             }
         }
     }

@@ -1,6 +1,9 @@
 ﻿
+@using Splendor.Core.Actions
+
 <div class="splendor-card @CanBuyClass @CanTakeClass"
-     style="background: @Model.BonusGiven.CardColour()"   >
+     style="background: @Model.BonusGiven.CardColour()"
+     @onclick="@(() => SubmitAction(Buy ?? Reserve))">
 
     <div class="splendor-points" style="visibility: @PointsVisibility">
         @Model.VictoryPoints
@@ -23,16 +26,19 @@
     public Splendor.Card Model { get; set; }
 
     [Parameter]
-    public bool CanBuy { get; set; }
+    public IAction Buy { get; set; }
 
     [Parameter]
-    public bool CanReserve { get; set; }
+    public IAction Reserve { get; set; }
+
+    [Parameter]
+    public Action<IAction> SubmitAction { get; set; }
 
     private string PointsVisibility => Model.VictoryPoints > 0 ? "visible"
                                                                : "hidden";
 
-    private string CanBuyClass => CanBuy ? "splendor-canbuy" : null;
+    private string CanBuyClass => Buy is null ? null : "splendor-canbuy";
 
-    private string CanTakeClass => CanBuy || CanReserve
-                                 ? "splendor-cantake" : null;
+    private string CanTakeClass => Buy is null && Reserve is null ? null
+                                 : "splendor-cantake";
 }
