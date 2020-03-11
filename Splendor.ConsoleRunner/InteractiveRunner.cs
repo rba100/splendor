@@ -10,6 +10,8 @@ namespace Splendor.ConsoleRunner
 {
     public class InteractiveRunner
     {
+        const int marginLeft = 15;
+
         public void Run()
         {
             Console.Write("Enter name: ");
@@ -19,16 +21,18 @@ namespace Splendor.ConsoleRunner
             var names = new[] { playerName }.Concat(ais.Select(a => a.Name)).ToArray();
             var gameState = new DefaultGameInitialiser(new DefaultCards()).Create(names);
             var game = new Game(gameState);
-            while (!game.IsGameFinished)
+            while (!game.IsGameFinished) // Process a turn in each iteration
             {
-                IAction action = null;
                 var turnPlayer = game.State.CurrentPlayer;
-                if(turnPlayer.Name == playerName)
+                var isPlayerTurn = turnPlayer.Name == playerName;
+                IAction action = null;
+                if(isPlayerTurn)
                 {
                     PrintState(game);
                     bool turnComplete = false;
                     while (!turnComplete)
                     {
+                        Console.CursorLeft = marginLeft;
                         Console.Write(">");
                         var input = Console.ReadLine();
                         try
@@ -38,10 +42,11 @@ namespace Splendor.ConsoleRunner
                             {
                                 game.CommitTurn(action);
                                 turnComplete = true;
+                                Console.Clear();
                             }
                         }catch(Exception ex)
                         {
-                            Console.WriteLine("Error: " + ex.Message);
+                            Console.WriteLine(ex.Message);
                         }
                     }
 
@@ -53,10 +58,10 @@ namespace Splendor.ConsoleRunner
                     game.CommitTurn(action);
                 }
 
-                var updatedTurnPlayer = game.State.Players.Single(p => p.Name == turnPlayer.Name);
-
-                Console.WriteLine($"{updatedTurnPlayer.Name} {updatedTurnPlayer.VictoryPoints}pts, {action}");
+                var updatedTurnPlayer = game.State.Players.Single(p => p.Name == turnPlayer.Name);                
+                Console.WriteLine($"{updatedTurnPlayer.Name}, {action}");
             }
+            PrintState(game);
             Console.WriteLine("****************************************");
             Console.WriteLine(game.TopPlayer.Name + " wins!");
             Console.WriteLine("****************************************");
@@ -64,8 +69,19 @@ namespace Splendor.ConsoleRunner
 
         private void PrintState(IGame game)
         {
+            Console.CursorTop = 4;
+            // Print players
+            foreach (var p in game.State.Players)
+            {
+                PrintPlayerTerse(p);
+                Console.WriteLine();
+            }
+
+            Console.CursorTop = 4;
+
             var player = game.State.CurrentPlayer;
             var budget = player.Budget;
+            Console.CursorLeft = marginLeft;
             Console.Write("Nobles: ");
             Console.WriteLine(string.Join(",", game.State.Nobles.Select(n => n.Name).ToArray()));
             foreach(var tier in game.State.Tiers.OrderByDescending(t => t.Tier))
@@ -74,6 +90,7 @@ namespace Splendor.ConsoleRunner
                 {
                     var card = slot.Value;
                     var buyIndicator = GetBuyIndicator(card, player);
+                    Console.CursorLeft = marginLeft;
                     Console.Write($"{tier.Tier}-{slot.Key}{buyIndicator}: ");
                     PrintCardLine(card, budget);
                 }
@@ -81,32 +98,40 @@ namespace Splendor.ConsoleRunner
             foreach (var card in game.State.CurrentPlayer.ReservedCards)
             {
                 var buyIndicator = GetBuyIndicator(card, player);
+                Console.CursorLeft = marginLeft;
                 Console.Write($"Res{buyIndicator}: ");
                 PrintCardLine(card, budget);
             }
 
-            Console.Write("Bank: "); PrintTokenPoolShortWithColours(game.State.Bank); Console.WriteLine();
+            Console.CursorLeft = marginLeft; Console.Write("Bank: "); PrintTokenPoolShortWithColours(game.State.Bank); Console.WriteLine();
             var purseValues = player.Purse.Colours().Select(col => $"{player.Purse[col]} {col}").ToList();
-            Console.WriteLine($"Purse ({game.State.CurrentPlayer.Purse.Sum}): " + string.Join(", ", purseValues));
-            Console.Write("Bonuses: "); PrintTokenPoolShortWithColours(game.State.CurrentPlayer.Bonuses); Console.WriteLine();
-            Console.Write("Can afford: "); PrintTokenPoolShortWithColoursAsNumers(game.State.CurrentPlayer.Budget); Console.WriteLine();
+            Console.CursorLeft = marginLeft; Console.WriteLine($"Purse ({game.State.CurrentPlayer.Purse.Sum}): " + string.Join(", ", purseValues));
+            Console.CursorLeft = marginLeft; Console.Write("Bonuses: "); PrintTokenPoolShortWithColours(game.State.CurrentPlayer.Bonuses); Console.WriteLine();
+            Console.CursorLeft = marginLeft; Console.Write("Can afford: "); PrintTokenPoolShortWithColoursAsNumers(game.State.CurrentPlayer.Budget); Console.WriteLine();
         }
 
-        private void PrintTokenPoolShortWithColours(IPool tokenPool)
+        private void PrintTokenPoolShortWithColours(IPool tokenPool, string separator = " ")
         {
             foreach (var col in tokenPool.Colours())
             {
                 var str = new string(FromCoinColour(col)[0], tokenPool[col]);
-                Write(str + " ", ToConsole(col));
+                Write(str + separator, ToConsole(col));
             }
         }
 
-        private void PrintTokenPoolShortWithColoursAsNumers(IPool tokenPool)
+        private void PrintPlayerTerse(Player p)
+        {
+            Console.WriteLine($"{p.Name} ({p.VictoryPoints})");
+            PrintTokenPoolShortWithColours(p.Bonuses, ""); Console.WriteLine();
+            PrintTokenPoolShortWithColoursAsNumers(p.Purse, ""); Console.WriteLine();
+        }
+
+        private void PrintTokenPoolShortWithColoursAsNumers(IPool tokenPool, string separator = " ")
         {
             foreach (var col in tokenPool.Colours())
             {
                 if (tokenPool[col] == 0) continue;
-                Write(tokenPool[col] + " ", ToConsole(col));
+                Write(tokenPool[col] + separator, ToConsole(col));
             }
         }
 
