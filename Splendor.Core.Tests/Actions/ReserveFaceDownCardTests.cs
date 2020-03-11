@@ -21,6 +21,7 @@ namespace Splendor.Core.Tests.Actions
 
             Assert.AreEqual(1, nextGameState.CurrentPlayer.ReservedCards.Count());
             Assert.AreEqual(1, nextGameState.CurrentPlayer.Purse.Gold);
+            Assert.AreEqual(4, nextGameState.Bank.Gold);
         }
 
         [Test]

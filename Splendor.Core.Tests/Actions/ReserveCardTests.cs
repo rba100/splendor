@@ -23,6 +23,7 @@ namespace Splendor.Core.Tests.Actions
 
             Assert.AreEqual(card, nextGameState.CurrentPlayer.ReservedCards.Single());
             Assert.AreEqual(1, nextGameState.CurrentPlayer.Purse.Gold);
+            Assert.AreEqual(4, nextGameState.Bank.Gold);
         }
 
         [Test]

@@ -16,7 +16,6 @@ namespace Splendor.Core
         /// </summary>
         IEnumerable<TokenColour> Colours(bool includeGold = true);
         int Sum { get; }
-        bool IsZero { get; }
         int Gold { get; }
         int White { get; }
         int Blue { get; }
@@ -53,8 +52,6 @@ namespace Splendor.Core
         public int Red { get; private set; }
         public int Green { get; private set; }
         public int Black { get; private set; }
-
-        public bool IsZero => Gold == 0 && White == 0 && Blue == 0 && Red == 0 && Green == 0 && Black == 0;
 
         public int this[TokenColour index]    // Indexer declaration  
         {

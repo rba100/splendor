@@ -71,14 +71,14 @@ namespace Splendor.Core.Actions
             {
                 if (TokensToTake.Colours().Count() > 1)
                 {
-                    throw new RulesViolationException("You can take two tokens of the same colour only if you take just those two tokens.");
+                    throw new RulesViolationException("You can only take two tokens of the same colour if you take no other tokens.");
                 }
                 
                 var doubleCoinColour = TokensToTake.Colours().Single();
 
                 if (gameState.Bank[doubleCoinColour] < 4)
                 {
-                    throw new RulesViolationException("You can only take two tokens if there are four or more available.");
+                    throw new RulesViolationException("You can only take two tokens of the same colour if there are four or more available of that colour.");
                 }
             }
 
