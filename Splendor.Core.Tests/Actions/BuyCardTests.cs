@@ -44,7 +44,7 @@ namespace Splendor.Core.Tests.Actions
                 payment = BuyCard.CreateDefaultPaymentOrNull(player, card);
             else payment = BuyCard.CreateDefaultPaymentOrNull(budget, card);
 
-            Assert.AreEqual(card.Cost, payment);
+            Assert.That(PoolsAreExactlyEquivilent(card.Cost, payment));
         }
 
         [TestCase(true, TestName = "Default payment is null if cannot afford via Player")]
@@ -62,6 +62,16 @@ namespace Splendor.Core.Tests.Actions
             else payment = BuyCard.CreateDefaultPaymentOrNull(budget, card);
 
             Assert.Null(payment);
+        }
+
+        private static bool PoolsAreExactlyEquivilent(IPool a, IPool b)
+        {
+            return a.Gold == b.Gold
+                && a.Black == b.Black
+                && a.Blue == b.Blue
+                && a.Red == b.Red
+                && a.White == b.White
+                && a.Green == b.Green;
         }
     }
 }

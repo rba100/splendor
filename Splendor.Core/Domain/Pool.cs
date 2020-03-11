@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Splendor.Core
 {
-    public interface IPool : IEquatable<IPool>
+    public interface IPool
     {
         int this[TokenColour index] { get; }
         Pool CreateCopy();
@@ -40,6 +40,9 @@ namespace Splendor.Core
             Black = black;
         }
 
+        /// <summary>
+        /// Creates an empty pool.
+        /// </summary>
         public Pool()
         {
         }
@@ -147,22 +150,6 @@ namespace Splendor.Core
         public IPool WithoutGold()
         {
             return new Pool(0, White, Blue, Red, Green, Black);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Pool pool &&
-                   Gold == pool.Gold &&
-                   White == pool.White &&
-                   Blue == pool.Blue &&
-                   Red == pool.Red &&
-                   Green == pool.Green &&
-                   Black == pool.Black;
-        }
-
-        public bool Equals(IPool other)
-        {
-            return Equals((object) other);
         }
 
         public int Sum => Gold + White + Blue + Red + Green + Black;
