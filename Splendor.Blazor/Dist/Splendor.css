@@ -160,7 +160,7 @@ body
 
 .splendor-pool-label
 {
-    width:      11vmin;
+    width:      11.5vmin;
     display:    inline-block;
     text-align: right;
 }
@@ -168,7 +168,7 @@ body
 .splendor-reserve
 {
     display:        inline-block;
-    width:          28.5vmin;
+    width:          28vmin;
     height:         10vmin;
     vertical-align: top;
     float:          right;
@@ -177,6 +177,6 @@ body
 .splendor-reserve > div
 {
     width:     200%;
-    transform: scale(0.7) translate(-22.5%, -22.5%);
+    transform: scale(0.7) translate(-24%, -22.5%);
 }
 /* ReSharper restore CssBrowserCompatibility */

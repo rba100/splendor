@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 using Splendor.Core;
+using Splendor.Core.AI;
 
 using static Microsoft.AspNetCore.Blazor.Hosting.BlazorWebAssemblyHost;
 
@@ -27,9 +28,18 @@ namespace Splendor.Blazor
                 var gameInitialiser = new DefaultGameInitialiser
                     (new DefaultCards());
 
-                var playerNames = new [] { "James", "Robin", "Mat" };
+                var playerNames = new [] { nameof(StupidSplendorAi),
+                                           "Robin",
+                                           nameof(ObservantStupidSplendorAi) };
 
                 services.AddTransient(_ => gameInitialiser.Create(playerNames));
+
+                services.AddTransient(_ => new ISpendorAi[]
+                {
+                    new StupidSplendorAi(string.Empty),
+                    null,
+                    new ObservantStupidSplendorAi(string.Empty)
+                });
             }
         }
     }

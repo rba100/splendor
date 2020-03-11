@@ -19,7 +19,7 @@
                    Reserve      = "@Reserve(tier.Tier)"
                    SubmitAction = "@(a => SubmitAction(a))" />
 
-        @foreach (var card in tier.ColumnSlots.Values)
+        @foreach (var card in tier.ColumnSlots.Values.Where(c => c != null))
         {
             <Card Model        = "@card"
                   Buy          = "@Buy(card)"
@@ -39,17 +39,14 @@
     public IReadOnlyCollection<BoardTier> Tiers { get; set; }
 
     [Parameter]
-    public IPool Budget { get; set; }
-
-    [Parameter]
-    public bool CanReserve { get; set; }
+    public Core.Player Player { get; set; }
 
     [Parameter]
     public Action<IAction> SubmitAction { get; set; }
 
     private IAction Buy(Splendor.Core.Card card)
     {
-        var payment = BuyCard.CreateDefaultPaymentOrNull(Budget, card);
+        var payment = BuyCard.CreateDefaultPaymentOrNull(Player, card);
 
         return payment is null ? null : new BuyCard(card, payment);
     }
@@ -59,4 +56,6 @@
 
     private IAction Reserve(int tier) =>
         CanReserve ? new ReserveFaceDownCard(tier) : null;
+
+    private bool CanReserve => Player.ReservedCards.Count < 3;
 }
