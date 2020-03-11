@@ -1,5 +1,6 @@
 ﻿
 @using Splendor.Core
+@using Splendor.Core.Actions
 
 @using static Splendor.Core.TokenColour;
 
@@ -9,7 +10,7 @@
     {
         <div class="splendor-cost @SelectedClass(colour) splendor-cantake"
              style="color: @colour.TextColour(); background: @colour.TokenColour()"
-             @onclick="@(_ => ToggleSelect(colour))">
+             @onclick="@(_ => OnClick(colour))">
 
             @Model[colour]
         </div>
@@ -31,11 +32,41 @@
     [Parameter]
     public IPool Model { get; set; }
 
+    [Parameter]
+    public Action<IAction> SubmitAction { get; set; }
+
     private string SelectedClass(TokenColour c) => m_ColoursSelected.Contains(c)
                                                  ? "splendor-selected" : null;
-    private void ToggleSelect(TokenColour c)
+    private void OnClick(TokenColour c)
     {
-        if (!m_ColoursSelected.Remove(c)) m_ColoursSelected.Add(c);
+        if (m_ColoursSelected.Contains(c))
+        {
+            if (Model[c] >= 4)
+            {
+                SubmitAction(new TakeTokens(new Pool { [c] = 2 }));
+
+                m_ColoursSelected.Clear();
+            }
+            else m_ColoursSelected.Remove(c);
+        }
+        else
+        {
+            m_ColoursSelected.Add(c);
+
+            if (m_ColoursSelected.Count >= 3)
+            {
+                var pool = new Pool();
+
+                foreach (var colour in m_ColoursSelected)
+                {
+                    pool[colour] = 1;
+                }
+
+                SubmitAction(new TakeTokens(pool));
+
+                m_ColoursSelected.Clear();
+            }
+        }
     }
 
     private readonly ISet<TokenColour> m_ColoursSelected =
