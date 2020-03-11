@@ -5,7 +5,7 @@ using static Splendor.Core.TokenColour;
 
 namespace Splendor.Blazor
 {
-    public static class ExtensionMethods
+    internal static class ExtensionMethods
     {
         public static string CardColour(this TokenColour c) => c switch
         {
