@@ -11,7 +11,7 @@ namespace Splendor.Core
         private Dictionary<int, Card> _columnSlots;
         private Queue<Card> _faceDownCards;
 
-        internal BoardTier(int tier, IEnumerable<Card> cards, int columns)
+        public BoardTier(int tier, IEnumerable<Card> cards, int columns)
         {
             Tier = tier;
             _faceDownCards = new Queue<Card>(cards);

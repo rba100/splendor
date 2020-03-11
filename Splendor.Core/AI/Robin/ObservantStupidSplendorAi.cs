@@ -189,12 +189,9 @@ namespace Splendor.Core.AI
 
         private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player player, Card[] cards, GameState state)
         {
-            var coloursWithoutFourOf = player.Bonuses.Colours().Where(col => player.Bonuses[col] < 4).ToArray();
-
             //This feature is broken but whatever I'm doing here is somehow beneficial?!
             var coloursByNobility = state.Nobles.Select(n => player.Bonuses.DeficitFor(n.Cost)).Aggregate(new Pool(), (c, n) => c.MergeWith(n));
 
-            var coloursForNobles = state.Nobles.SelectMany(n => n.Cost.Colours()).GroupBy(c => c).ToDictionary(g => g.Key, g => g.Count());
             var bonusDesirability = GetBonusDesirability(player, cards);
 
             foreach (var card in cards)

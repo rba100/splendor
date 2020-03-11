@@ -44,7 +44,7 @@ namespace Splendor.Core.Actions
                 nextTiers.Add(nextTier);
                 playerReserved.Add(cardTaken);
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
                 throw new RulesViolationException("There are no face down cards remaining in tier " + Tier);
             }

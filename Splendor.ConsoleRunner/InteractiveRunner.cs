@@ -73,14 +73,14 @@ namespace Splendor.ConsoleRunner
                 foreach(var slot in tier.ColumnSlots.OrderBy(s=>s.Key))
                 {
                     var card = slot.Value;
-                    var buyIndicator = GetBuyIndicator(card, budget);
+                    var buyIndicator = GetBuyIndicator(card, player);
                     Console.Write($"{tier.Tier}-{slot.Key}{buyIndicator}: ");
                     PrintCardLine(card, budget);
                 }
             }
             foreach (var card in game.State.CurrentPlayer.ReservedCards)
             {
-                var buyIndicator = GetBuyIndicator(card, budget);
+                var buyIndicator = GetBuyIndicator(card, player);
                 Console.Write($"Res{buyIndicator}: ");
                 PrintCardLine(card, budget);
             }
@@ -110,7 +110,7 @@ namespace Splendor.ConsoleRunner
             }
         }
 
-        private char GetBuyIndicator(Card card, IPool budget)
+        private char GetBuyIndicator(Card card, Player player)
         {
             if (card == null) return ' ';
 
@@ -118,9 +118,9 @@ namespace Splendor.ConsoleRunner
             // '·' can almost afford
             // ' ' simply cannot afford
 
-            var buyIndicator = BuyCard.CanAffordCard(budget, card)
+            var buyIndicator = BuyCard.CanAffordCard(player, card)
                    ? '*'
-                   : budget.DeficitFor(card.Cost).Sum <= 3 ? '·' : ' ';
+                   : player.Budget.DeficitFor(card.Cost).Sum <= 3 ? '·' : ' ';
 
             return buyIndicator;
         }
