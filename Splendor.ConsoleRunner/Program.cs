@@ -12,8 +12,8 @@ namespace Splendor.ConsoleRunner
     {
         static void Main(string[] args)
         {
-            //Interactive();
-            RunDetailed();
+            Interactive();
+            //RunDetailed();
             //Run(numberOfGames: 20000, useParallelism: true);
         }
 
