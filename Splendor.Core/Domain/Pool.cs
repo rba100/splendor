@@ -3,27 +3,6 @@ using System.Collections.Generic;
 
 namespace Splendor.Core
 {
-    public interface IPool
-    {
-        int this[TokenColour index] { get; }
-        Pool CreateCopy();
-        Pool DeficitFor(IPool other);
-        Pool MergeWith(IPool other);
-        IPool WithoutGold();
-
-        /// <summary>
-        /// Returns the colours with non-zero values.
-        /// </summary>
-        IEnumerable<TokenColour> Colours(bool includeGold = true);
-        int Sum { get; }
-        int Gold { get; }
-        int White { get; }
-        int Blue { get; }
-        int Red { get; }
-        int Green { get; }
-        int Black { get; }
-    }
-
     /// <summary>
     /// When passed as IPool, class is treated as frozen by convention.
     /// </summary>
@@ -142,11 +121,6 @@ namespace Splendor.Core
             if (Red > 0) yield return TokenColour.Red;
             if (Green > 0) yield return TokenColour.Green;
             if (Black > 0) yield return TokenColour.Black;
-        }
-
-        public IPool WithoutGold()
-        {
-            return new Pool(0, White, Blue, Red, Green, Black);
         }
 
         public int Sum => Gold + White + Blue + Red + Green + Black;
