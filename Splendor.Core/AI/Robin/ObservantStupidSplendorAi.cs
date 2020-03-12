@@ -180,18 +180,20 @@ namespace Splendor.Core.AI
 
         private IEnumerable<CardFeasibilityStudy> AnalyseCards(Player player, Card[] cards, GameState state)
         {
-            //This feature is broken but whatever I'm doing here is somehow beneficial?!
-            var coloursByNobility = state.Nobles.Select(n => player.Bonuses.DeficitFor(n.Cost)).Aggregate(new Pool(), (c, n) => c.MergeWith(n));
-
+            var newColourNobility = ColourBiasForNobles(player, state);
             var bonusDesirability = GetBonusDesirability(player, cards);
 
             foreach (var card in cards)
             {
-                yield return GetCardStudy(card, state.CurrentPlayer, state.Bank, bonusDesirability, coloursByNobility);
+                yield return GetCardStudy(card, state.CurrentPlayer, state.Bank, bonusDesirability, newColourNobility);
             }
         }
 
-        private CardFeasibilityStudy GetCardStudy(Card card, Player player, IPool bank, IPool bonusDesirability, Pool coloursByNobility)
+        private CardFeasibilityStudy GetCardStudy(Card card,
+                                                  Player player,
+                                                  IPool bank,
+                                                  IPool bonusDesirability,
+                                                  Dictionary<TokenColour, decimal> newColourNobility)
         {
             var deficit = player.Budget.DeficitFor(card.Cost);
             var deficitSum = Math.Max(0, deficit.Sum - player.Purse.Gold);
@@ -201,9 +203,27 @@ namespace Splendor.Core.AI
                 + _options.Biases.FromScarcity(scarcity)
                 + _options.Biases.FromVictoryPoints(card.VictoryPoints)
                 + _options.Biases.FromCardBonus(bonusDesirability, card.BonusGiven)
-                + _options.Biases.FromNobleDeficit(coloursByNobility[card.BonusGiven]);
+                + newColourNobility[card.BonusGiven];
 
             return new CardFeasibilityStudy { Card = card, Deficit = deficit, Repulsion = repulsion, DeficitWithGold = deficitSum };
+        }
+
+        private Dictionary<TokenColour, decimal> ColourBiasForNobles(Player player, GameState state)
+        {
+            var biases = Utility.AllColours().ToDictionary(c => c, c => 0m);
+            if (!_options.LooksAtNobles) return biases;
+            var bonuses = player.Bonuses;
+            var noblesAsDeficits = state.Nobles.Select(n => bonuses.DeficitFor(n.Cost)).ToArray();
+            var coloursPresent = noblesAsDeficits.SelectMany(d => d.Colours()).Distinct();
+            foreach (var colour in coloursPresent)
+            {
+                var noblesWithThatColour = noblesAsDeficits.Where(d => d[colour] > 0).ToArray();
+                var sharedBy = noblesWithThatColour.Length;
+                var distance = noblesWithThatColour.Select(d => d.Sum).Min();
+                biases[colour] += sharedBy * _options.Biases.NobleColourSharedBias;
+                biases[colour] += distance * _options.Biases.NobleColourCloseBias;
+            }
+            return biases;
         }
 
         private IPool GetBonusDesirability(Player player, Card[] cards)
@@ -245,12 +265,13 @@ namespace Splendor.Core.AI
         public bool IsTheiving { get; set; } = true;
         public bool LooksAhead { get; set; } = true;
         public bool CanTakeTwo { get; set; } = true;
+        public bool LooksAtNobles { get; set; } = true;
 
         /// <summary>
         /// Performs a random reserve as a last resort.
         /// </summary>
         public bool RandomReserves { get; set; } = true;
-        public bool PhasesGame { get; set; } = false;        
+        public bool PhasesGame { get; set; } = false;     
 
         /// <summary>
         /// Buys a victory point card if able, ignoring other actions.
@@ -262,14 +283,11 @@ namespace Splendor.Core.AI
 
     public class BiasValues
     {
+        public decimal NobleColourSharedBias { get; set; } = -0.9m;
+        public decimal NobleColourCloseBias { get; set; } = -0.2m;
         // Bias values modify 'repulsion'. I.e. good things have low or negative values
         public Func<int, decimal> FromVictoryPoints { get; set; } = vp => -vp * 0.5m;
         public Func<int, decimal> FromScarcity { get; set; } = s => s * 10m;
-
-        /// <summary>
-        /// This feature is broken but is somehow beneficial.
-        /// </summary>
-        public Func<int, decimal> FromNobleDeficit { get; set; } = d => (2-d) / 3m;
         public Func<IPool, TokenColour, decimal> FromCardBonus { get; set; } = (cr,col) => -cr[col] * 0.5m;
     }
 }
