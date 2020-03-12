@@ -231,7 +231,8 @@ namespace Splendor.Core.AI
             var pool = new Pool();
             foreach(var card in cards.Where(c=>c.VictoryPoints > 1))
             {
-                var colours = player.Bonuses.DeficitFor(card.Cost).Colours();
+                var deficit = player.Bonuses.DeficitFor(card.Cost);
+                var colours = deficit.Colours();
                 foreach(var colour in colours) pool[colour]++;
             }
             return pool;
@@ -264,7 +265,7 @@ namespace Splendor.Core.AI
     {
         public bool IsTheiving { get; set; } = true;
         public bool LooksAhead { get; set; } = true;
-        public bool CanTakeTwo { get; set; } = true;
+        public bool CanTakeTwo { get; set; } = false;
         public bool LooksAtNobles { get; set; } = true;
 
         /// <summary>
