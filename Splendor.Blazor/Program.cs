@@ -1,46 +1,42 @@
 ﻿
 using Microsoft.AspNetCore.Blazor.Hosting;
-using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 using Splendor.Core;
 using Splendor.Core.AI;
 
-using static Microsoft.AspNetCore.Blazor.Hosting.BlazorWebAssemblyHost;
-
 namespace Splendor.Blazor
 {
-    public class Program
+    public sealed class Program
     {
-        public static void Main() => CreateDefaultBuilder()
-                                    .UseBlazorStartup<Startup>()
-                                    .Build()
-                                    .Run();
-
-        public sealed class Startup
+        public static void Main()
         {
-            // ReSharper disable once UnusedMember.Global
-            public void Configure(IComponentsApplicationBuilder app) =>
-                app.AddComponent<App>("app");
+            var builder = WebAssemblyHostBuilder.CreateDefault();
 
-            public void ConfigureServices(IServiceCollection services)
+            builder.RootComponents.Add<App>("app");
+
+            builder.Services.AddTransient(_ => CreateGame());
+
+            builder.Services.AddTransient(_ => new ISpendorAi[]
             {
-                var gameInitialiser = new DefaultGameInitialiser
-                    (new DefaultCards());
+                new StupidSplendorAi(string.Empty),
+                null,
+                new ObservantStupidSplendorAi(string.Empty)
+            });
 
-                var playerNames = new [] { nameof(StupidSplendorAi),
-                                           "Robin",
-                                           nameof(ObservantStupidSplendorAi) };
+            builder.Build().RunAsync();
+        }
 
-                services.AddTransient(_ => gameInitialiser.Create(playerNames));
+        private static GameState CreateGame()
+        {
+            var gameInitialiser = new DefaultGameInitialiser
+                (new DefaultCards());
 
-                services.AddTransient(_ => new ISpendorAi[]
-                {
-                    new StupidSplendorAi(string.Empty),
-                    null,
-                    new ObservantStupidSplendorAi(string.Empty)
-                });
-            }
+            var playerNames = new [] { nameof(StupidSplendorAi),
+                                       "Robin",
+                                       nameof(ObservantStupidSplendorAi) };
+
+            return gameInitialiser.Create(playerNames);
         }
     }
 }
