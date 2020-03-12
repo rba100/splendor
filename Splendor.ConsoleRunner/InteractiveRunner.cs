@@ -10,7 +10,7 @@ namespace Splendor.ConsoleRunner
 {
     public class InteractiveRunner
     {
-        const int marginLeft = 15;
+        const int marginLeft = 30;
 
         public void Run()
         {
