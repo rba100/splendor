@@ -1,0 +1,182 @@
+﻿
+/* ReSharper disable CssBrowserCompatibility */
+body
+{
+    font-size: 2.25vmin;
+}
+
+.splendor-card
+{
+    width:          8.5vmin;
+    height:         11vmin;
+    margin:         2vmin;
+    border-radius:  1vmin;
+    border:         0.25vmin solid gray;
+    box-shadow:     0.5vmin 0.5vmin lightgray;
+    display:        inline-block;
+    padding:        0.5vmin;
+    vertical-align: top;
+}
+
+.splendor-canbuy
+{
+    box-shadow: 0.5vmin 0.5vmin gold;
+}
+
+.splendor-card:hover
+{
+    opacity: 0.5;
+}
+
+.splendor-cantake:hover
+{
+    opacity:    1;
+    box-shadow: none;
+    transform:  scale(1.2)
+}
+
+.splendor-cost
+{
+    display:       inline-block;
+    margin:        0.5vmin;
+    width:         2.8vmin;
+    height:        2.8vmin;
+    text-align:    center;
+    border-radius: 100%;
+}
+
+.splendor-points
+{
+    margin:        0.125vmin 0 0.5vmin 2.8vmin;
+    width:         2.8vmin;
+    height:        2.8vmin;
+    text-align:    center;
+    background:    radial-gradient(circle at 50%, gold, transparent);
+    border-radius: 100%;
+}
+
+.splendor-noble
+{
+    width:          8.5vmin;
+    height:         8.5vmin;
+    margin:         2vmin;
+    border-radius:  1vmin;
+    border:         0.25vmin solid gray;
+    box-shadow:     0.5vmin 0.5vmin lightgray;
+    display:        inline-block;
+    padding:        0.5vmin;
+    vertical-align: top;
+    background:     radial-gradient(circle at 50%, #e8b50c, #bd971a);
+}
+
+.splendor-nobles
+{
+    padding-left: 14.5vmin;
+}
+
+.splendor-noble:after
+{
+    content:       "3";
+    float:         right;
+    margin:        0.5vmin;
+    margin-right:  1vmin;
+    width:         2.8vmin;
+    height:        2.8vmin;
+    text-align:    center;
+    background:    radial-gradient(circle at 50%, gold, transparent);
+    border-radius: 100%;
+}
+
+.splendor-bonus
+{
+    display:       inline-block;
+    margin:        0.5vmin;
+    width:         2.8vmin;
+    height:        2.8vmin;
+    text-align:    center;
+    border-radius: 0.5vmin;
+}
+
+.splendor-bank
+{
+    margin:          2vmin;
+    padding:         0 1vmin;
+    width:           66.5vmin;
+    background:      lightgrey;
+    border-radius:   0.5vmin;
+    height:          6vmin;
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+}
+
+.splendor-bank .splendor-cost
+{
+    border: 0.4vmin solid transparent;
+}
+
+.splendor-bank .splendor-cost.splendor-selected
+{
+    transform: scale(1.2);
+    border:    0.4vmin solid yellow;
+}
+
+.splendor-card-stack
+{
+    text-align: center;
+    background: repeating-linear-gradient(45deg,
+                                          #909090,
+                                          #909090 1vmin,
+                                          #808080 1vmin,
+                                          #808080 2vmin);
+}
+
+.splendor-player-name
+{
+    text-align:    center;
+    margin-bottom: 1vmin;
+}
+
+.splendor-player
+{
+    margin:        2vmin;
+    padding:       0 1vmin;
+    width:         66.5vmin;
+    background:    lightgrey;
+    border-radius: 0.5vmin;
+}
+
+.splendor-player > .splendor-points
+{
+    position:   absolute;
+    margin:     0;
+    margin-top: 1vmin;
+}
+
+.splendor-player.splendor-selected
+{
+    background: radial-gradient(circle at 50%, lightblue, grey);
+}
+
+.splendor-pool-label
+{
+    width:      11.5vmin;
+    display:    inline-block;
+    text-align: right;
+}
+
+.splendor-reserve
+{
+    display:        inline-block;
+    width:          28vmin;
+    height:         10vmin;
+    vertical-align: top;
+    float:          right;
+}
+
+.splendor-reserve > div
+{
+    width:     200%;
+    transform: scale(0.7) translate(-24%, -22.5%);
+}
+/* ReSharper restore CssBrowserCompatibility */

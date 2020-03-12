@@ -1,0 +1,19 @@
+﻿
+<div class="splendor-noble">
+
+    @foreach (var colour in Model.Cost.Colours())
+    {
+        <div class="splendor-bonus"
+             style="color: @colour.TextColour(); background: @colour.CardColour()">
+
+            @Model.Cost[colour]
+        </div>
+    }
+
+</div>
+
+@code
+{
+    [Parameter]
+    public Splendor.Core.Noble Model { get; set; }
+}

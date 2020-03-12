@@ -1,0 +1,81 @@
+﻿
+@page "/"
+
+@using Splendor.Core
+@using Splendor.Core.Actions
+@using Splendor.Core.AI
+
+@inject GameState InitialGameState
+
+@inject ISpendorAi[] AIs;
+
+<div style="display: inline-block">
+
+    <Market Nobles       = "@m_Game.State.Nobles.ToArray()"
+            Tiers        = "@m_Game.State.Tiers.OrderBy(t => t.Tier).ToArray()"
+            Player       = "@m_Game.State.CurrentPlayer"
+            SubmitAction = "@ApplyAction" />
+
+    <Bank Model             = "@m_Game.State.Bank"
+          SubmitAction      = "@ApplyAction"
+          AddActionReaction = "@AddActionReaction" />
+</div>
+
+<div style="display: inline-block; vertical-align: top">
+   
+    @foreach (var player in Players)
+    {
+        <Player Model        = "@player"
+                MyTurn       = "@(player == m_Game.State.CurrentPlayer)"
+                SubmitAction = "@ApplyAction" />
+    }
+
+</div>
+
+@code
+{
+    private IEnumerable<Core.Player> Players => m_Game.State.Players
+        .SkipWhile(p => p != m_Game.State.CurrentPlayer)
+        .Concat(m_Game.State.Players.TakeWhile(p => p != m_Game.State.CurrentPlayer));
+
+    private void AddActionReaction(Action reaction) =>
+        m_ActionReactions.Add(reaction);
+
+    private Game m_Game;
+
+    protected override void OnInitialized()
+    {
+        m_Game = new Game(InitialGameState);
+
+        AdvanceOverAis();
+    }
+
+    private void ApplyAction(IAction action)
+    {
+        if (action is null || m_Game.IsGameFinished) return;
+
+        m_Game.CommitTurn(action);
+
+        AdvanceOverAis();
+
+        m_ActionReactions.ForEach(r => r());
+
+        StateHasChanged();
+    }
+
+    private void AdvanceOverAis()
+    {
+        while (!m_Game.IsGameFinished && CurrentAi != null)
+        {
+            m_Game.CommitTurn(CurrentAi.ChooseAction(m_Game.State));
+        }
+    }
+
+    private ISpendorAi CurrentAi => AIs
+        [m_Game.State.Players
+               .Select((player, index) => (player, index))
+               .Single(t => t.player == m_Game.State.CurrentPlayer)
+               .index];
+
+    private readonly List<Action> m_ActionReactions = new List<Action>();
+}
