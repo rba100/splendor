@@ -16,9 +16,9 @@ namespace Splendor.AIs.Unofficial.Actions
         /// </summary>
         ///
         /// <remarks>
-        /// Never returns null, never contains a null enumeration or action.
-        /// Inner enumerations are never empty. Both the outer and inner
-        /// enumerations may be lazy and should not be repeatedly evaluated.
+        /// Never returns null, never contains a null enumeration
+        /// or action. Both the outer and inner can be empty and
+        /// may be lazy and should not be repeatedly evaluated.
         /// </remarks>
         ///
         /// <returns>

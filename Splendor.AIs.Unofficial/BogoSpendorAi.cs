@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Linq;
 
 using Splendor.AIs.Unofficial.Actions;
 using Splendor.Core;
@@ -22,9 +23,27 @@ namespace Splendor.AIs.Unofficial
 
         public IActionEnumerator ActionEnumerator { private get; set; }
 
-        public IAction ChooseAction(GameState gameState) =>
-            ActionEnumerator.GenerateValidActionVariations(gameState)
-                            .GetRandomItem(Random)
-                            .GetRandomItem(Random);
+        public IAction ChooseAction(GameState gameState)
+        {
+            var actionVariations = ActionEnumerator
+                                  .GenerateValidActionVariations(gameState)
+                                  .ToList();
+
+            while (actionVariations.Any())
+            {
+                var index = Random.Next(actionVariations.Count);
+
+                var actions = actionVariations[index].ToArray();
+
+                if (actions.Any())
+                {
+                    return actions[Random.Next(actions.Length)];
+                }
+                
+                actionVariations.RemoveAt(index);
+            }
+
+            return new NoAction();
+        }
     }
 }
