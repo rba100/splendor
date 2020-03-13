@@ -42,7 +42,7 @@ namespace Splendor.Core.AI
             /* BEHAVIOUR */
 
             // Check to see if a player can win (including me)
-            if (_options.IsTheiving) foreach (var player in gameState.Players.OrderByDescending(p => p == me))
+            if (_options.IsThieving) foreach (var player in gameState.Players.OrderByDescending(p => p == me))
             {
                 var score = player.VictoryPoints;
 
@@ -66,14 +66,6 @@ namespace Splendor.Core.AI
                 var winningCard = winCards.First();
                 if (cardsICanBuy.Contains(winningCard)) return new BuyCard(winningCard, BuyCard.CreateDefaultPaymentOrNull(me, winningCard));
                 if (player != me && me.ReservedCards.Count < 3) return new ReserveCard(winningCard);
-            }
-
-            // Buy a 2 or greater victory point card if possible
-            if(_options.Greedy) foreach (var card in cardsICanBuy.Where(c => c.VictoryPoints > 1)
-                                                                 .OrderByDescending(c => c.VictoryPoints))
-            {
-                var payment = BuyCard.CreateDefaultPaymentOrNull(me, card);
-                return new BuyCard(card, payment);
             }
 
             // Buy favourite card if possible
@@ -263,7 +255,7 @@ namespace Splendor.Core.AI
 
     public class AiOptions
     {
-        public bool IsTheiving { get; set; } = true;
+        public bool IsThieving { get; set; } = true;
         public bool LooksAhead { get; set; } = true;
         public bool CanTakeTwo { get; set; } = false;
         public bool LooksAtNobles { get; set; } = true;
@@ -272,13 +264,6 @@ namespace Splendor.Core.AI
         /// Performs a random reserve as a last resort.
         /// </summary>
         public bool RandomReserves { get; set; } = true;
-        public bool PhasesGame { get; set; } = false;     
-
-        /// <summary>
-        /// Buys a victory point card if able, ignoring other actions.
-        /// </summary>
-        public bool Greedy { get; set; } = false;
-
         public BiasValues Biases { get; } = new BiasValues();
     }
 
