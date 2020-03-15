@@ -1,0 +1,44 @@
+﻿
+@using Splendor.Core.Actions
+
+<div class="splendor-card @CanBuyClass @CanTakeClass"
+     style="background: @Model.BonusGiven.CardColour()"
+     @onclick="@(() => SubmitAction(Buy ?? Reserve))">
+
+    <div class="splendor-points" style="visibility: @PointsVisibility">
+        @Model.VictoryPoints
+    </div>
+    
+    @foreach (var colour in Model.Cost.Colours())
+    {
+        <div class="splendor-cost"
+             style="color: @colour.TextColour(); background: @colour.TokenColour()">
+
+            @Model.Cost[colour]
+        </div>
+    }
+
+</div>
+
+@code
+{
+    [Parameter]
+    public Splendor.Core.Card Model { get; set; }
+
+    [Parameter]
+    public IAction Buy { get; set; }
+
+    [Parameter]
+    public IAction Reserve { get; set; }
+
+    [Parameter]
+    public Action<IAction> SubmitAction { get; set; }
+
+    private string PointsVisibility => Model.VictoryPoints > 0 ? "visible"
+                                                               : "hidden";
+
+    private string CanBuyClass => Buy is null ? null : "splendor-canbuy";
+
+    private string CanTakeClass => Buy is null && Reserve is null ? null
+                                 : "splendor-cantake";
+}

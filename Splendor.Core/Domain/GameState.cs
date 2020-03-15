@@ -20,13 +20,13 @@ namespace Splendor.Core
             _currentPlayerIndex = currentPlayerIndex;
         }
 
-        public IPool Bank { get; private set; }
-        public ICollection<Noble> Nobles { get; private set; }
-        public IReadOnlyCollection<BoardTier> Tiers { get; private set; }
-        public IReadOnlyCollection<Player> Players { get; private set; }
+        public IPool Bank { get; }
+        public ICollection<Noble> Nobles { get; }
+        public IReadOnlyCollection<BoardTier> Tiers { get; }
+        public IReadOnlyCollection<Player> Players { get; }
         public Player CurrentPlayer => Players.Skip(_currentPlayerIndex).First();
 
-        private int _currentPlayerIndex = 0;
+        private readonly int _currentPlayerIndex;
 
         public GameState Clone(IPool withTokensAvailable = null,
                                ICollection<Noble> withNobles = null,
@@ -58,11 +58,7 @@ namespace Splendor.Core
         /// </summary>
         public GameState CloneWithPlayerReplacedByName(Player player)
         {
-            var nextPlayers = new List<Player>();
-            foreach (var p in Players) if (p.Name == player.Name)
-                    nextPlayers.Add(player);
-                else nextPlayers.Add(p);
-
+            var nextPlayers = Players.Select(p => p.Name == player.Name ? player : p).ToList();
             return Clone(withPlayers: nextPlayers);
         }
     }

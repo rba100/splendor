@@ -1,0 +1,61 @@
+﻿
+@using Splendor.Core
+@using Splendor.Core.Actions
+
+<div class="splendor-nobles">
+
+    @foreach (var noble in Nobles)
+    {
+        <Noble Model="@noble" />
+    }
+
+</div>
+
+@foreach (var tier in Tiers.Reverse())
+{
+    <div>
+
+        <CardStack HasCards     = "@tier.HasFaceDownCardsRemaining"
+                   Reserve      = "@Reserve(tier.Tier)"
+                   SubmitAction = "@(a => SubmitAction(a))" />
+
+        @foreach (var card in tier.ColumnSlots.Values.Where(c => c != null))
+        {
+            <Card Model        = "@card"
+                  Buy          = "@Buy(card)"
+                  Reserve      = "@Reserve(card)"
+                  SubmitAction = "@(a => SubmitAction(a))" />
+        }
+
+    </div>
+}
+
+@code
+{
+    [Parameter]
+    public IReadOnlyCollection<Splendor.Core.Noble> Nobles { get; set; }
+
+    [Parameter]
+    public IReadOnlyCollection<BoardTier> Tiers { get; set; }
+
+    [Parameter]
+    public Core.Player Player { get; set; }
+
+    [Parameter]
+    public Action<IAction> SubmitAction { get; set; }
+
+    private IAction Buy(Splendor.Core.Card card)
+    {
+        var payment = BuyCard.CreateDefaultPaymentOrNull(Player, card);
+
+        return payment is null ? null : new BuyCard(card, payment);
+    }
+
+    private IAction Reserve(Splendor.Core.Card card) =>
+        CanReserve ? new ReserveCard(card) : null;
+
+    private IAction Reserve(int tier) =>
+        CanReserve ? new ReserveFaceDownCard(tier) : null;
+
+    private bool CanReserve => Player.ReservedCards.Count < 3;
+}

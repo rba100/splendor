@@ -1,0 +1,82 @@
+﻿
+@using Splendor.Core
+@using Splendor.Core.Actions
+
+@using static Splendor.Core.TokenColour;
+
+<div class="splendor-bank">
+
+    @foreach (var colour in Model.Colours(includeGold: false))
+    {
+        <div class="splendor-cost @SelectedClass(colour) splendor-cantake"
+             style="color: @colour.TextColour(); background: @colour.TokenColour()"
+             @onclick="@(_ => OnClick(colour))">
+
+            @Model[colour]
+        </div>
+    }
+
+    @if (Model.Gold > 0)
+    {
+        <div class="splendor-cost @SelectedClass(Gold)"
+             style="color: @Gold.TextColour(); background: @Gold.TokenColour()">
+
+            @Model[Gold]
+        </div>
+    }
+
+</div>
+
+@code
+{
+    [Parameter]
+    public IPool Model { get; set; }
+
+    [Parameter]
+    public Action<IAction> SubmitAction { get; set; }
+
+    [Parameter]
+    public Action<Action> AddActionReaction { get; set; }
+
+    protected override void OnInitialized() =>
+        AddActionReaction(m_ColoursSelected.Clear);
+
+    private string SelectedClass(TokenColour c) => m_ColoursSelected.Contains(c)
+                                                 ? "splendor-selected" : null;
+    private void OnClick(TokenColour c)
+    {
+        if (m_ColoursSelected.Contains(c))
+        {
+            if (Model[c] >= 4)
+            {
+                SubmitAction(new AutoReturnTakeTokens(new Pool { [c] = 2 }));
+
+                m_ColoursSelected.Clear();
+            }
+            else m_ColoursSelected.Remove(c);
+        }
+        else
+        {
+            m_ColoursSelected.Add(c);
+
+            if (   m_ColoursSelected.Count >= 3
+                || (    m_ColoursSelected.Count
+                    == Model.Colours(includeGold: false).Count()))
+            {
+                var pool = new Pool();
+
+                foreach (var colour in m_ColoursSelected)
+                {
+                    pool[colour] = 1;
+                }
+
+                SubmitAction(new AutoReturnTakeTokens(pool));
+
+                m_ColoursSelected.Clear();
+            }
+        }
+    }
+
+    private readonly ISet<TokenColour> m_ColoursSelected =
+        new SortedSet<TokenColour>();
+}

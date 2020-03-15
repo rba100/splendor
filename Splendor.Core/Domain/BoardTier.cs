@@ -1,5 +1,4 @@
 ﻿
-using Splendor.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +7,8 @@ namespace Splendor.Core
 {
     public sealed class BoardTier
     {
-        private Dictionary<int, Card> _columnSlots;
-        private Queue<Card> _faceDownCards;
+        private readonly Dictionary<int, Card> _columnSlots;
+        private readonly Queue<Card> _faceDownCards;
 
         public BoardTier(int tier, IEnumerable<Card> cards, int columns)
         {
@@ -47,8 +46,8 @@ namespace Splendor.Core
             return (new BoardTier(Tier, _columnSlots.CreateCopy(), q), card);
         }
 
-        public int Tier { get; private set; }
+        public int Tier { get; }
         public bool HasFaceDownCardsRemaining => _faceDownCards.Count > 0;
-        public IReadOnlyDictionary<int, Card> ColumnSlots { get => _columnSlots; }
+        public IReadOnlyDictionary<int, Card> ColumnSlots => _columnSlots;
     }
 }

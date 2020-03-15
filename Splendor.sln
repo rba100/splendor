@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splendor.Core", "Splendor.C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splendor.ConsoleRunner", "Splendor.ConsoleRunner\Splendor.ConsoleRunner.csproj", "{0B399E6F-6709-490B-BA05-1040D414DC1C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splendor.Blazor", "Splendor.Blazor\Splendor.Blazor.csproj", "{596E3C17-F250-46BF-8E8E-3621324BA232}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Splendor.Core.Tests", "Splendor.Core.Tests\Splendor.Core.Tests.csproj", "{A48D1A8C-D31B-4CC0-869E-A657C00151A2}"
 EndProject
 Global
@@ -23,6 +25,10 @@ Global
 		{0B399E6F-6709-490B-BA05-1040D414DC1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B399E6F-6709-490B-BA05-1040D414DC1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B399E6F-6709-490B-BA05-1040D414DC1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{596E3C17-F250-46BF-8E8E-3621324BA232}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{596E3C17-F250-46BF-8E8E-3621324BA232}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{596E3C17-F250-46BF-8E8E-3621324BA232}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{596E3C17-F250-46BF-8E8E-3621324BA232}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A48D1A8C-D31B-4CC0-869E-A657C00151A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A48D1A8C-D31B-4CC0-869E-A657C00151A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A48D1A8C-D31B-4CC0-869E-A657C00151A2}.Release|Any CPU.ActiveCfg = Release|Any CPU

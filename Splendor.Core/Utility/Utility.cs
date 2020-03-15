@@ -30,5 +30,15 @@ namespace Splendor.Core
         {
             return dictionary.ToDictionary(d => d.Key, d => d.Value);
         }
+
+        public static IEnumerable<TokenColour> AllColours(bool withGold = false)
+        {
+            if (withGold) yield return TokenColour.Gold;
+            yield return TokenColour.White;
+            yield return TokenColour.Blue;
+            yield return TokenColour.Red;
+            yield return TokenColour.Green;
+            yield return TokenColour.Black;
+        }
     }
 }
