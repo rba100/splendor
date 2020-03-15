@@ -22,6 +22,7 @@ namespace Splendor.Core.AI
             /* PRE-CALCULATIONS */
 
             var me = gameState.CurrentPlayer;
+            var otherPlayers = gameState.Players.Where(p=> p != me);
 
             bool CanBuy(Card card) => BuyCard.CanAffordCard(me, card);
 
@@ -66,6 +67,25 @@ namespace Splendor.Core.AI
                 var winningCard = winCards.First();
                 if (cardsICanBuy.Contains(winningCard)) return new BuyCard(winningCard, BuyCard.CreateDefaultPaymentOrNull(me, winningCard));
                 if (player != me && me.ReservedCards.Count < 3) return new ReserveCard(winningCard);
+            }
+
+            // If the second best card isn't very appealing, then check to see if I should reserve the first.
+            if (_options.IsVeryTheiving && myOrderedCardStudy.Length > 1)
+            {
+                var first = myOrderedCardStudy.First();
+                var second = myOrderedCardStudy.Skip(1).First();
+                var firstCardIsTheOnlyGoodOne = second.Repulsion - first.Repulsion
+                    > _options.Biases.RelativeCardValueThresholdForReservation;
+                var otherPlayerCanBuy = otherPlayers.Any(p => BuyCard.CanAffordCard(p, first.Card));
+                var iCanAffordIfReserve = first.DeficitWithGold == 1;
+                if (firstCardIsTheOnlyGoodOne
+                    && otherPlayerCanBuy
+                    && iCanAffordIfReserve
+                    && me.ReservedCards.Count < 3
+                    && !me.ReservedCards.Contains(first.Card))
+                {
+                    return new ReserveCard(first.Card);
+                }
             }
 
             // Buy favourite card if possible
@@ -256,6 +276,7 @@ namespace Splendor.Core.AI
     public class AiOptions
     {
         public bool IsThieving { get; set; } = true;
+        public bool IsVeryTheiving { get; set; } = false;
         public bool LooksAhead { get; set; } = true;
         public bool CanTakeTwo { get; set; } = false;
         public bool LooksAtNobles { get; set; } = true;
@@ -275,5 +296,6 @@ namespace Splendor.Core.AI
         public Func<int, decimal> FromVictoryPoints { get; set; } = vp => -vp * 0.5m;
         public Func<int, decimal> FromScarcity { get; set; } = s => s * 10m;
         public Func<IPool, TokenColour, decimal> FromCardBonus { get; set; } = (cr,col) => -cr[col] * 0.5m;
+        public decimal RelativeCardValueThresholdForReservation = 1m;
     }
 }
