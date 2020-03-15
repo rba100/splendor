@@ -74,11 +74,10 @@ namespace Splendor.Core.AI
             {
                 var first = myOrderedCardStudy.First();
                 var second = myOrderedCardStudy.Skip(1).First();
-                var firstCardIsTheOnlyGoodOne = second.Repulsion - first.Repulsion
-                    > _options.Biases.RelativeCardValueThresholdForReservation;
+                var firstIsAmazing = first.Repulsion < -5;
                 var otherPlayerCanBuy = otherPlayers.Any(p => BuyCard.CanAffordCard(p, first.Card));
                 var iCanAffordIfReserve = first.DeficitWithGold == 1;
-                if (firstCardIsTheOnlyGoodOne
+                if (firstIsAmazing
                     && otherPlayerCanBuy
                     && iCanAffordIfReserve
                     && me.ReservedCards.Count < 3
@@ -296,6 +295,6 @@ namespace Splendor.Core.AI
         public Func<int, decimal> FromVictoryPoints { get; set; } = vp => -vp * 0.5m;
         public Func<int, decimal> FromScarcity { get; set; } = s => s * 10m;
         public Func<IPool, TokenColour, decimal> FromCardBonus { get; set; } = (cr,col) => -cr[col] * 0.5m;
-        public decimal RelativeCardValueThresholdForReservation = 1m;
+        public decimal RelativeCardValueThresholdForReservation = 10m;
     }
 }
