@@ -14,18 +14,16 @@ namespace Splendor.AIs.Unofficial
     ///
     public sealed class BogoSpendorAi : ISpendorAi
     {
-        public string Name => nameof(BogoSpendorAi);
+        public string Name { get; } = $"{Guid.NewGuid()}";
 
         /// <remarks>Instances of Random must not be shared
         ///          if there is any chance of concurrency</remarks>
         ///
         public Random Random { private get; set; } = new Random();
 
-        public IActionEnumerator ActionEnumerator { private get; set; }
-
         public IAction ChooseAction(GameState gameState)
         {
-            var actionVariations = ActionEnumerator
+            var actionVariations = m_ActionEnumerator
                                   .GenerateValidActionVariations(gameState)
                                   .ToList();
 
@@ -45,5 +43,10 @@ namespace Splendor.AIs.Unofficial
 
             return new NoAction();
         }
+
+        private IActionEnumerator m_ActionEnumerator =
+            new CompositeActionEnumerator(new TakeTokensActionEnumerator(),
+                                          new BuyCardActionEnumerator(),
+                                          new ReserveCardActionEnumerator());
     }
 }
