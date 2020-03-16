@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Blazor.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
+using Splendor.AIs.Unofficial;
 using Splendor.Core;
 using Splendor.Core.AI;
 
@@ -21,7 +22,8 @@ namespace Splendor.Blazor
             {
                 new StupidSplendorAi(string.Empty),
                 null,
-                new ObservantStupidSplendorAi(string.Empty)
+                new ObservantStupidSplendorAi(string.Empty),
+                new BogoSpendorAi()
             });
 
             builder.Build().RunAsync();
@@ -34,7 +36,8 @@ namespace Splendor.Blazor
 
             var playerNames = new [] { nameof(StupidSplendorAi),
                                        "Robin",
-                                       nameof(ObservantStupidSplendorAi) };
+                                       nameof(ObservantStupidSplendorAi),
+                                       nameof(BogoSpendorAi) };
 
             return gameInitialiser.Create(playerNames);
         }
