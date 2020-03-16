@@ -22,6 +22,7 @@ namespace Splendor.Core.AI
             /* PRE-CALCULATIONS */
 
             var me = gameState.CurrentPlayer;
+            var otherPlayers = gameState.Players.Where(p=> p != me);
 
             bool CanBuy(Card card) => BuyCard.CanAffordCard(me, card);
 
@@ -42,7 +43,7 @@ namespace Splendor.Core.AI
             /* BEHAVIOUR */
 
             // Check to see if a player can win (including me)
-            if (_options.IsTheiving) foreach (var player in gameState.Players.OrderByDescending(p => p == me))
+            if (_options.IsThieving) foreach (var player in gameState.Players.OrderByDescending(p => p == me))
             {
                 var score = player.VictoryPoints;
 
@@ -68,12 +69,22 @@ namespace Splendor.Core.AI
                 if (player != me && me.ReservedCards.Count < 3) return new ReserveCard(winningCard);
             }
 
-            // Buy a 2 or greater victory point card if possible
-            if(_options.Greedy) foreach (var card in cardsICanBuy.Where(c => c.VictoryPoints > 1)
-                                                                 .OrderByDescending(c => c.VictoryPoints))
+            // If the second best card isn't very appealing, then check to see if I should reserve the first.
+            if (_options.IsVeryTheiving && myOrderedCardStudy.Length > 1)
             {
-                var payment = BuyCard.CreateDefaultPaymentOrNull(me, card);
-                return new BuyCard(card, payment);
+                var first = myOrderedCardStudy.First();
+                var second = myOrderedCardStudy.Skip(1).First();
+                var firstIsAmazing = first.Repulsion < -5;
+                var otherPlayerCanBuy = otherPlayers.Any(p => BuyCard.CanAffordCard(p, first.Card));
+                var iCanAffordIfReserve = first.DeficitWithGold == 1;
+                if (firstIsAmazing
+                    && otherPlayerCanBuy
+                    && iCanAffordIfReserve
+                    && me.ReservedCards.Count < 3
+                    && !me.ReservedCards.Contains(first.Card))
+                {
+                    return new ReserveCard(first.Card);
+                }
             }
 
             // Buy favourite card if possible
@@ -263,7 +274,8 @@ namespace Splendor.Core.AI
 
     public class AiOptions
     {
-        public bool IsTheiving { get; set; } = true;
+        public bool IsThieving { get; set; } = true;
+        public bool IsVeryTheiving { get; set; } = false;
         public bool LooksAhead { get; set; } = true;
         public bool CanTakeTwo { get; set; } = false;
         public bool LooksAtNobles { get; set; } = true;
@@ -272,13 +284,6 @@ namespace Splendor.Core.AI
         /// Performs a random reserve as a last resort.
         /// </summary>
         public bool RandomReserves { get; set; } = true;
-        public bool PhasesGame { get; set; } = false;     
-
-        /// <summary>
-        /// Buys a victory point card if able, ignoring other actions.
-        /// </summary>
-        public bool Greedy { get; set; } = false;
-
         public BiasValues Biases { get; } = new BiasValues();
     }
 
@@ -290,5 +295,6 @@ namespace Splendor.Core.AI
         public Func<int, decimal> FromVictoryPoints { get; set; } = vp => -vp * 0.5m;
         public Func<int, decimal> FromScarcity { get; set; } = s => s * 10m;
         public Func<IPool, TokenColour, decimal> FromCardBonus { get; set; } = (cr,col) => -cr[col] * 0.5m;
+        public decimal RelativeCardValueThresholdForReservation = 10m;
     }
 }
