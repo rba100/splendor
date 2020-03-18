@@ -74,10 +74,12 @@ namespace Splendor.Core.AI
             {
                 var first = myOrderedCardStudy.First();
                 var second = myOrderedCardStudy.Skip(1).First();
-                var firstIsAmazing = first.Repulsion < -5;
+                var firstIsAmazing = first.Repulsion < -5m;
+                var sedcondIsntAmazing = second.Repulsion > -5m;
                 var otherPlayerCanBuy = otherPlayers.Any(p => BuyCard.CanAffordCard(p, first.Card));
                 var iCanAffordIfReserve = first.DeficitWithGold == 1;
                 if (firstIsAmazing
+                    && sedcondIsntAmazing
                     && otherPlayerCanBuy
                     && iCanAffordIfReserve
                     && me.ReservedCards.Count < 3
@@ -275,14 +277,10 @@ namespace Splendor.Core.AI
     public class AiOptions
     {
         public bool IsThieving { get; set; } = true;
-        public bool IsVeryTheiving { get; set; } = false;
+        public bool IsVeryTheiving { get; set; } = true;
         public bool LooksAhead { get; set; } = true;
         public bool CanTakeTwo { get; set; } = false;
         public bool LooksAtNobles { get; set; } = true;
-
-        /// <summary>
-        /// Performs a random reserve as a last resort.
-        /// </summary>
         public bool RandomReserves { get; set; } = true;
         public BiasValues Biases { get; } = new BiasValues();
     }
@@ -291,10 +289,8 @@ namespace Splendor.Core.AI
     {
         public decimal NobleColourSharedBias { get; set; } = -0.9m;
         public decimal NobleColourCloseBias { get; set; } = -0.2m;
-        // Bias values modify 'repulsion'. I.e. good things have low or negative values
         public Func<int, decimal> FromVictoryPoints { get; set; } = vp => -vp * 0.5m;
         public Func<int, decimal> FromScarcity { get; set; } = s => s * 10m;
         public Func<IPool, TokenColour, decimal> FromCardBonus { get; set; } = (cr,col) => -cr[col] * 0.5m;
-        public decimal RelativeCardValueThresholdForReservation = 10m;
     }
 }
