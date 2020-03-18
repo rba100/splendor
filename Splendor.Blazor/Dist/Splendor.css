@@ -59,7 +59,7 @@ body
 {
     width:          8.5vmin;
     height:         8.5vmin;
-    margin:         2vmin;
+    margin:         2vmin 0 2vmin 4vmin;
     border-radius:  1vmin;
     border:         0.25vmin solid gray;
     box-shadow:     0.5vmin 0.5vmin lightgray;
@@ -71,7 +71,13 @@ body
 
 .splendor-nobles
 {
-    padding-left: 14.5vmin;
+    text-align: right;
+    width:      70vmin;
+}
+
+.splendor-noble:first-of-type
+{
+    margin-left: 0;
 }
 
 .splendor-noble:after
@@ -123,7 +129,6 @@ body
 
 .splendor-card-stack
 {
-    text-align: center;
     background: repeating-linear-gradient(45deg,
                                           #909090,
                                           #909090 1vmin,
