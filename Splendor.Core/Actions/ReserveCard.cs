@@ -42,7 +42,7 @@ namespace Splendor.Core.Actions
             nextTiers.Remove(nextTier);
             nextTiers.Add(nextTier.Clone(withCardTaken: Card));
             var playerReserved = new List<Card>(player.ReservedCards);
-            var playerPurse = player.Purse.CreateCopy();
+            var nextPlayerPurse = player.Purse.CreateCopy();
             var nextTokensAvailable = gameState.Bank.CreateCopy();
 
             playerReserved.Add(Card);
@@ -50,25 +50,25 @@ namespace Splendor.Core.Actions
             if (gameState.Bank[TokenColour.Gold] > 0)
             {
                 nextTokensAvailable[TokenColour.Gold]--;
-                playerPurse[TokenColour.Gold]++;
+                nextPlayerPurse[TokenColour.Gold]++;
 
-                if (player.Purse.Sum > 10)
+                if (nextPlayerPurse.Sum > 10)
                 {
                     var colourToReturn = ColourToReturnIfMaxCoins.HasValue
                         ? ColourToReturnIfMaxCoins.Value
                         : player.Purse.Colours().First(col => col != TokenColour.Gold);
                     
-                    if (player.Purse[colourToReturn] < 1)
+                    if (nextPlayerPurse[colourToReturn] < 1)
                     {
                         throw new RulesViolationException("You can't give back a coin you don't have.");
                     }
 
-                    playerPurse[colourToReturn]--;
+                    nextPlayerPurse[colourToReturn]--;
                     nextTokensAvailable[colourToReturn]++;
                 }
             }
 
-            var nextPlayer = player.Clone(playerPurse, playerReserved);
+            var nextPlayer = player.Clone(nextPlayerPurse, playerReserved);
             return gameState.Clone(nextTokensAvailable, withTiers: nextTiers).CloneWithPlayerReplacedByName(nextPlayer);
         }
     }

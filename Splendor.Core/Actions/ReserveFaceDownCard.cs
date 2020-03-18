@@ -34,7 +34,7 @@ namespace Splendor.Core.Actions
             var tier = gameState.Tiers.Single(t => t.Tier == Tier);
             var playerCardsInPlay = new List<Card>(player.CardsInPlay);
             var playerReserved = new List<Card>(player.ReservedCards);
-            var playerPurse = player.Purse.CreateCopy();
+            var nextPlayerPurse = player.Purse.CreateCopy();
             var nextTokensAvailable = gameState.Bank.CreateCopy();
 
             nextTiers.Remove(tier);
@@ -52,27 +52,27 @@ namespace Splendor.Core.Actions
             if (gameState.Bank[TokenColour.Gold] > 0)
             {
                 nextTokensAvailable[TokenColour.Gold]--;
-                playerPurse[TokenColour.Gold]++;
+                nextPlayerPurse[TokenColour.Gold]++;
 
-                if (player.Purse.Sum > 10)
+                if (nextPlayerPurse.Sum > 10)
                 {
                     var colourToReturn = ColourToReturnIfMaxCoins.HasValue
                         ? ColourToReturnIfMaxCoins.Value
                         : player.Purse.Colours().First(col => col != TokenColour.Gold);
 
-                    if (player.Purse[colourToReturn] < 1)
+                    if (nextPlayerPurse[colourToReturn] < 1)
                     {
                         throw new RulesViolationException("You can't give back a coin you don't have.");
                     }
 
-                    playerPurse[colourToReturn]--;
+                    nextPlayerPurse[colourToReturn]--;
                     nextTokensAvailable[colourToReturn]++;
                 }
             }
 
             var nextPlayers = new List<Player>();
             foreach (var p in gameState.Players) if (p.Name == player.Name)
-                    nextPlayers.Add(player.Clone(playerPurse, playerReserved, playerCardsInPlay));
+                    nextPlayers.Add(player.Clone(nextPlayerPurse, playerReserved, playerCardsInPlay));
                 else nextPlayers.Add(p);
 
             return gameState.Clone(nextTokensAvailable, withTiers: nextTiers, withPlayers: nextPlayers);
