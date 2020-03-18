@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Splendor.AIs.Unofficial\Splendor.AIs.Unofficial.csproj" />
     <ProjectReference Include="..\Splendor.Core\Splendor.Core.csproj" />
   </ItemGroup>
 

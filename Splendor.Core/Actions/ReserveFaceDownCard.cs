@@ -51,13 +51,16 @@ namespace Splendor.Core.Actions
 
             if (gameState.Bank[TokenColour.Gold] > 0)
             {
-                if (player.Purse.Sum >= 10)
+                nextTokensAvailable[TokenColour.Gold]--;
+                playerPurse[TokenColour.Gold]++;
+
+                if (player.Purse.Sum > 10)
                 {
                     var colourToReturn = ColourToReturnIfMaxCoins.HasValue
                         ? ColourToReturnIfMaxCoins.Value
                         : player.Purse.Colours().First(col => col != TokenColour.Gold);
 
-                    if (player.Purse[colourToReturn] < 1 && ColourToReturnIfMaxCoins != TokenColour.Gold)
+                    if (player.Purse[colourToReturn] < 1)
                     {
                         throw new RulesViolationException("You can't give back a coin you don't have.");
                     }
@@ -65,9 +68,6 @@ namespace Splendor.Core.Actions
                     playerPurse[colourToReturn]--;
                     nextTokensAvailable[colourToReturn]++;
                 }
-
-                nextTokensAvailable[TokenColour.Gold]--;
-                playerPurse[TokenColour.Gold]++;
             }
 
             var nextPlayers = new List<Player>();
