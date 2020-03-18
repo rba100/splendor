@@ -72,20 +72,19 @@ namespace Splendor.Core.AI
             // If the second best card isn't very appealing, then check to see if I should reserve the first.
             if (_options.IsVeryTheiving && myOrderedCardStudy.Length > 1)
             {
-                var first = myOrderedCardStudy.First();
                 var second = myOrderedCardStudy.Skip(1).First();
-                var firstIsAmazing = first.Repulsion < -5m;
+                var firstIsAmazing = myTargetCard.Repulsion < -5m;
                 var sedcondIsntAmazing = second.Repulsion > -5m;
-                var otherPlayerCanBuy = otherPlayers.Any(p => BuyCard.CanAffordCard(p, first.Card));
-                var iCanAffordIfReserve = first.DeficitWithGold == 1;
+                var otherPlayerCanBuy = otherPlayers.Any(p => BuyCard.CanAffordCard(p, myTargetCard.Card));
+                var iCanAffordIfReserve = myTargetCard.DeficitWithGold == 1;
                 if (firstIsAmazing
                     && sedcondIsntAmazing
                     && otherPlayerCanBuy
                     && iCanAffordIfReserve
                     && me.ReservedCards.Count < 3
-                    && !me.ReservedCards.Contains(first.Card))
+                    && !me.ReservedCards.Contains(myTargetCard.Card))
                 {
-                    return new ReserveCard(first.Card);
+                    return new ReserveCard(myTargetCard.Card);
                 }
             }
 
