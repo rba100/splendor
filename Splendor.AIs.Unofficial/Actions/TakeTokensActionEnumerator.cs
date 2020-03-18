@@ -44,14 +44,10 @@ namespace Splendor.AIs.Unofficial.Actions
         private static IEnumerable<IEnumerable<TakeTokens>> TakeThreeVariations
             (GameState gameState)
         {
-            var colours = gameState.Bank.Colours(includeGold: false).ToArray();
-
-            var indexPermutations = IndexPermutations
-                (new int[] {}, 3, colours.Length);
-
-            var toTakePermutations = indexPermutations
-                .Select(l => l.Select(i => colours[i]))
-                .Select(ToPool);
+            var toTakePermutations = gameState.Bank.Colours(includeGold: false)
+                                                   .ToArray()
+                                                   .ItemPermutations(3)
+                                                   .Select(l => l.ToPool());
 
             foreach (var toTake in toTakePermutations)
             {
@@ -70,68 +66,15 @@ namespace Splendor.AIs.Unofficial.Actions
 
             if (returnCount <= 0) return new [] { Take(new Pool()) };
 
-            var allTokens = totalTokens
-                .Colours()
-                .SelectMany(c => Repeat(c, Math.Min(totalTokens[c], returnCount)))
-                .ToArray();
-
-            var indexPermutations = IndexPermutations
-                (new int[] {}, returnCount, allTokens.Length);
-
-            return indexPermutations
-                  .Select(l => l.Select(i => allTokens[i]).ToArray())
-                  .Select(l => { Array.Sort(l); return l; })
+            return totalTokens
+                  .Colours()
+                  .OrderBy(c => c)
+                  .SelectMany(c => Repeat(c, Math.Min(totalTokens[c], returnCount)))
+                  .ToArray()
+                  .ItemPermutations(returnCount)
                   .Distinct(new ColoursEqualityComparer())
-                  .Select(ToPool)
+                  .Select(l => l.ToPool())
                   .Select(Take);
-        }
-
-        private static IEnumerable<int[]> IndexPermutations
-            (int[] indexes, int returnCount, int allTokensLength)
-        {
-            if (indexes.Length >= returnCount)
-            {
-                yield return indexes;
-
-                yield break;
-            }
-
-            var startFromIndex = indexes.Any() ? indexes.Last() + 1 : 0;
-
-            var permuteWith = Range(startFromIndex,
-                                    allTokensLength - startFromIndex);
-
-            foreach (var index in permuteWith)
-            {
-                var results = IndexPermutations(indexes.Append(index).ToArray(),
-                                                returnCount,
-                                                allTokensLength);
-
-                foreach (var result in results) yield return result;
-            }
-        }
-
-        private static IPool ToPool(IEnumerable<TokenColour> colours)
-        {
-            var pool = new Pool();
-
-            foreach (var colour in colours)
-            {
-                pool[colour] += 1;
-            }
-
-            return pool;
-        }
-
-        private sealed class ColoursEqualityComparer
-            :
-            IEqualityComparer<TokenColour[]>
-        {
-            public bool Equals(TokenColour[] x, TokenColour[] y) =>
-                x.SequenceEqual(y);
-
-            public int GetHashCode(TokenColour[] obj) =>
-                unchecked(obj.Aggregate(17, (a, b) => 23 * a + (int)b));
         }
     }
 }

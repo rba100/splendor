@@ -1,9 +1,12 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Splendor.Core;
 using Splendor.Core.Actions;
+
+using static System.Linq.Enumerable;
 
 namespace Splendor.AIs.Unofficial.Actions
 {
@@ -17,7 +20,60 @@ namespace Splendor.AIs.Unofficial.Actions
                 throw new ArgumentNullException(nameof(gameState));
             }
 
-            return new IEnumerable<IAction>[] {};
+            var cards = gameState.Tiers
+                .SelectMany(t => t.ColumnSlots.Values)
+                .Where(c => c != null)
+                .Concat(gameState.CurrentPlayer.ReservedCards);
+
+            foreach (var card in cards)
+            {
+                yield return BuyPermutations(card, gameState.CurrentPlayer);
+            }
+        }
+
+        private static IEnumerable<IAction> BuyPermutations(Card card,
+                                                            Player player)
+        {
+            var costAfterBonuses = player.Bonuses.DeficitFor(card.Cost);
+
+            var dontHave = player.Purse.DeficitFor(costAfterBonuses);
+
+            if (dontHave.Sum > player.Purse.Gold) return new IAction[] {};
+
+            var doHave = dontHave.DeficitFor(costAfterBonuses);
+
+            var doHaveColours = doHave.Colours()
+                               .SelectMany(c => Repeat(c, doHave[c]))
+                               .ToArray();
+
+            var extraGold = player.Purse.Gold - dontHave.Sum;
+
+            return PaymentPermutations(doHaveColours, extraGold)
+                  .Select(c => { Array.Sort(c); return c; })
+                  .Distinct(new ColoursEqualityComparer())
+                  .Select(c => c.Concat(Repeat(TokenColour.Gold, dontHave.Sum)))
+                  .Select(c => new BuyCard(card, c.ToPool()));
+        }
+
+        private static IEnumerable<TokenColour[]> PaymentPermutations
+            (TokenColour[] costColours, int goldCount)
+        {
+            for (var useGold = 0; useGold <= goldCount; ++useGold)
+            {
+                var indexPermutations = costColours.IndexPermutations(useGold);
+
+                foreach (var indexes in indexPermutations)
+                {
+                    var useColours = costColours.ToArray();
+
+                    foreach (var index in indexes)
+                    {
+                        useColours[index] = TokenColour.Gold;
+                    }
+
+                    yield return useColours;
+                }
+            }
         }
     }
 }
