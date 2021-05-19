@@ -57,7 +57,7 @@ namespace Splendor.Core.Actions
                     var colourToReturn = ColourToReturnIfMaxCoins.HasValue
                         ? ColourToReturnIfMaxCoins.Value
                         : player.Purse.Colours().First(col => col != TokenColour.Gold);
-                    
+
                     if (nextPlayerPurse[colourToReturn] < 1)
                     {
                         throw new RulesViolationException("You can't give back a coin you don't have.");
@@ -68,8 +68,8 @@ namespace Splendor.Core.Actions
                 }
             }
 
-            var nextPlayer = player.Clone(nextPlayerPurse, playerReserved);
-            return gameState.Clone(nextTokensAvailable, withTiers: nextTiers).CloneWithPlayerReplacedByName(nextPlayer);
+            var nextPlayer = player with { Purse = nextPlayerPurse, ReservedCards = playerReserved };
+            return gameState.WithUpdatedPlayerByName(nextPlayer) with { Bank = nextTokensAvailable, Tiers = nextTiers };
         }
     }
 }

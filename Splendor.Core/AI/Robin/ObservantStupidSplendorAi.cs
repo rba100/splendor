@@ -110,7 +110,7 @@ namespace Splendor.Core.AI
             {
                 var nextCards = me.CardsInPlay.ToList();
                 nextCards.Add(myTargetCard.Card);
-                var nextMe = me.Clone(withCardsInPlay: nextCards);
+                var nextMe = me with { CardsInPlay = nextCards };
                 myNextTargetCard = AnalyseCards(nextMe, faceUpAndMyReserved.Except(new[] { myTargetCard.Card }).ToArray(), gameState)
                     .OrderBy(s => s.Repulsion)
                     .FirstOrDefault();

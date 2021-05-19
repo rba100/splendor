@@ -5,9 +5,13 @@ using System.Linq;
 
 namespace Splendor.Core
 {
-    public class Player
+    public record Player
     {
-        public string Name { get; }
+        public string Name { get; init; }
+        public IPool Purse { get; init; }
+        public IReadOnlyCollection<Card> ReservedCards { get; init; }
+        public IReadOnlyCollection<Card> CardsInPlay { get; init; }
+        public IReadOnlyCollection<Noble> Nobles { get; init; }
 
         public Player(string name)
         {
@@ -16,15 +20,11 @@ namespace Splendor.Core
             Nobles = new List<Noble>();
             ReservedCards = new List<Card>();
             CardsInPlay = new List<Card>();
-
-            Bonuses = GetDiscount();
-            Budget = Bonuses.MergeWith(Purse);
-            VictoryPoints = GetVictoryPoints();
         }
 
         private Player(string name,
                        IPool purse,
-                       IReadOnlyCollection<Card> reservedCards, 
+                       IReadOnlyCollection<Card> reservedCards,
                        IReadOnlyCollection<Card> cardsInPlay,
                        IReadOnlyCollection<Noble> nobles)
         {
@@ -33,22 +33,6 @@ namespace Splendor.Core
             ReservedCards = reservedCards ?? throw new ArgumentNullException(nameof(reservedCards));
             CardsInPlay = cardsInPlay ?? throw new ArgumentNullException(nameof(cardsInPlay));
             Nobles = nobles ?? throw new ArgumentNullException(nameof(nobles));
-
-            Bonuses = GetDiscount();
-            Budget = Bonuses.MergeWith(Purse);
-            VictoryPoints = GetVictoryPoints();
-        }
-
-        public Player Clone(IPool withPurse = null,
-                            IReadOnlyCollection<Card> withReservedCards = null,
-                            IReadOnlyCollection<Card> withCardsInPlay = null,
-                            IReadOnlyCollection<Noble> withNobles = null)
-        {
-            return new Player(Name, 
-                              withPurse ?? Purse, 
-                              withReservedCards ?? ReservedCards,
-                              withCardsInPlay ?? CardsInPlay, 
-                              withNobles ?? Nobles);
         }
 
         public Player CloneWithNoble(Noble noble)
@@ -61,20 +45,12 @@ namespace Splendor.Core
 
             nobles.Add(noble);
 
-            return new Player(Name,
-                              Purse,
-                              ReservedCards,
-                              CardsInPlay,
-                              nobles);
+            return this with { Nobles = nobles };
         }
 
-        public IPool Purse { get; private set; }
-        public IReadOnlyCollection<Card> ReservedCards { get; private set; }
-        public IReadOnlyCollection<Card> CardsInPlay { get; private set; }
-        public IReadOnlyCollection<Noble> Nobles { get; private set; }
-        public IPool Budget { get; private set; }
-        public IPool Bonuses { get; private set; }
-        public int VictoryPoints { get; private set; }
+        public IPool Budget { get => GetDiscount().MergeWith(Purse); }
+        public IPool Bonuses { get => GetDiscount(); }
+        public int VictoryPoints { get => GetVictoryPoints(); }
 
         private IPool GetDiscount()
         {

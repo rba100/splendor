@@ -32,7 +32,7 @@ namespace Splendor.Core.Tests.Actions
             var card = DefaultGame.Tiers.First().ColumnSlots[0];
             var action = new ReserveCard(card);
 
-            var nextGameState = action.Execute(DefaultGame.Clone(withTokensAvailable: new Pool())); // Bank has no tokens
+            var nextGameState = action.Execute(DefaultGame with { Bank = new Pool() }); // Bank has no tokens
 
             Assert.AreEqual(card, nextGameState.CurrentPlayer.ReservedCards.Single());
             Assert.AreEqual(0, nextGameState.CurrentPlayer.Purse.Gold);
@@ -50,11 +50,11 @@ namespace Splendor.Core.Tests.Actions
         public void Cannot_reserve_a_bought_card()
         {
             var (tier, card) = DefaultGame.Tiers.First().CloneAndTakeFaceDownCard();
-            var player = DefaultGame.CurrentPlayer.Clone(withCardsInPlay: new[] { card });
+            var player = DefaultGame.CurrentPlayer with { CardsInPlay = new[] { card } };
             var tiers = new List<BoardTier>(DefaultGame.Tiers);
             tiers.RemoveAll(t => t.Tier == tier.Tier);
             tiers.Add(tier);
-            var gameState = DefaultGame.Clone(withTiers: tiers).CloneWithPlayerReplacedByName(player);
+            var gameState = DefaultGame.WithUpdatedPlayerByName(player) with { Tiers = tiers };
 
             var action = new ReserveCard(card);
             Assert.Throws<RulesViolationException>(() => action.Execute(gameState));

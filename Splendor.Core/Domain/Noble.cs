@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Splendor.Core
 {
-    public class Noble
+    public record Noble
     {
         internal Noble(int victoryPoints, IPool cost, string name = null)
         {
@@ -13,10 +13,9 @@ namespace Splendor.Core
             Name = name ?? AutoName();
         }
 
-        public IPool Cost { get; private set; }
-        public int VictoryPoints { get; private set; }
-
-        public string Name { get; private set; }
+        public IPool Cost { get; init; }
+        public int VictoryPoints { get; init; }
+        public string Name { get; init; }
 
         private string AutoName()
         {

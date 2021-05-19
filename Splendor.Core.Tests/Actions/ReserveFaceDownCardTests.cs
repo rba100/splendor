@@ -29,7 +29,7 @@ namespace Splendor.Core.Tests.Actions
         {
             var action = new ReserveFaceDownCard(1);
 
-            var nextGameState = action.Execute(DefaultGame.Clone(withTokensAvailable: new Pool())); // Bank has no tokens
+            var nextGameState = action.Execute(DefaultGame with { Bank = new Pool() }); // Bank has no tokens
 
             Assert.AreEqual(1, nextGameState.CurrentPlayer.ReservedCards.Count());
             Assert.AreEqual(0, nextGameState.CurrentPlayer.Purse.Gold);

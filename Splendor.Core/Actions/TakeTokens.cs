@@ -44,9 +44,9 @@ namespace Splendor.Core.Actions
                 nextPlayerTokens[colour] -= TokensToReturn[colour];
             }
 
-            var player = gameState.CurrentPlayer.Clone(withPurse: nextPlayerTokens);
+            var player = gameState.CurrentPlayer with { Purse = nextPlayerTokens };
 
-            return gameState.Clone(withTokensAvailable: nextAvailableTokens).CloneWithPlayerReplacedByName(player);
+            return gameState.WithUpdatedPlayerByName(player) with { Bank = nextAvailableTokens };
         }
 
         private void Validate(GameState gameState)
@@ -73,7 +73,7 @@ namespace Splendor.Core.Actions
                 {
                     throw new RulesViolationException("You can only take two tokens of the same colour if you take no other tokens.");
                 }
-                
+
                 var doubleCoinColour = TokensToTake.Colours().Single();
 
                 if (gameState.Bank[doubleCoinColour] < 4)
