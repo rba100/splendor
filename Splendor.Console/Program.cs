@@ -7,8 +7,7 @@ namespace Splendor.ConsoleGame
     {
         static void Main(string[] args)
         {
-            InteractiveRunner runner = new();
-            runner.Run();
+            InteractiveRunner runner = new(); runner.Run();
         }
 
         static int colour = 0;

@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splendor.AIs.Unofficial", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splendor.AIs.Unofficial.Tests", "Splendor.AIs.Unofficial.Tests\Splendor.AIs.Unofficial.Tests.csproj", "{B0A9D68E-5E44-4C39-923F-C60035041FA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Splendor.ConsoleGame", "Splendor.Console\Splendor.ConsoleGame.csproj", "{C923310B-E591-4F11-A7E0-90EF4EC688F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Splendor.ConsoleGame", "Splendor.Console\Splendor.ConsoleGame.csproj", "{C923310B-E591-4F11-A7E0-90EF4EC688F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

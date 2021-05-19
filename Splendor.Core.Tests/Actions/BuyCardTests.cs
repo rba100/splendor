@@ -16,7 +16,7 @@ namespace Splendor.Core.Tests.Actions
             var card = new Card(1, 0, new Pool(0, 1, 2, 0, 0, 0), TokenColour.Black);
 
             var budget = new Pool(1, 1, 1, 0, 0, 0);
-            var player = new Player("").Clone(withPurse: budget);
+            var player = new Player("") with { Purse = budget };
             Assert.True(BuyCard.CanAffordCard(player, card));
         }
 
@@ -25,7 +25,7 @@ namespace Splendor.Core.Tests.Actions
         {
             var card = new Card(1, 0, new Pool(0, 1, 2, 0, 0, 0), TokenColour.Black);
             var budget = new Pool(0, 1, 1, 0, 0, 1);
-            var player = new Player("").Clone(withPurse: budget);
+            var player = new Player("") with { Purse = budget };
             Assert.False(BuyCard.CanAffordCard(player, card));
         }
 
@@ -34,7 +34,7 @@ namespace Splendor.Core.Tests.Actions
         {
             var card = new Card(1, 0, new Pool(0, 1, 0, 1, 0, 1), TokenColour.Black);
             var budget = new Pool(0, 2, 2, 2, 2, 2);
-            var player = new Player("").Clone(withPurse: budget);
+            var player = new Player("") with { Purse = budget };
             IPool payment = BuyCard.CreateDefaultPaymentOrNull(player, card);
 
             Assert.That(PoolsAreExactlyEquivilent(card.Cost, payment));
@@ -46,7 +46,7 @@ namespace Splendor.Core.Tests.Actions
             var card = new Card(1, 0, new Pool(0, 1, 0, 1, 0, 0), TokenColour.Black);
 
             var budget = new Pool(1, 0, 0, 0, 1, 1);
-            var player = new Player("").Clone(withPurse: budget);
+            var player = new Player("") with { Purse = budget };
 
             IPool payment = BuyCard.CreateDefaultPaymentOrNull(player, card);
 
@@ -60,14 +60,13 @@ namespace Splendor.Core.Tests.Actions
             var cardInPlay = new Card(1, 0, new Pool(), TokenColour.Green);
             var purse = new Pool(0, 1, 2, 0, 1, 1);
 
-            var player = DefaultGame.CurrentPlayer
-                .Clone(withPurse: purse, withCardsInPlay: new []{ cardInPlay });
+            var player = DefaultGame.CurrentPlayer with { Purse = purse, CardsInPlay = new[] { cardInPlay } };
 
             var tiers = DefaultGame.Tiers.ToList();
             tiers.RemoveAll(r => r.Tier == 1);
             tiers.Add(new BoardTier(1, new[] { card }, 1));
 
-            var gameState = DefaultGame.CloneWithPlayerReplacedByName(player).Clone(withTiers: tiers);
+            var gameState = DefaultGame.WithUpdatedPlayerByName(player) with { Tiers = tiers };
 
             var payment = BuyCard.CreateDefaultPaymentOrNull(player, card);
             Assert.AreEqual(4, payment.Sum);

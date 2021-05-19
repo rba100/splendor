@@ -62,9 +62,9 @@ namespace Splendor.Core.Actions
                 nextTokensAvailable[colour] += Payment[colour];
             }
 
-            var nextPlayer = player.Clone(playerPurse, playerReserved, playerCardsInPlay);
+            var nextPlayer = player with { Purse = playerPurse, ReservedCards = playerReserved, CardsInPlay = playerCardsInPlay };
 
-            return gameState.CloneWithPlayerReplacedByName(nextPlayer).Clone(nextTokensAvailable, withTiers: nextTiers);
+            return gameState.WithUpdatedPlayerByName(nextPlayer) with { Bank = nextTokensAvailable, Tiers = nextTiers };
         }
 
         public static bool CanAffordCard(Player player, Card card)

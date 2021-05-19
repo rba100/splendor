@@ -1,11 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Splendor.ConsoleGame
 {
     public static class ConsoleDrawing
     {
+        public static void MessageBox(string message)
+        {
+            var width = message.Length + 4;
+            var height = 5;
+            var x = (Console.WindowWidth - width) / 2;
+            var y = (Console.WindowHeight - height) / 2;
+            BlankRegion(x, y, width, height);
+            DrawBoxDouble(x, y, width, height);
+            WriteAt(message, x + 2, y + 2);
+        }
+
+        public static void MessageBox(params string[] messages)
+        {
+            var width = messages.Max(l => l.Length) + 4;
+            var height = 4 + messages.Length;
+            var x = (Console.WindowWidth - width) / 2;
+            var y = (Console.WindowHeight - height) / 2;
+            BlankRegion(x, y, width, height);
+            DrawBoxDouble(x, y, width, height);
+            for(int i = 0; i < messages.Length; i++)
+                WriteAt(messages[i], x + 2, y + 2 + i);
+        }
+
         public static void DrawBox(int x, int y, int width, int height)
         {
             WriteAt('#', x, y);
@@ -51,7 +75,7 @@ namespace Splendor.ConsoleGame
         public static void BlankRegion(int x, int y, int width, int height)
         {
             var blank = new string(' ', width);
-            for(var i = 0; i < height; i++)
+            for (var i = 0; i < height; i++)
             {
                 Console.SetCursorPosition(x, y + i);
                 Console.Write(blank);

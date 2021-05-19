@@ -75,10 +75,9 @@ namespace Splendor.Core
                 }
                 if (ruledOut) continue;
 
-                var nextPlayer = State.CurrentPlayer.CloneWithNoble(noble);
                 nextNobles.Remove(noble);
 
-                State = State.Clone(withNobles: nextNobles).CloneWithPlayerReplacedByName(nextPlayer);
+                State = State.WithUpdatedPlayerByName(State.CurrentPlayer.CloneWithNoble(noble)) with { Nobles = nextNobles };
                 break;
             }
         }

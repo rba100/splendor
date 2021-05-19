@@ -4,8 +4,13 @@ using System.Linq;
 
 namespace Splendor.Core
 {
-    public class Card
+    public record Card
     {
+        public int Tier { get; init; }
+        public int VictoryPoints { get; init; }
+        public IPool Cost { get; init; }
+        public TokenColour BonusGiven { get; init; }
+
         public Card(int tier, int victoryPoints, IPool cost, TokenColour givesDiscount)
         {
             Tier = tier;
@@ -20,10 +25,5 @@ namespace Splendor.Core
             var costs = Cost.Colours().Select(col => $"{Cost[col]} {col}").ToList();
             return $"{VictoryPoints}pt {BonusGiven}{tierMarker} {string.Join(",", costs)}";
         }
-
-        public int Tier { get; private set; }
-        public int VictoryPoints { get; private set; }
-        public IPool Cost { get; private set; }
-        public TokenColour BonusGiven { get; private set; }
     }
 }

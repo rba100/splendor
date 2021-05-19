@@ -7,9 +7,7 @@ using System.Linq;
 namespace Splendor.ConsoleGame
 {
     public class InteractiveRunner
-    {
-        const int marginLeft = 30;
-        
+    {        
         public void Run()
         {
             ClearAndDrawFrame();
@@ -59,12 +57,10 @@ namespace Splendor.ConsoleGame
                 }
 
                 var updatedTurnPlayer = game.State.Players.Single(p => p.Name == turnPlayer.Name);
-                Console.WriteLine($"{updatedTurnPlayer.Name}, {action}");
+                //Console.WriteLine($"{updatedTurnPlayer.Name}, {action}");
             }
             PrintState(game);
-            Console.WriteLine("****************************************");
-            Console.WriteLine(game.TopPlayer.Name + " wins!");
-            Console.WriteLine("****************************************");
+            Query(game.TopPlayer.Name + " wins!", ConsoleColor.Red);
         }
 
         private void ClearAndDrawFrame()
@@ -83,14 +79,19 @@ namespace Splendor.ConsoleGame
 
         private string Query(string prompt, ConsoleColor promptColour = ConsoleColor.Yellow)
         {
-            Console.SetCursorPosition(2, Console.WindowHeight - 4);
-            using(new ConsoleColour(promptColour)) Console.Write(prompt);
+            SetPrompt(prompt, promptColour);
+            ConsoleDrawing.BlankRegion(2, Console.WindowHeight - 2, Console.WindowWidth - 3, 1);
             Console.SetCursorPosition(2, Console.WindowHeight - 2);
             Console.Write(">");
             var result = Console.ReadLine();
-            ConsoleDrawing.BlankRegion(2, Console.WindowHeight - 4, Console.WindowWidth - 2, 1);
-            ConsoleDrawing.BlankRegion(2, Console.WindowHeight - 2, Console.WindowWidth - 2, 1);
             return result;
+        }
+
+        private static void SetPrompt(string prompt, ConsoleColor promptColour = ConsoleColor.Yellow)
+        {
+            ConsoleDrawing.BlankRegion(2, Console.WindowHeight - 4, Console.WindowWidth - 3, 1);
+            Console.SetCursorPosition(2, Console.WindowHeight - 4);
+            using (new ConsoleColour(promptColour)) Console.Write(prompt);
         }
 
         private string QueryBox(string prompt)
@@ -110,6 +111,8 @@ namespace Splendor.ConsoleGame
 
         private void PrintState(IGame game)
         {
+            var marginLeft = Math.Max(0, (Console.WindowWidth / 2) - 26);
+
             Console.CursorTop = 2;
             // Print players
             foreach (var p in game.State.Players)
@@ -162,9 +165,13 @@ namespace Splendor.ConsoleGame
 
         private void PrintPlayerTerse(Player p)
         {
-            ConsoleDrawing.WriteAt($"{p.Name} ({p.VictoryPoints})", 2, Console.CursorTop);
+            var noblesTerse = string.Join(", ", p.Nobles.Select(n => n.Name).ToArray());
+            var s = p.Nobles.Count == 1 ? "" : "s";
+            if (noblesTerse != string.Empty) noblesTerse = $", noble{s} {noblesTerse}";
+            ConsoleDrawing.WriteAt($"{p.Name} ({p.VictoryPoints}){noblesTerse}", 2, Console.CursorTop);
             Console.WriteLine();
             Console.SetCursorPosition(2, Console.CursorTop);
+            
             PrintTokenPoolShortWithColours(p.Bonuses, ""); Console.WriteLine();
             Console.SetCursorPosition(2, Console.CursorTop);
             PrintTokenPoolShortWithColoursAsNumers(p.Purse, ""); Console.WriteLine();
@@ -200,20 +207,23 @@ namespace Splendor.ConsoleGame
 
             if (i.StartsWith("h"))
             {
-                Console.WriteLine("Commands: refer to cards buy their tier and index, e.g. '1-2' for tier 1, 2nd card.");
-                Console.WriteLine("    t: take tokens, e.g. 't ugb' for take blUe, Green, Black.");
-                Console.WriteLine("    b: buy card. e.g. 'b 1-2', or 'b res' to buy a reserved card (choice made for you).");
-                Console.WriteLine("    r: reserve card. e.g. 'r 1-2', or just 'r 1' to reserve a random face down card from tier 1.");
-                Console.WriteLine("Instruments:");
-                Console.WriteLine("    *: you can afford this card.");
-                Console.WriteLine("    ·: you can almost afford this card.");
+                var messages = new string[]
+                    { "Commands: refer to cards buy their tier and index, e.g. '1-2' for tier 1, 2nd card."
+                    ,"    t: take tokens, e.g. 't ugb' for take blUe, Green, Black."
+                    ,"    b: buy card. e.g. 'b 1-2', or 'b res' to buy a reserved card (choice made for you if you have more than one)."
+                    ,"    r: reserve card. e.g. 'r 1-2', or just 'r 1' to reserve a random face down card from tier 1."
+                    ,"Instruments:"
+                    ,"    *: you can afford this card."
+                    ,"    ·: you can almost afford this card." };
+
+                ConsoleDrawing.MessageBox(messages);
+                Console.ReadKey();
                 return null;
             }
 
             if (i.StartsWith("t"))
             {
-                var whiteSpace = i.IndexOf(' ');
-                var codes = i.Substring(whiteSpace);
+                var codes = i.Substring(1);
                 var tokens = TokenPoolFromInput(codes);
                 IPool tokensToReturn = new Pool();
                 var commaIndex = codes.IndexOf(',');
@@ -226,8 +236,7 @@ namespace Splendor.ConsoleGame
 
             if (i.StartsWith("b"))
             {
-                var whiteSpace = i.IndexOf(' ');
-                var args = i.Substring(whiteSpace).Trim();
+                var args = i.Substring(1).Trim();
                 if (args.StartsWith("res"))
                 {
                     var resCard = state.CurrentPlayer.ReservedCards.OrderByDescending(c => c.VictoryPoints).FirstOrDefault(c => BuyCard.CanAffordCard(state.CurrentPlayer, c));
@@ -248,8 +257,7 @@ namespace Splendor.ConsoleGame
 
             if (i.StartsWith("r"))
             {
-                var whiteSpace = i.IndexOf(' ');
-                var args = i.Substring(whiteSpace).Trim();
+                var args = i.Substring(1).Trim();
                 var tier = int.Parse(args[0].ToString());
                 IPool tokensToReturn = new Pool();
                 var commaIndex = args.IndexOf(',');

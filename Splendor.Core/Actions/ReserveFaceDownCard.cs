@@ -72,10 +72,10 @@ namespace Splendor.Core.Actions
 
             var nextPlayers = new List<Player>();
             foreach (var p in gameState.Players) if (p.Name == player.Name)
-                    nextPlayers.Add(player.Clone(nextPlayerPurse, playerReserved, playerCardsInPlay));
+                    nextPlayers.Add(player with { Purse = nextPlayerPurse, ReservedCards = playerReserved, CardsInPlay = playerCardsInPlay });
                 else nextPlayers.Add(p);
 
-            return gameState.Clone(nextTokensAvailable, withTiers: nextTiers, withPlayers: nextPlayers);
+            return gameState with { Bank = nextTokensAvailable, Tiers = nextTiers, Players = nextPlayers };
         }
     }
 }
