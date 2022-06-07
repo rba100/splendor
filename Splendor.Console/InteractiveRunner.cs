@@ -10,7 +10,6 @@ namespace Splendor.ConsoleGame
     {        
         public void Run()
         {
-            ConsoleDrawing.InitFullScreenApp();
             ClearAndDrawFrame();
             string playerName = Query("What is your name?");
 

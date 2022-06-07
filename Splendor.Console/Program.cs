@@ -7,6 +7,7 @@ namespace Splendor.ConsoleGame
     {
         static void Main(string[] args)
         {
+            ConsoleDrawing.InitFullScreenApp();
             InteractiveRunner runner = new(); runner.Run();
             ConsoleDrawing.Clear();
         }
