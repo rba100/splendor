@@ -7,6 +7,22 @@ namespace Splendor.ConsoleGame
 {
     public static class ConsoleDrawing
     {
+        static int _OriginX = 0;
+        static int _OriginY = 0;
+
+        public static void InitFullScreenApp()
+        {
+            Console.Clear();
+            _OriginX = 0;
+            _OriginY = Console.CursorTop;
+        }
+
+        public static void Clear()
+        {
+            BlankRegion(_OriginX, _OriginY, Console.WindowWidth, Console.WindowHeight);
+            SetPos(0,0);
+        }
+
         public static void MessageBox(string message)
         {
             var width = message.Length + 4;
@@ -77,26 +93,26 @@ namespace Splendor.ConsoleGame
             var blank = new string(' ', width);
             for (var i = 0; i < height; i++)
             {
-                Console.SetCursorPosition(x, y + i);
+                SetPos(x, y + i);
                 Console.Write(blank);
             }
         }
 
         public static void WriteAt(char c, int x, int y)
         {
-            Console.SetCursorPosition(x, y);
+            SetPos(x, y);
             Console.Write(c);
         }
 
         public static void WriteAt(string str, int x, int y)
         {
-            Console.SetCursorPosition(x, y);
+            SetPos(x, y);
             Console.Write(str);
         }
 
         public static void DrawLineX(char c, int x, int y, int length)
         {
-            Console.SetCursorPosition(x, y);
+            SetPos(x, y);
             Console.Write(new string(c, length));
         }
 
@@ -104,9 +120,14 @@ namespace Splendor.ConsoleGame
         {
             for (int i = 0; i < length; i++)
             {
-                Console.SetCursorPosition(x, y + i);
+                SetPos(x, y + i);
                 Console.Write(c);
             }
+        }
+
+        private static void SetPos(int x, int y)
+        {
+            Console.SetCursorPosition(_OriginX + x, _OriginY + y);
         }
     }
 

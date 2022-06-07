@@ -10,6 +10,7 @@ namespace Splendor.ConsoleGame
     {        
         public void Run()
         {
+            ConsoleDrawing.InitFullScreenApp();
             ClearAndDrawFrame();
             string playerName = Query("What is your name?");
 
@@ -32,6 +33,7 @@ namespace Splendor.ConsoleGame
                         ClearAndDrawFrame();
                         PrintState(game);
                         var input = Query(prompt, promptColour);
+                        if(input.ToLowerInvariant() == "quit") return;
                         try
                         {
                             action = GetActionFromInput(input, game.State);
@@ -60,12 +62,12 @@ namespace Splendor.ConsoleGame
                 //Console.WriteLine($"{updatedTurnPlayer.Name}, {action}");
             }
             PrintState(game);
-            Query(game.TopPlayer.Name + " wins!", ConsoleColor.Red);
+            Query(game.TopPlayer.Name + " wins! Press enter to exit.", ConsoleColor.Red);
         }
 
         private void ClearAndDrawFrame()
         {
-            Console.Clear();
+            ConsoleDrawing.Clear();
             var width = Console.WindowWidth;
             var height = Console.WindowHeight;
             ConsoleDrawing.DrawBoxDouble(0, 0, width, height);

@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,9 +13,9 @@ namespace Splendor.ConsoleRunner
     {
         static void Main(string[] args)
         {
-            Interactive();
+            //Interactive();
             //RunDetailed();
-            //Run(numberOfGames: 20000, useParallelism: true);
+            Run(numberOfGames: 2000, useParallelism: true);
         }
 
         static void Interactive()
@@ -38,7 +39,8 @@ namespace Splendor.ConsoleRunner
 
             runner.Run();
 
-            Console.ReadLine();
+            if(Debugger.IsAttached)
+                Console.ReadLine();
         }
 
         static void Run(int numberOfGames = 1, bool useParallelism = true)
@@ -51,8 +53,8 @@ namespace Splendor.ConsoleRunner
             var scoreBoard = new Dictionary<ISpendorAi, int>
             {
                 { new ObservantStupidSplendorAi("Test Subject", aiOptions), 0},
-                { new ObservantStupidSplendorAi("Drone1", droneOptions), 0},
-                //{ new StupidSplendorAi("Drone2"), 0},
+                //{ new ObservantStupidSplendorAi("Drone1", droneOptions), 0},
+                { new StupidSplendorAi("Drone2"), 0},
             };
             var ais = scoreBoard.Select(r => r.Key).ToArray();
             var range = Enumerable.Range(0, numberOfGames);
@@ -81,7 +83,8 @@ namespace Splendor.ConsoleRunner
                 Console.WriteLine($"{row.Key.Name} {row.Value} wins");
             }
 
-            Console.ReadLine();
+            if(Debugger.IsAttached)
+                Console.ReadLine();
         }
     }
 }
